@@ -50,7 +50,7 @@ MAIN_LOOP
 END         MOVE.B      #9,D0               ;End program
             TRAP        #15     
 *-Files-----------------------------------------------------
-            ;INCLUDE     'insert_filename_here.x68'     ;To include a file
+            INCLUDE     'Jump_Table.X68'    ;Include Jump Table File
             
 *-Variables and constants-----------------------------------
 CR          EQU         $0D

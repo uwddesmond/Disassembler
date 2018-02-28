@@ -1,6 +1,6 @@
 00001000 Starting Address
 Assembler used: EASy68K Editor/Assembler v5.15.04
-Created On: 2/27/2018 10:32:24 PM
+Created On: 2/27/2018 10:34:54 PM
 
 00000000                             1  *-----------------------------------------------------------
 00000000                             2  * Title      :  Team Visual Basic's Disassembler
@@ -19,25 +19,30 @@ Created On: 2/27/2018 10:32:24 PM
 00001018                            15              
 00001018  6000 0042                 16              BRA         END                 ;If loop improperly terminated, base case BRA to END program         
 0000101C                            17  *-Intro Message---------------------------------------------
-0000101C  43F9 0000108A             18  DISP_INTRO  LEA         M_INTRO,A1          ;Load intro msg
+Line 18 ERROR: Undefined symbol
+0000101C  43F9 004DBB8E             18  DISP_INTRO  LEA         M_INTRO,A1          ;Load intro msg
 00001022  103C 000E                 19              MOVE.B      #14,D0              ;Trap Task 14 displays null terminated string
 00001026  4E4F                      20              TRAP        #15    
 00001028                            21      
 00001028  4E75                      22              RTS                             ;Return to main START section
 0000102A                            23  *-Take Start and End Address as Input-----------------------
-0000102A  43F9 000010EE             24  INPUT_ADDR  LEA         M_INPUT_S,A1        ;Load input request msg
+Line 24 ERROR: Undefined symbol
+0000102A  43F9 004DBB8E             24  INPUT_ADDR  LEA         M_INPUT_S,A1        ;Load input request msg
 00001030  103C 000E                 25              MOVE.B      #14,D0              ;Trap Task 14 displays null terminated string
 00001034  4E4F                      26              TRAP        #15
 00001036                            27              
-00001036  43F9 00001062             28              LEA         START_ADDR,A1
+Line 28 ERROR: Undefined symbol
+00001036  43F9 004DBB8E             28              LEA         START_ADDR,A1
 0000103C  103C 0002                 29              MOVE.B      #2,D0               ;Read string from keyboard and store in (A1)
 00001040  4E4F                      30              TRAP        #15
 00001042                            31              
-00001042  43F9 00001114             32              LEA         M_INPUT_E,A1        ;Load input request msg
+Line 32 ERROR: Undefined symbol
+00001042  43F9 004DBB8E             32              LEA         M_INPUT_E,A1        ;Load input request msg
 00001048  103C 000E                 33              MOVE.B      #14,D0              ;Trap Task 14 displays null terminated string
 0000104C  4E4F                      34              TRAP        #15
 0000104E                            35              
-0000104E  43F9 00001076             36              LEA         END_ADDR,A1
+Line 36 ERROR: Undefined symbol
+0000104E  43F9 004DBB8E             36              LEA         END_ADDR,A1
 00001054  103C 0002                 37              MOVE.B      #2,D0               ;Read string from keyboard and store in (A1)
 00001058  4E4F                      38              TRAP        #15
 0000105A                            39              
@@ -54,44 +59,114 @@ Created On: 2/27/2018 10:32:24 PM
 0000105C  103C 0009                 50  END         MOVE.B      #9,D0               ;End program
 00001060  4E4F                      51              TRAP        #15     
 00001062                            52  *-Files-----------------------------------------------------
-00001062                            53              ;INCLUDE     'insert_filename_here.x68'     ;To include a file
-00001062                            54              
-00001062                            55  *-Variables and constants-----------------------------------
-00001062  =0000000D                 56  CR          EQU         $0D
-00001062  =0000000A                 57  LF          EQU         $0A
-00001062                            58  
-00001062                            59  START_ADDR  DS.B        20                  ;Machine code start address stored here
-00001076                            60  END_ADDR    DS.B        20                  ;Machine code end address stored here
-0000108A                            61              
-0000108A                            62  
-0000108A                            63  
-0000108A                            64  *-Strings---------------------------------------------------
-0000108A= 54 65 61 6D 20 56 ...     65  M_INTRO     DC.B        'Team Visual Basic',CR,LF
-0000109D= 4D 6F 74 6F 72 6F ...     66              DC.B        'Motorola 68000 Disassembler',CR,LF
-000010BA= 42 79 20 41 75 73 ...     67              DC.B        'By Austin Abeyta, Dylan Desmond, and Henry Hong',CR,LF,CR,LF,0 
-000010EE                            68              
-000010EE= 50 6C 65 61 73 65 ...     69  M_INPUT_S   DC.B        'Please Input the Starting Address: ',CR,LF,0
-00001114= 50 6C 65 61 73 65 ...     70  M_INPUT_E   DC.B        'Please Input the Ending Address: ',CR,LF,0
-00001138                            71                      
-00001138                            72              END         START               ; last line of source
+00001062                            53              INCLUDE     'Jump_Table.X68'    ;Include Jump Table File
+00001000                            54      ORG    $1000
+00001000                            55  START:    
+00001000                            56  
+00001000  3EBC FFFF                 57      MOVE.W  #$FFFF,(A7) *Load test op into (A7)
+00001004  3410                      58      MOVE.W  (A0),D2     *move op code into d2 to bit shift
+00001006  E84A                      59      LSR.W   #4,D2       *Shift right 4 bits
+00001008  E84A                      60      LSR.W   #4,D2       *shift right 4 bits
+0000100A  E84A                      61      LSR.W   #4,D2       *shift right 4 bits
+0000100C  0C42 0000                 62      CMPI.W  #0,D2       *check if it falls into 0 bin
+00001010  675A                      63      BEQ.S   BIN_0
+00001012  0C42 0001                 64      CMPI.W  #1,D2       *check if it falls into 1 bin
+00001016  6758                      65      BEQ.S   BIN_1
+00001018  0C42 0002                 66      CMPI.W  #2,D2       *check if it falls into 2 bin
+0000101C  6756                      67      BEQ.S   BIN_2
+0000101E  0C42 0003                 68      CMPI.W  #3,D2       *check if it falls into 3 bin
+00001022  6754                      69      BEQ.S   BIN_3
+00001024  0C42 0004                 70      CMPI.W  #4,D2       *check if it falls into 4 bin
+00001028  6752                      71      BEQ.S   BIN_4
+0000102A  0C42 0005                 72      CMPI.W  #5,D2       *check if it falls into 5 bin
+0000102E  6750                      73      BEQ.S   BIN_5
+00001030  0C42 0006                 74      CMPI.W  #6,D2       *check if it falls into 6 bin
+00001034  674E                      75      BEQ.S   BIN_6
+00001036  0C42 0007                 76      CMPI.W  #7,D2       *check if it falls into 7 bin
+0000103A  674C                      77      BEQ.S   BIN_7
+0000103C  0C42 0008                 78      CMPI.W  #8,D2       *check if it falls into 8 bin
+00001040  674A                      79      BEQ.S   BIN_8
+00001042  0C42 0009                 80      CMPI.W  #9,D2       *check if it falls into 9 bin
+00001046  6748                      81      BEQ.S   BIN_9
+00001048  0C42 000A                 82      CMPI.W  #10,D2       *check if it falls into 10 bin
+0000104C  6746                      83      BEQ.S   BIN_10
+0000104E  0C42 000B                 84      CMPI.W  #11,D2       *check if it falls into 11 bin
+00001052  6744                      85      BEQ.S   BIN_11
+00001054  0C42 000C                 86      CMPI.W  #12,D2       *check if it falls into 12 bin
+00001058  6742                      87      BEQ.S   BIN_12
+0000105A  0C42 000D                 88      CMPI.W  #13,D2       *check if it falls into 12 bin
+0000105E  6740                      89      BEQ.S   BIN_13
+00001060  0C42 000E                 90      CMPI.W  #14,D2       *check if it falls into 14 bin
+00001064  673E                      91      BEQ.S   BIN_14
+00001066  0C42 000F                 92      CMPI.W  #15,D2       *check if it falls into 15 bin
+0000106A  673C                      93      BEQ.S   BIN_15
+0000106C                            94      
+0000106C                            95  BIN_0
+0000106C  FFFF FFFF                 96      SIMHALT
+00001070                            97  BIN_1
+00001070  FFFF FFFF                 98      SIMHALT
+00001074                            99  BIN_2
+00001074  FFFF FFFF                100      SIMHALT
+00001078                           101  BIN_3
+00001078  FFFF FFFF                102      SIMHALT
+0000107C                           103  BIN_4
+0000107C  FFFF FFFF                104      SIMHALT
+00001080                           105  BIN_5
+00001080  FFFF FFFF                106      SIMHALT
+00001084                           107  BIN_6
+00001084  FFFF FFFF                108      SIMHALT
+00001088                           109  BIN_7
+00001088  FFFF FFFF                110      SIMHALT  
+0000108C                           111  BIN_8
+0000108C  FFFF FFFF                112      SIMHALT
+00001090                           113  BIN_9
+00001090  FFFF FFFF                114      SIMHALT
+00001094                           115  BIN_10
+00001094  FFFF FFFF                116      SIMHALT
+00001098                           117  BIN_11
+00001098  FFFF FFFF                118      SIMHALT
+0000109C                           119  BIN_12
+0000109C  FFFF FFFF                120      SIMHALT
+000010A0                           121  BIN_13
+000010A0  FFFF FFFF                122      SIMHALT
+000010A4                           123  BIN_14
+000010A4  FFFF FFFF                124      SIMHALT
+000010A8                           125  BIN_15
+000010A8  FFFF FFFF                126      SIMHALT   
+000010AC                           127      
+000010AC                           128      
+000010AC  FFFF FFFF                129      SIMHALT             ; halt simulator
+000010B0                           130  
+000010B0                           131  
+000010B0                           132      END    START        ; last line of source
+000010B0                           133  -------------------- end include --------------------
 
-No errors detected
+5 errors detected
 No warnings generated
 
 
 SYMBOL TABLE INFORMATION
 Symbol-name         Value
 -------------------------
+BIN_0               106C
+BIN_1               1070
+BIN_10              1094
+BIN_11              1098
+BIN_12              109C
+BIN_13              10A0
+BIN_14              10A4
+BIN_15              10A8
+BIN_2               1074
+BIN_3               1078
+BIN_4               107C
+BIN_5               1080
+BIN_6               1084
+BIN_7               1088
+BIN_8               108C
+BIN_9               1090
 CNVRT_ADDR          105C
-CR                  D
 DISP_INTRO          101C
 END                 105C
-END_ADDR            1076
 INPUT_ADDR          102A
-LF                  A
 MAIN_LOOP           105C
-M_INPUT_E           1114
-M_INPUT_S           10EE
-M_INTRO             108A
 START               1000
-START_ADDR          1062
