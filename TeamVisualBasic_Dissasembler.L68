@@ -1,0 +1,97 @@
+00001000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 2/27/2018 10:32:24 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      :  Team Visual Basic's Disassembler
+00000000                             3  * Written by :  Henry Hong, Dylan Desmond, Austin Abeyta
+00000000                             4  * Date       :  ?
+00000000                             5  * Description:  CSS422 Final Project
+00000000                             6  *               Machine code to Motorola 68000 Assembly
+00000000                             7  *               Main Driver File
+00000000                             8  *-----------------------------------------------------------
+00000000                             9      
+00001000                            10  START       ORG         $1000               ;Start @ address $1000
+00001000  4EB9 0000101C             11              JSR         DISP_INTRO          ;Display Intro Message
+00001006  4EB9 0000102A             12              JSR         INPUT_ADDR          ;Take start and ending address as user input
+0000100C  4EB9 0000105C             13              JSR         CNVRT_ADDR
+00001012  4EB9 0000105C             14              JSR         MAIN_LOOP           ;Meat of the program: Check for validity, OPCODE match, and print to screen
+00001018                            15              
+00001018  6000 0042                 16              BRA         END                 ;If loop improperly terminated, base case BRA to END program         
+0000101C                            17  *-Intro Message---------------------------------------------
+0000101C  43F9 0000108A             18  DISP_INTRO  LEA         M_INTRO,A1          ;Load intro msg
+00001022  103C 000E                 19              MOVE.B      #14,D0              ;Trap Task 14 displays null terminated string
+00001026  4E4F                      20              TRAP        #15    
+00001028                            21      
+00001028  4E75                      22              RTS                             ;Return to main START section
+0000102A                            23  *-Take Start and End Address as Input-----------------------
+0000102A  43F9 000010EE             24  INPUT_ADDR  LEA         M_INPUT_S,A1        ;Load input request msg
+00001030  103C 000E                 25              MOVE.B      #14,D0              ;Trap Task 14 displays null terminated string
+00001034  4E4F                      26              TRAP        #15
+00001036                            27              
+00001036  43F9 00001062             28              LEA         START_ADDR,A1
+0000103C  103C 0002                 29              MOVE.B      #2,D0               ;Read string from keyboard and store in (A1)
+00001040  4E4F                      30              TRAP        #15
+00001042                            31              
+00001042  43F9 00001114             32              LEA         M_INPUT_E,A1        ;Load input request msg
+00001048  103C 000E                 33              MOVE.B      #14,D0              ;Trap Task 14 displays null terminated string
+0000104C  4E4F                      34              TRAP        #15
+0000104E                            35              
+0000104E  43F9 00001076             36              LEA         END_ADDR,A1
+00001054  103C 0002                 37              MOVE.B      #2,D0               ;Read string from keyboard and store in (A1)
+00001058  4E4F                      38              TRAP        #15
+0000105A                            39              
+0000105A  4E75                      40              RTS                             ;Return to main START section
+0000105C                            41  
+0000105C                            42  
+0000105C                            43  *-Convert User Input into Hex Address-----------------------
+0000105C                            44  CNVRT_ADDR                  
+0000105C                            45  
+0000105C                            46  *-Main Loop-------------------------------------------------
+0000105C                            47  MAIN_LOOP   
+0000105C                            48      
+0000105C                            49  *-END-------------------------------------------------------
+0000105C  103C 0009                 50  END         MOVE.B      #9,D0               ;End program
+00001060  4E4F                      51              TRAP        #15     
+00001062                            52  *-Files-----------------------------------------------------
+00001062                            53              ;INCLUDE     'insert_filename_here.x68'     ;To include a file
+00001062                            54              
+00001062                            55  *-Variables and constants-----------------------------------
+00001062  =0000000D                 56  CR          EQU         $0D
+00001062  =0000000A                 57  LF          EQU         $0A
+00001062                            58  
+00001062                            59  START_ADDR  DS.B        20                  ;Machine code start address stored here
+00001076                            60  END_ADDR    DS.B        20                  ;Machine code end address stored here
+0000108A                            61              
+0000108A                            62  
+0000108A                            63  
+0000108A                            64  *-Strings---------------------------------------------------
+0000108A= 54 65 61 6D 20 56 ...     65  M_INTRO     DC.B        'Team Visual Basic',CR,LF
+0000109D= 4D 6F 74 6F 72 6F ...     66              DC.B        'Motorola 68000 Disassembler',CR,LF
+000010BA= 42 79 20 41 75 73 ...     67              DC.B        'By Austin Abeyta, Dylan Desmond, and Henry Hong',CR,LF,CR,LF,0 
+000010EE                            68              
+000010EE= 50 6C 65 61 73 65 ...     69  M_INPUT_S   DC.B        'Please Input the Starting Address: ',CR,LF,0
+00001114= 50 6C 65 61 73 65 ...     70  M_INPUT_E   DC.B        'Please Input the Ending Address: ',CR,LF,0
+00001138                            71                      
+00001138                            72              END         START               ; last line of source
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+CNVRT_ADDR          105C
+CR                  D
+DISP_INTRO          101C
+END                 105C
+END_ADDR            1076
+INPUT_ADDR          102A
+LF                  A
+MAIN_LOOP           105C
+M_INPUT_E           1114
+M_INPUT_S           10EE
+M_INTRO             108A
+START               1000
+START_ADDR          1062
