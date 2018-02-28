@@ -1,6 +1,6 @@
 *-----------------------------------------------------------
 * Title      :Dissambler 
-* Written by :Austin Abeyta, Dylan
+* Written by :Henry Hong, Dylan Desmond, Austin Abeyta
 * Date       :2/27/2018
 * Description:Using the first 4 bytes  (A7)
 *-----------------------------------------------------------
