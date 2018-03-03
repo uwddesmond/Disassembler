@@ -6,6 +6,7 @@
 *-----------------------------------------------------------
     ORG    $1000
 START:      MOVE.W      #$4E71,(A7)     *Load test for Nop into (A7)
+START:      MOVE.W      #$D0C0,(A7)     *Load test for Nop into (A7)
             MOVE.W      (A0),D2         *move op code into d2 to bit shift
             LSR.W       #4,D2           *Shift right 4 bits
             LSR.W       #4,D2           *shift right 4 bits
@@ -124,12 +125,7 @@ BIN_6       MOVE.W      (A0),D2         *reload fresh op code
     SIMHALT
 BIN_7
     SIMHALT  
-BIN_8       MOVE.W      (A0),D2         *load op string
-            LSR.W       #6,D2           *shift bits to bits that determine op
-            AND.W       #$07,D2         *mask out random bits
-            CMPI.W      #7,D2           *check if bits match div
-            BEQ         DIVS            *branch to div
-            BRA         OR              *check if bits mack OR
+BIN_8       MOVE.W      (A0),D2
             LSR.W       #6,D2
             AND.W       #$07,D2   
             CMPI.W      #7,D2
@@ -140,7 +136,6 @@ BIN_9
     SIMHALT
 BIN_10
     SIMHALT
-BIN_11
 BIN_11      MOVE.W      (A0),D2         *reload opcode into D2
             LSR.W       #4,D2           *shift bits to the right 4
             LSR.W       #4,D2           *Shift bits to the right 4
@@ -153,7 +148,6 @@ BIN_11      MOVE.W      (A0),D2         *reload opcode into D2
     SIMHALT
 BIN_12
     SIMHALT
-BIN_13
 BIN_13      MOVE.W      (A0),D2         *reload opcode into D2
             LSR.W       #6,D2           *shift bits to the right 6
             AND.W       #$07,D2         *isolate the last 3 bits
