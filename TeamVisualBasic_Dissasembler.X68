@@ -47,12 +47,12 @@ INPUT_ADDR  LEA         M_IN_RULES,A1       ;Load input restriction and rules ms
 
 *-Convert User Input into Hex Address-----------------------
 CNVRT_ADDR  LEA         START_ADDR,A0       ;Load start address into A0
-            MOVE.B      #8,D1               ;Load counter var into D1. Count down from 8
+            MOVE.B      #8,D3               ;Load counter var into D3. Count down from 8
             JSR         C_LOOP
             MOVE.L      D2,A5               ;Save start address in A5
             
             LEA         END_ADDR,A0         ;Load end address into A0
-            MOVE.B      #8,D1               ;Load counter var into D1. Count down from 8
+            MOVE.B      #8,D3               ;Load counter var into D3. Count down from 8
             CLR.L       D2
             JSR         C_LOOP
             MOVE.L      D2,A6               ;Save end address in A6 
@@ -61,14 +61,16 @@ CNVRT_ADDR  LEA         START_ADDR,A0       ;Load start address into A0
             
 C_LOOP      MOVE.B      (A0)+,D0            ;Load the ascii digit into D0
             CMP.B       #$FF,D0             ;If value is $FF, there is no digit
-            BEQ         C_INVALID              
+            BEQ         C_INVALID
+            CMP.B       #$00,D0             ;If value is $00, then probably done
+            BEQ         CNVRT_DONE              
 
-            SUBI.B      #1,D1               ;Decrement counter var
+            SUBI.B      #1,D3               ;Decrement counter var
             
             ;Determine whether num, upper, or lower case ascii a-f                                    
-            CMP.B       #$30,D0             ;If < 30, not a number
+            CMP.B       #$30,D0             ;If <30, not a number
             BLT         C_INVALID           
-            CMP.B       #$46,D0             ;If > 46, it's possibly a lowercase letter 
+            CMP.B       #$46,D0             ;If >46, it's possibly a lowercase letter 
             BGT         C_IS_LC             ;Check if it's a valid lower ascii letter
             
             CMP.B       #$39,D0             ;If <39, must be number
@@ -113,7 +115,10 @@ C_INVALID   MOVE.B      #11,D0              ;Clear screen
             
             BRA         START 
  
-CNVRT_DONE  RTS
+CNVRT_DONE  CMP.B       #8,D3               ;If no input, invalid
+            BEQ         C_INVALID           
+            
+            RTS                             ;Else, done
 
 *-Main Loop-------------------------------------------------
 MAIN_LOOP   
@@ -148,9 +153,12 @@ M_INV_INPUT DC.B        'Input address is invalid! Please re-enter: ',CR,LF,0
             
 
 *-Files-----------------------------------------------------
-            INCLUDE     'Jump_Table.X68'    ;Include Jump Table File
+            ;INCLUDE     'TeamVisualBasic_JumpTable.X68'    ;Include Jump Table File
             
             END         START               ;last line of source
+
+
+
 
 
 
