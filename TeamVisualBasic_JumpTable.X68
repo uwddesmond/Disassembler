@@ -19,6 +19,7 @@ START:      MOVE.W      #$D0C0,(A7)     *Load test for Nop into (A7)
             LSR.W       #4,D2           *shift right 4 bits
             LSR.W       #4,D2           *shift right 4 bits
 
+            *Checking for github
             CMPI.W      #1,D2           *check if it is a MOVE
             BEQ       BIN_MOVE
             CMPI.W      #2,D2           *check if it is a MOVE
