@@ -305,7 +305,6 @@ S_CMPI  DC.B    'CMPI',0
 S_BCLR  DC.B    'BCLR',0
 S_MOVE  DC.B    'MOVE',0
 S_MOVEA DC.B    'MOVEA',0
->>>>>>> 1d4e1e7c1ef8223073c9a39adeb575f02741d1fd
 S_BGE   DC.B    'BGE',0
 S_BCS   DC.B    'BCS',0
 S_BVC   DC.B    'BVC',0
@@ -318,7 +317,11 @@ S_MOVEM DC.B    'MOVEM',0
 S_DIVS  DC.B    'DIVS',0
 S_OR    DC.B    'OR',0
 S_JSR   DC.B    'JSR',0
-
+S_LS    DC.B    'LS',0
+S_AS    DC.B    'AS',0
+S_RO    DC.B    'R0',0
+S_LEFT  DC.B    'L',0
+S_RIGHT DC.B    'R',0
 
     END    START        ; last line of source
 
