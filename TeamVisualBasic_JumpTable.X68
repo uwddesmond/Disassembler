@@ -12,7 +12,7 @@ START:      MOVE.W      #$4E71,(A7)     *Load test for Nop into (A7)
             LSR.W       #4,D2           *shift right 4 bits
             LSR.W       #2,D2           *shift right 2 bits to check if
             CMPI.W      #0,D2           *check if it falls into 0 bin
-            BEQ       BIN_0
+            BEQ         BIN_0
             
             MOVE.W      (A0),D2         *reload op code into d2 to bit shift
             LSR.W       #4,D2           *Shift right 4 bits
@@ -94,12 +94,12 @@ BIN_6       MOVE.W      (A0),D2         *reload fresh op code
     SIMHALT
 BIN_7
     SIMHALT  
-BIN_8       MOVE.W      (A0),D2
-            LSR.W       #6,D2
-            AND.W       #$07,D2   
-            CMPI.W      #7,D2
-            BEQ         DIVS
-            BRA         OR  
+BIN_8       MOVE.W      (A0),D2         *load op string
+            LSR.W       #6,D2           *shift bits to bits that determine op
+            AND.W       #$07,D2         *mask out random bits
+            CMPI.W      #7,D2           *check if bits match div
+            BEQ         DIVS            *branch to div
+            BRA         OR              *check if bits mack OR
     SIMHALT
 BIN_9
     SIMHALT
@@ -114,6 +114,15 @@ BIN_13
 BIN_14
     SIMHALT
 BIN_15
+            MOVE.W      (A0),D2         *Reload the opcode
+            LSR.W       #3,D2           *shift bits down
+            AND.W       #$07,D2         *mask bits
+            CMP.W       #1,D2           *determin which kind of shift it is
+            BEQ         LOGICSHIFT      *bra to logic shift
+            CMP.W       #0,D2
+            BEQ         ARITHMETICSHIFT *bra to arthimetic shift
+            CMP.W       #3,D2
+            BEQ         ROTATE          *bra to rotate
     SIMHALT   
 
 
@@ -160,8 +169,31 @@ DIVS        LEA         S_DIVS,A1
             
 OR          LEA         S_OR,A1
             JSR         PRINT_OP       
+*-------------BIN 15-------------
+LOGICSHIFT  LEA         S_LEFT,A1
+            JSR         PRINT_OP
+            BRA         RIGHTORLEFT
+              
+RIGHTORLEFT   MOVE.W  (A0),D2       *reload op
+              LSL.W   #8,D2         *shift until dr bit is reached
+              CMP.W   #0,D2         *check if left
+              BEQ     LEFT
+              CMP.W   #1,D2         *check if right
+              BEQ     RIGHT  
+ARITHMETICSHIFT LEA         S_AS,A1
+                JSR         PRINT_OP
+                BRA         RIGHTORLEFT
+                
+ROTATE      LEA         S_RO,A1
+            JSR         PRINT_OP
+            BRA         RIGHTORLEFT
             
-            
+LEFT                    
+           LEA          S_LEFT,A1
+           JSR          PRINT_OP
+           
+RIGHT      LEA          S_RIGHT,A1
+           JSR          PRINT_OP 
 S_BGE   DC.B    'BGE',0
 S_BCS   DC.B    'BCS',0
 S_BVC   DC.B    'BVC',0
@@ -174,6 +206,11 @@ S_MOVEM DC.B    'MOVEM',0
 S_DIVS  DC.B    'DIVS',0
 S_OR    DC.B    'OR',0
 S_JSR   DC.B    'JSR',0
+S_LS    DC.B    'LS',0
+S_AS    DC.B    'AS',0
+S_RO    DC.B    'R0',0
+S_LEFT  DC.B    'L',0
+S_RIGHT DC.B    'R',0
 
 * Put variables and constants here
 
