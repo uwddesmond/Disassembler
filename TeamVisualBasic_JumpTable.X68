@@ -194,6 +194,8 @@ LEFT
            
 RIGHT      LEA          S_RIGHT,A1
            JSR          PRINT_OP 
+           
+*---------------SRTRINGS------------------
 S_BGE   DC.B    'BGE',0
 S_BCS   DC.B    'BCS',0
 S_BVC   DC.B    'BVC',0
