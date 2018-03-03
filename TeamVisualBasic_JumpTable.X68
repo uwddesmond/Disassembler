@@ -160,7 +160,15 @@ BIN_13      MOVE.W      (A0),D2         *reload opcode into D2
     SIMHALT
 BIN_14
     SIMHALT
-BIN_15
+BIN_15      MOVE.W      (A0),D2         *Reload the opcode
+            LSR.W       #3,D2           *shift bits down
+            AND.W       #$07,D2         *mask bits
+            CMP.W       #1,D2           *determin which kind of shift it is
+            BEQ         LOGICSHIFT      *bra to logic shift
+            CMP.W       #0,D2
+            BEQ         ARITHMETICSHIFT *bra to arthimetic shift
+            CMP.W       #3,D2
+            BEQ         ROTATE          *bra to rotate
     SIMHALT   
 
 
@@ -313,6 +321,7 @@ S_JSR   DC.B    'JSR',0
 
 
     END    START        ; last line of source
+
 
 *~Font name~Courier New~
 *~Font size~10~
