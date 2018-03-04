@@ -8,6 +8,7 @@
 *-----------------------------------------------------------
     
 START       ORG         $1000               ;Start @ address $1000
+            ORG         $1234               
             JSR         DISP_INTRO          ;Display Intro Message
             JSR         INPUT_ADDR          ;Take start and ending address as user input
             JSR         MAIN_LOOP           ;Meat of the program: Check for validity, OPCODE match, and print to screen
@@ -125,7 +126,7 @@ MAIN_LOOP
     
 *-END-------------------------------------------------------
 END         MOVE.B      #9,D0               ;End program
-            TRAP        #15     
+            TRAP        #15                      
             
 *-Variables and constants-----------------------------------
 CR          EQU         $0D
@@ -153,9 +154,10 @@ M_INV_INPUT DC.B        'Input address is invalid! Please re-enter: ',CR,LF,0
             
 
 *-Files-----------------------------------------------------
-            ;INCLUDE     'TeamVisualBasic_JumpTable.X68'    ;Include Jump Table File
+            INCLUDE     'TeamVisualBasic_JumpTable.X68'    ;Include Jump Table File
             
             END         START               ;last line of source
+
 
 
 
