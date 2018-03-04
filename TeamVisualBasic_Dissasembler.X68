@@ -7,7 +7,7 @@
 *               Main Driver File
 *-----------------------------------------------------------
     
-START       ORG         $1000                              ;Start @ address $1000             
+START       ORG         $1000               ;Start @ address $1000             
             JSR         DISP_INTRO          ;Display Intro Message
             JSR         INPUT_ADDR          ;Take start and ending address as user input
             JSR         MAIN_LOOP           ;Meat of the program: Check for validity, OPCODE match, and print to screen
@@ -121,7 +121,8 @@ CNVRT_DONE  CMP.B       #8,D3               ;If no input, invalid
             RTS                             ;Else, done
 
 *-Main Loop-------------------------------------------------
-MAIN_LOOP   JSR         JT_START
+MAIN_LOOP   
+            JSR         JT_START
     
 *-END-------------------------------------------------------
 END         MOVE.B      #9,D0               ;End program
@@ -133,7 +134,8 @@ LF          EQU         $0A
 
 START_ADDR  DS.B        20                  ;Machine code start address stored here
 END_ADDR    DS.B        20                  ;Machine code end address stored here
-            
+
+OPCODE      DS.B        10                  ;Storage for a line of OPCODE data to calculate and print upon            
 
 
 *-Strings---------------------------------------------------

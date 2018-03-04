@@ -13,7 +13,8 @@
 *-then Branch off into 16 bin possibilities
 *-----------------------------------------------------------
 
-JT_START    MOVE.W      #$4E71,(A7)         *Load test for Nop into (A7)
+JT_START    MOVE.W      #$4E71,(A7)         *Load test for Nop into (A7)       ;<---- Don't use A7, switch this to another register
+                                                                               ;<-A0 and A1 are good registers for temporary calculations
             
             MOVE.W      (A0),D2             *move op code into d2 to bit shift
             LSR.W       #4,D2               *Shift right 4 bits
@@ -252,171 +253,142 @@ BIN_14      MOVE.W      (A0),D2             *Reload the opcode
 BIN_15      *BRA        DATA                *IF it goes into this bin it is DATA
                                                                                              
 
-
-*-PRINT OP-----------------------------
-
-PRINT_OP    MOVE.B      #14,D0
-            TRAP        #15
-
-            
-
-
 *--------------------------------------------------------------
 *-Decode table
 *-Part 2 of the Jump Table
 *-OPCODE Effective addressing and EA Mode decoding
 *--------------------------------------------------------------
 
- 
 *-BIN 0--------------------------------------------------------           
-ORI         LEA         S_ORI,A1
-            MOVE.B      #14,D0
-            TRAP        #15
+ORI         MOVE.W      #S_ORI,(A4)+        *Load OPCODE string into (A4)
+                      
+            
+CMPI        MOVE.W      #S_CMPI,(A4)+       *Load OPCODE string into (A4)
             
             
-CMPI        LEA         S_CMPI,A1
-            MOVE.B      #14,D0
-            TRAP        #15
-            
-            
-BCLR        LEA         S_BCLR,A1
-            MOVE.B      #14,D0
-            TRAP        #15
+BCLR        MOVE.W      #S_BCLR,(A4)+       *Load OPCODE string into (A4)
             
 
 *-BIN_MOVE (Bins 1, 2, and 3)---------------------------------- 
            
-MOVE        LEA         S_MOVE,A1
-            MOVE.B      #14,D0
-            TRAP        #15
+MOVE        MOVE.W      #S_MOVE,(A4)+       *Load OPCODE string into (A4)
             
-MOVEA       LEA         S_MOVEA,A1
-            MOVE.B      #14,D0
-            TRAP        #15
+MOVEA       MOVE.W      #S_MOVEA,(A4)+      *Load OPCODE string into (A4)
             
 
 *-BIN 4--------------------------------------------------------
 
-
-NOP         LEA         S_NOP,A1
-            JSR         PRINT_OP
+NOP         MOVE.W      #S_NOP,(A4)+        *Load OPCODE string into (A4)
+            BRA         PRINT_OP
             
             
-RTS         LEA         S_RTS,A1
-            JSR         PRINT_OP       
+RTS         MOVE.W      #S_RTS,(A4)+        *Load OPCODE string into (A4)
+            BRA         PRINT_OP       
             
-LEA         LEA         S_LEA,A1
-            JSR         PRINT_OP
+LEA         MOVE.W      #S_LEA,(A4)+        *Load OPCODE string into (A4)
+            BRA         PRINT_OP
             
-MOVEM       LEA         S_MOVEM,A1
-            JSR         PRINT_OP
+MOVEM       MOVE.W      #S_MOVEM,(A4)+      *Load OPCODE string into (A4)
+            BRA         PRINT_OP
             
-JSR         LEA         S_JSR,A1
-            JSR         PRINT_OP
+JSR         MOVE.W      #S_JSR,(A4)+        *Load OPCODE string into (A4)
+            BRA         PRINT_OP
             
-NEG         LEA         S_NEG,A1
-            JSR         PRINT_OP
+NEG         MOVE.W      #S_NEG,(A4)+        *Load OPCODE string into (A4)
+            BRA         PRINT_OP
              
             
 *-BIN 5--------------------------------------------------------
 
-SUBQ        LEA         S_SUBQ,A1
-            MOVE.B      #14,D0
-            TRAP        #15
+SUBQ        MOVE.W      #S_SUBQ,(A4)+       *Load OPCODE string into (A4)
                        
 *-BIN 6--------------------------------------------------------
 
-BGE         LEA         S_BGE,A1
-            JSR         PRINT_OP
+BGE         MOVE.W      S_BGE,(A4)+         *Load OPCODE string into (A4)
+            BRA         PRINT_OP
             
             
-BCS         LEA         S_BCS,A1
-            JSR         PRINT_OP
+BCS         MOVE.W      #S_BCS,(A4)+        *Load OPCODE string into (A4)
+            BRA         PRINT_OP
             
-BVC         LEA         S_BVC,A1  
-            JSR         PRINT_OP
+BVC         MOVE.W      #S_BVC,(A4)+        *Load OPCODE string into (A4)
+            BRA         PRINT_OP
             
-BCC         LEA         S_BCC,A1
-            JSR         PRINT_OP
+BCC         MOVE.W      #S_BCC,(A4)+        *Load OPCODE string into (A4)
+            BRA         PRINT_OP
             
 *-BIN 8--------------------------------------------------------
 
-DIVS        LEA         S_DIVS,A1
-            JSR         PRINT_OP
+DIVS        MOVE.W      #S_DIVS,(A4)+       *Load OPCODE string into (A4)
+            BRA         PRINT_OP
             
-OR          LEA         S_OR,A1
-            JSR         PRINT_OP  
+OR          MOVE.W      #S_OR,(A4)+         *Load OPCODE string into (A4)
+            BRA         PRINT_OP  
 
 *-BIN 9---------------------------------------------------------
 
-SUB         LEA         S_SUB,A1
-            MOVE.B      #14,D0
-            TRAP        #15
+SUB         MOVE.W      #S_SUB,(A4)+        *Load OPCODE string into (A4)
             
 *-BIN 11--------------------------------------------------------  
          
-EOR         LEA         S_EOR,A1
-            MOVE.B      #14,D0
-            TRAP        #15
+EOR         MOVE.W      #S_EOR,(A4)+        *Load OPCODE string into (A4)
             
 
-CMP         LEA         S_CMP,A1
-            MOVE.B      #14,D0
-            TRAP        #15
+CMP         MOVE.W      #S_CMP,(A4)+        *Load OPCODE string into (A4)
             
 
 *-BIN 12---------------------------------------------------------
 
-MULS        LEA         S_MULS,A1
-            MOVE.B      #14,D0
-            TRAP        #15
+MULS        MOVE.W      #S_MULS,(A4)+       *Load OPCODE string into (A4)
             
 *-BIN 13---------------------------------------------------------
 
-ADD         LEA         S_ADD,A1
-            MOVE.B      #14,D0
-            TRAP        #15
+ADD         MOVE.W      #S_ADD,(A4)+        *Load OPCODE string into (A4)
             
 
-ADDA        LEA         S_ADDA,A1
-            MOVE.B      #14,D0
-            TRAP        #15
+ADDA        MOVE.W      #S_ADDA,(A4)+       *Load OPCODE string into (A4)
             
      
 *-BIN 14-------------------------------------------------------
-
-LOGICSHIFT  LEA         S_LEFT,A1
+                                                                    ;<--Double check the flow of this bin, will it print out
+                                                                    ;<-LSL LSR ROL ROR correctly?
+LOGICSHIFT  MOVE.W      #S_LEFT,(A4)+       *Load OPCODE string into (A4)                    
             JSR         PRINT_OP
             BRA         RIGHTORLEFT             
               
-RIGHTORLEFT MOVE.W      (A0),D2                 *reload op
-            LSL.W       #8,D2                   *shift until dr bit is reached
-            CMP.W       #0,D2                   *check if left
+RIGHTORLEFT MOVE.W      (A0),D2             *reload op
+            LSL.W       #8,D2               *shift until dr bit is reached
+            CMP.W       #0,D2               *check if left
             BEQ         LEFT
             
-            CMP.W       #1,D2                   *check if right
+            CMP.W       #1,D2               *check if right
             BEQ         RIGHT  
                                     
-ARITH_SHIFT LEA         S_AS,A1
+ARITH_SHIFT MOVE.W      #S_AS,(A4)+         *Load arithmetic shift OPCODE string into (A4)             
             JSR         PRINT_OP
-            BRA         RIGHTORLEFT
+            BRA         RIGHTORLEFT         
                 
-ROTATE      LEA         S_RO,A1
+ROTATE      MOVE.W      #S_RO,(A4)+         *Load rotate OPCODE string into (A4)
             JSR         PRINT_OP
             BRA         RIGHTORLEFT
             
-LEFT        LEA         S_LEFT,A1
-            JSR         PRINT_OP                       
+LEFT        MOVE.W      #S_LEFT,(A4)+       *Load directional string into (A4)
+            BRA         PRINT_OP                       
            
            
-RIGHT       LEA         S_RIGHT,A1
-            JSR         PRINT_OP 
+RIGHT       MOVE.W      #S_RIGHT,(A4)+      *Load directional string into (A4)
+            BRA         PRINT_OP 
            
            
-*-STRINGS------------------------------------------------------
 
-            JSR         PRINT_OP    
+
+
+*-PRINT OP-----------------------------------------------------
+
+PRINT_OP    RTS                             *Return program flow back to Dissasembler file(?)
+
             
+*-STRINGS------------------------------------------------------
 
 *-OPCODE Names-------------------------------------------------
 S_NOP       DC.B        'NOP',0   
