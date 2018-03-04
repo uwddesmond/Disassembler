@@ -32,6 +32,8 @@ INPUT_ADDR  LEA         M_IN_RULES,A1       ;Load input restriction and rules ms
             MOVE.B      #2,D0               ;Read string from keyboard and store in (A1)
             TRAP        #15
             
+            MOVE.L      (A1),(START_ADDR)   ;Save the user input into the predefined storage address
+            
             LEA         M_INPUT_E,A1        ;Load input request msg
             MOVE.B      #14,D0              ;Trap Task 14 displays null terminated string
             TRAP        #15
@@ -39,6 +41,9 @@ INPUT_ADDR  LEA         M_IN_RULES,A1       ;Load input restriction and rules ms
             LEA         END_ADDR,A1
             MOVE.B      #2,D0               ;Read string from keyboard and store in (A1)
             TRAP        #15
+            
+            MOVE.L      (A1),(END_ADDR)     ;Save the user input into the predefined storage address
+
             
             JSR         CNVRT_ADDR          ;Convert user ASCII input into usable hex addresses
 
@@ -49,14 +54,16 @@ INPUT_ADDR  LEA         M_IN_RULES,A1       ;Load input restriction and rules ms
 CNVRT_ADDR  LEA         START_ADDR,A0       ;Load start address into A0
             MOVE.B      #8,D3               ;Load counter var into D3. Count down from 8
             JSR         C_LOOP
-            MOVE.L      D2,A5               ;Save start address in A5
+            ;LEA         START_ADDR,A5       ;Save start address in A5
+            MOVE.L      D2,A5               ;Save converted input in (A5)
             
             LEA         END_ADDR,A0         ;Load end address into A0
             MOVE.B      #8,D3               ;Load counter var into D3. Count down from 8
             CLR.L       D2
             JSR         C_LOOP
-            MOVE.L      D2,A6               ;Save end address in A6 
-            
+            ;LEA         END_ADDR,A6         ;Save end address in A6 
+            MOVE.L      D2,A6               ;Save converted input in (A6)
+          
             BRA         CNVRT_DONE          ;Finish by RTSing back  
             
 C_LOOP      MOVE.B      (A0)+,D0            ;Load the ascii digit into D0
@@ -64,8 +71,10 @@ C_LOOP      MOVE.B      (A0)+,D0            ;Load the ascii digit into D0
             BEQ         C_INVALID
             CMP.B       #$00,D0             ;If value is $00, then probably done
             BEQ         CNVRT_DONE              
-
-            SUBI.B      #1,D3               ;Decrement counter var
+            
+            CMP.B       #0,D3               ;If counter var == 0
+            BEQ         CNVRT_DONE
+            SUBI.B      #1,D3               ;Else, decrement counter var
             
             ;Determine whether num, upper, or lower case ascii a-f                                    
             CMP.B       #$30,D0             ;If <30, not a number
@@ -109,6 +118,14 @@ C_INVALID   MOVE.B      #11,D0              ;Clear screen
             MOVE.W      #$FF00,D1
             TRAP        #15
             
+            LEA         START_ADDR,A5       ;Clear memory where old input was  
+            LEA         END_ADDR,A6                                
+            MOVE.L      #$00000000,(A5)        
+            MOVE.L      #$00000000,(A6)
+            MOVE.L      #$00000000,A5       ;Clear registers
+            MOVE.L      #$00000000,A6 
+     
+            
             LEA         M_INV_INPUT,A1      ;Load error message
             MOVE.B      #14,D0              ;Trap Task 14 displays null terminated string
             TRAP        #15
@@ -120,8 +137,14 @@ CNVRT_DONE  CMP.B       #8,D3               ;If no input, invalid
             
             RTS                             ;Else, done
 
+*-Prepare OPCODE--------------------------------------------
+PREPARE_OP  MOVE.L      #OP_ADDR,A4         ;Define a location in memory to write an OPCODE string to
+            RTS
+            
+
 *-Main Loop-------------------------------------------------
-MAIN_LOOP   
+MAIN_LOOP   JSR         PREPARE_OP          ;Define a location in memory to write an OPCODE string to
+            
             JSR         JT_START
     
 *-END-------------------------------------------------------
@@ -132,10 +155,10 @@ END         MOVE.B      #9,D0               ;End program
 CR          EQU         $0D
 LF          EQU         $0A
 
-START_ADDR  DS.B        20                  ;Machine code start address stored here
-END_ADDR    DS.B        20                  ;Machine code end address stored here
+START_ADDR  DS.B        30                  ;Machine code start address stored here
+END_ADDR    DS.B        30                  ;Machine code end address stored here
 
-OPCODE      DS.B        10                  ;Storage for a line of OPCODE data to calculate and print upon            
+OP_ADDR     DS.B        20                  ;Storage for a line of OPCODE data to calculate and print upon            
 
 
 *-Strings---------------------------------------------------
@@ -144,13 +167,14 @@ M_INTRO     DC.B        'Team Visual Basic',CR,LF
             DC.B        'By Austin Abeyta, Dylan Desmond, and Henry Hong',CR,LF,CR,LF,0 
 
 M_IN_RULES  DC.B        'Please limit address input to numeric (0-9) and/or ALL CAPS alphabet A-F',CR,LF
-            DC.B        'Please limit address input to a range of [0010000-FFFFFFFF]!',CR,LF
-            DC.B        'Input less than 8 digits will be padded on left, and truncated on right',CR,LF,0    
-         
+            DC.B        'Please limit address input to a range of [005000-FFFFFFFF]!',CR,LF
+            DC.B        'Input less than 8 digits will be padded on left',CR,LF    
+            DC.B        'Input greater than 8 digits will be truncated on the right',CR,LF,0
+            
 M_INPUT_S   DC.B        'Please Input the Starting Address: ',CR,LF,0
 M_INPUT_E   DC.B        'Please Input the Ending Address: ',CR,LF,0
 
-M_INV_INPUT DC.B        'Input address is invalid! Please re-enter: ',CR,LF,0
+M_INV_INPUT DC.B        'Input address is invalid! Please re-enter: ',CR,LF,CR,LF,0
                     
             
 

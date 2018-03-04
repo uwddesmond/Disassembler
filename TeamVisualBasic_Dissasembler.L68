@@ -1,6 +1,6 @@
 00001000 Starting Address
 Assembler used: EASy68K Editor/Assembler v5.15.04
-Created On: 3/4/2018 12:27:13 PM
+Created On: 3/4/2018 1:37:31 PM
 
 00000000                             1  *-----------------------------------------------------------
 00000000                             2  * Title      :  Team Visual Basic's Disassembler
@@ -14,494 +14,518 @@ Created On: 3/4/2018 12:27:13 PM
 00001000                            10  START       ORG         $1000               ;Start @ address $1000             
 00001000  4EB9 00001016             11              JSR         DISP_INTRO          ;Display Intro Message
 00001006  4EB9 00001024             12              JSR         INPUT_ADDR          ;Take start and ending address as user input
-0000100C  4EB9 0000111E             13              JSR         MAIN_LOOP           ;Meat of the program: Check for validity, OPCODE match, and print to screen
+0000100C  4EB9 0000115E             13              JSR         MAIN_LOOP           ;Meat of the program: Check for validity, OPCODE match, and print to screen
 00001012                            14                                                          
-00001012  6000 0110                 15              BRA         END                 ;If loop improperly terminated, base case BRA to END program         
+00001012  6000 0154                 15              BRA         END                 ;If loop improperly terminated, base case BRA to END program         
 00001016                            16  *-Intro Message---------------------------------------------
-00001016  43F9 0000115C             17  DISP_INTRO  LEA         M_INTRO,A1          ;Load intro msg
+00001016  43F9 000011BE             17  DISP_INTRO  LEA         M_INTRO,A1          ;Load intro msg
 0000101C  103C 000E                 18              MOVE.B      #14,D0              ;Trap Task 14 displays null terminated string
 00001020  4E4F                      19              TRAP        #15                     
 00001022                            20      
 00001022  4E75                      21              RTS                             ;Return to main START section
 00001024                            22  *-Take Start and End Address as Input-----------------------
-00001024  43F9 000011C0             23  INPUT_ADDR  LEA         M_IN_RULES,A1       ;Load input restriction and rules msg
+00001024  43F9 00001222             23  INPUT_ADDR  LEA         M_IN_RULES,A1       ;Load input restriction and rules msg
 0000102A  103C 000E                 24              MOVE.B      #14,D0              ;Trap Task 14 displays null terminated string
 0000102E  4E4F                      25              TRAP        #15                 
 00001030                            26  
-00001030  43F9 00001292             27              LEA         M_INPUT_S,A1        ;Load input request msg
+00001030  43F9 00001317             27              LEA         M_INPUT_S,A1        ;Load input request msg
 00001036  103C 000E                 28              MOVE.B      #14,D0              ;Trap Task 14 displays null terminated string
 0000103A  4E4F                      29              TRAP        #15
 0000103C                            30              
-0000103C  43F9 0000112A             31              LEA         START_ADDR,A1
+0000103C  43F9 0000116E             31              LEA         START_ADDR,A1
 00001042  103C 0002                 32              MOVE.B      #2,D0               ;Read string from keyboard and store in (A1)
 00001046  4E4F                      33              TRAP        #15
 00001048                            34              
-00001048  43F9 000012B8             35              LEA         M_INPUT_E,A1        ;Load input request msg
-0000104E  103C 000E                 36              MOVE.B      #14,D0              ;Trap Task 14 displays null terminated string
-00001052  4E4F                      37              TRAP        #15
-00001054                            38              
-00001054  43F9 0000113E             39              LEA         END_ADDR,A1
-0000105A  103C 0002                 40              MOVE.B      #2,D0               ;Read string from keyboard and store in (A1)
-0000105E  4E4F                      41              TRAP        #15
-00001060                            42              
-00001060  4EB9 00001068             43              JSR         CNVRT_ADDR          ;Convert user ASCII input into usable hex addresses
-00001066                            44  
-00001066  4E75                      45              RTS                             ;Return to main START section
-00001068                            46  
-00001068                            47  
-00001068                            48  *-Convert User Input into Hex Address-----------------------
-00001068  41F9 0000112A             49  CNVRT_ADDR  LEA         START_ADDR,A0       ;Load start address into A0
-0000106E  163C 0008                 50              MOVE.B      #8,D3               ;Load counter var into D3. Count down from 8
-00001072  4EB9 00001092             51              JSR         C_LOOP
-00001078  2A42                      52              MOVE.L      D2,A5               ;Save start address in A5
-0000107A                            53              
-0000107A  41F9 0000113E             54              LEA         END_ADDR,A0         ;Load end address into A0
-00001080  163C 0008                 55              MOVE.B      #8,D3               ;Load counter var into D3. Count down from 8
-00001084  4282                      56              CLR.L       D2
-00001086  4EB9 00001092             57              JSR         C_LOOP
-0000108C  2C42                      58              MOVE.L      D2,A6               ;Save end address in A6 
-0000108E                            59              
-0000108E  6000 0086                 60              BRA         CNVRT_DONE          ;Finish by RTSing back  
-00001092                            61              
-00001092  1018                      62  C_LOOP      MOVE.B      (A0)+,D0            ;Load the ascii digit into D0
-00001094  B03C 00FF                 63              CMP.B       #$FF,D0             ;If value is $FF, there is no digit
-00001098  6700 0062                 64              BEQ         C_INVALID
-0000109C  B03C 0000                 65              CMP.B       #$00,D0             ;If value is $00, then probably done
-000010A0  6700 0074                 66              BEQ         CNVRT_DONE              
-000010A4                            67  
-000010A4  5303                      68              SUBI.B      #1,D3               ;Decrement counter var
-000010A6                            69              
-000010A6                            70              ;Determine whether num, upper, or lower case ascii a-f                                    
-000010A6  B03C 0030                 71              CMP.B       #$30,D0             ;If <30, not a number
-000010AA  6D00 0050                 72              BLT         C_INVALID           
-000010AE  B03C 0046                 73              CMP.B       #$46,D0             ;If >46, it's possibly a lowercase letter 
-000010B2  6E00 0016                 74              BGT         C_IS_LC             ;Check if it's a valid lower ascii letter
-000010B6                            75              
-000010B6  B03C 0039                 76              CMP.B       #$39,D0             ;If <39, must be number
-000010BA  6D00 0022                 77              BLT         C_NUMERIC
-000010BE  B03C 0041                 78              CMP.B       #$41,D0             ;If >41, must be upper case ascii
-000010C2  6E00 0024                 79              BGT         C_ALPHA_U
-000010C6                            80  
-000010C6  6000 0034                 81              BRA         C_INVALID           ;If none of the above, the input is not valid 
-000010CA                            82              
-000010CA  B03C 0061                 83  C_IS_LC     CMP.B       #$61,D0             ;If >61, input is invalid
-000010CE  6D00 002C                 84              BLT         C_INVALID
-000010D2  B03C 0066                 85              CMP.B       #$66,D0             ;If >66, input is invalid
-000010D6  6E00 0024                 86              BGT         C_INVALID
-000010DA                            87              
-000010DA  6000 0016                 88              BRA         C_ALPHA_L           ;Else must be a valid lowercase input
-000010DE                            89  
-000010DE  0400 0030                 90  C_NUMERIC   SUBI.B      #$30,D0             ;Subtract 0x30 to convert to hex
-000010E2  E98A                      91              LSL.L       #4,D2               ;Shift by 1 digit to make room for next digit
-000010E4  D400                      92              ADD.B       D0,D2               ;Accumulate digits into D2
-000010E6  60AA                      93              BRA         C_LOOP  
-000010E8                            94  
-000010E8                            95  
-000010E8  0400 0037                 96  C_ALPHA_U   SUBI.B      #$37,D0             ;Subtract 0x37 to convert to hex
-000010EC  E98A                      97              LSL.L       #4,D2               ;Shift by 1 digit to make room for next digit
-000010EE  D400                      98              ADD.B       D0,D2               ;Accumulate digits into D2
-000010F0  60A0                      99              BRA         C_LOOP
-000010F2                           100  
-000010F2  0400 0057                101  C_ALPHA_L   SUBI.B      #$57,D0             ;Subtract 0x57 to convert to hex
-000010F6  E98A                     102              LSL.L       #4,D2               ;Shift by 1 digit to make room for next digit
-000010F8  D400                     103              ADD.B       D0,D2               ;Accumulate digits into D2
-000010FA  6096                     104              BRA         C_LOOP
-000010FC                           105          
-000010FC                           106                          
-000010FC                           107                                   
-000010FC  103C 000B                108  C_INVALID   MOVE.B      #11,D0              ;Clear screen
-00001100  323C FF00                109              MOVE.W      #$FF00,D1
-00001104  4E4F                     110              TRAP        #15
-00001106                           111              
-00001106  43F9 000012DC            112              LEA         M_INV_INPUT,A1      ;Load error message
-0000110C  103C 000E                113              MOVE.B      #14,D0              ;Trap Task 14 displays null terminated string
-00001110  4E4F                     114              TRAP        #15
-00001112                           115              
-00001112  6000 FEEC                116              BRA         START 
-00001116                           117   
-00001116  B63C 0008                118  CNVRT_DONE  CMP.B       #8,D3               ;If no input, invalid
-0000111A  67E0                     119              BEQ         C_INVALID           
-0000111C                           120              
-0000111C  4E75                     121              RTS                             ;Else, done
-0000111E                           122  
-0000111E                           123  *-Main Loop-------------------------------------------------
-0000111E                           124  MAIN_LOOP   
-0000111E  4EB9 0000130A            125              JSR         JT_START
-00001124                           126      
-00001124                           127  *-END-------------------------------------------------------
-00001124  103C 0009                128  END         MOVE.B      #9,D0               ;End program
-00001128  4E4F                     129              TRAP        #15                      
-0000112A                           130              
-0000112A                           131  *-Variables and constants-----------------------------------
-0000112A  =0000000D                132  CR          EQU         $0D
-0000112A  =0000000A                133  LF          EQU         $0A
-0000112A                           134  
-0000112A                           135  START_ADDR  DS.B        20                  ;Machine code start address stored here
-0000113E                           136  END_ADDR    DS.B        20                  ;Machine code end address stored here
-00001152                           137  
-00001152                           138  OPCODE      DS.B        10                  ;Storage for a line of OPCODE data to calculate and print upon            
-0000115C                           139  
-0000115C                           140  
-0000115C                           141  *-Strings---------------------------------------------------
-0000115C= 54 65 61 6D 20 56 ...    142  M_INTRO     DC.B        'Team Visual Basic',CR,LF
-0000116F= 4D 6F 74 6F 72 6F ...    143              DC.B        'Motorola 68000 Disassembler',CR,LF
-0000118C= 42 79 20 41 75 73 ...    144              DC.B        'By Austin Abeyta, Dylan Desmond, and Henry Hong',CR,LF,CR,LF,0 
-000011C0                           145  
-000011C0= 50 6C 65 61 73 65 ...    146  M_IN_RULES  DC.B        'Please limit address input to numeric (0-9) and/or ALL CAPS alphabet A-F',CR,LF
-0000120A= 50 6C 65 61 73 65 ...    147              DC.B        'Please limit address input to a range of [0010000-FFFFFFFF]!',CR,LF
-00001248= 49 6E 70 75 74 20 ...    148              DC.B        'Input less than 8 digits will be padded on left, and truncated on right',CR,LF,0    
-00001292                           149           
-00001292= 50 6C 65 61 73 65 ...    150  M_INPUT_S   DC.B        'Please Input the Starting Address: ',CR,LF,0
-000012B8= 50 6C 65 61 73 65 ...    151  M_INPUT_E   DC.B        'Please Input the Ending Address: ',CR,LF,0
-000012DC                           152  
-000012DC= 49 6E 70 75 74 20 ...    153  M_INV_INPUT DC.B        'Input address is invalid! Please re-enter: ',CR,LF,0
-0000130A                           154                      
-0000130A                           155              
-0000130A                           156  
-0000130A                           157  *-Files-----------------------------------------------------
-0000130A                           158              INCLUDE     'TeamVisualBasic_JumpTable.X68'    ;Include Jump Table File
-0000130A                           159  
-0000130A                           160  
-0000130A  3EBC 4E71                161  JT_START    MOVE.W      #$4E71,(A7)         *Load test for Nop into (A7)       ;<---- Don't use A7, switch this to another register
-0000130E                           162                                                                                 ;<-A0 and A1 are good registers for temporary calculations
-0000130E                           163              
-0000130E  3410                     164              MOVE.W      (A0),D2             *move op code into d2 to bit shift
-00001310  E84A                     165              LSR.W       #4,D2               *Shift right 4 bits
-00001312  E84A                     166              LSR.W       #4,D2               *shift right 4 bits
-00001314  E84A                     167              LSR.W       #4,D2               *shift right 4 bits
-00001316                           168              
-00001316  0C42 0000                169              CMPI.W      #0,D2               *check if it falls into 0 bin
-0000131A  6700 007A                170              BEQ         BIN_0
-0000131E                           171      
-0000131E  0C42 0001                172              CMPI.W      #1,D2               *check if it is a MOVE
-00001322  6700 009E                173              BEQ         BIN_MOVE
-00001326                           174              
-00001326  0C42 0002                175              CMPI.W      #2,D2               *check if it is a MOVE
-0000132A  6700 0096                176              BEQ         BIN_MOVE
-0000132E                           177              
-0000132E  0C42 0003                178              CMPI.W      #3,D2               *check if it is a MOVE
-00001332  6700 008E                179              BEQ         BIN_MOVE
-00001336                           180              
-00001336  0C42 0004                181              CMPI.W      #4,D2               *check if it falls into 4 bin
-0000133A  6700 009A                182              BEQ         BIN_4
-0000133E                           183  
-0000133E  0C42 0005                184              CMPI.W      #5,D2               *check if it falls into 5 bin
-00001342  6700 00D0                185              BEQ         BIN_5
-00001346                           186  
-00001346  0C42 0006                187              CMPI.W      #6,D2               *check if it falls into 6 bin
-0000134A  6700 00CC                188              BEQ         BIN_6
-0000134E                           189  
-0000134E  0C42 0007                190              CMPI.W      #7,D2               *check if it falls into 7 bin
-00001352  6700 00EE                191              BEQ         BIN_7
-00001356                           192  
-00001356  0C42 0008                193              CMPI.W      #8,D2               *check if it falls into 8 bin
-0000135A  6700 00E6                194              BEQ         BIN_8
-0000135E                           195  
-0000135E  0C42 0009                196              CMPI.W      #9,D2               *check if it falls into 9 bin
-00001362  6700 00F2                197              BEQ         BIN_9
-00001366                           198  
-00001366  0C42 000A                199              CMPI.W      #10,D2              *check if it falls into 10 bin
-0000136A  6700 00EE                200              BEQ         BIN_10
-0000136E                           201  
-0000136E  0C42 000B                202              CMPI.W      #11,D2              *check if it falls into 11 bin
-00001372  6700 00E6                203              BEQ         BIN_11
-00001376                           204  
-00001376  0C42 000C                205              CMPI.W      #12,D2              *check if it falls into 12 bin
-0000137A  6700 00F8                206              BEQ         BIN_12
-0000137E                           207  
-0000137E  0C42 000D                208              CMPI.W      #13,D2              *check if it falls into 12 bin
-00001382  6700 00F4                209              BEQ         BIN_13
-00001386                           210  
-00001386  0C42 000E                211              CMPI.W      #14,D2              *check if it falls into 14 bin
-0000138A  6700 0108                212              BEQ         BIN_14
-0000138E                           213  
-0000138E  0C42 000F                214              CMPI.W      #15,D2              *check if it falls into 15 bin
-00001392  6700 0120                215              BEQ         BIN_15
-00001396                           216  
-00001396  3410                     217  BIN_0       MOVE.W      (A0),D2             *reload opcode
-00001398  E04A                     218              LSR.W       #8,D2               *shift bits to the right 8
-0000139A  C47C 000F                219              AND.W       #$0F,D2             *Isolate the last 4 bits
-0000139E                           220              
-0000139E  0C42 000C                221              CMPI.W      #12,D2              *Check if the bit is C
-000013A2  6700 0114                222              BEQ         CMPI                *if CMPI go to the subroutine
-000013A6                           223              
-000013A6  0C42 0000                224              CMPI.W      #0,D2               *Check if the bit is a 0
-000013AA  6700 0108                225              BEQ         ORI                 *if ORI go to the subroutine
-000013AE                           226              
-000013AE  0C42 0008                227              CMPI.W      #8,D2               *Check if the bit is an 8
-000013B2  6700 0108                228              BEQ         BCLR                *if BCLR immediate go to subroutine
-000013B6                           229              
-000013B6  C47C 0001                230              AND.W       #$01,D2             *isolate the last bit
-000013BA  0C42 0001                231              CMPI.W      #1,D2               *Check if the bit is a 1
-000013BE  6700 00FC                232              BEQ         BCLR                *if BCLR register go to subroutine
-000013C2                           233              
-000013C2                           234              *BRA         DATA           
-000013C2                           235  
-000013C2  3410                     236  BIN_MOVE    MOVE.W      (A0),D2             *reload opcode
-000013C4  EC4A                     237              LSR.W       #6,D2               *shift bits to the right 6
-000013C6  C47C 0007                238              AND.W       #$07,D2             *isolate the last 3 bits
-000013CA  0C42 0001                239              CMPI.W      #1,D2               *check if the bits are 001
-000013CE  6700 00F4                240              BEQ         MOVEA               *if MOVEA go to SUB
-000013D2                           241              
-000013D2                           242              *CMPI.W      #7,D2              *check if the bits are 111
-000013D2                           243              *BEQ         DATA               *if 111 must be DATA
-000013D2  6000 00EC                244              BRA         MOVE                *otherwise must be MOVE
-000013D6                           245              
-000013D6  3410                     246  BIN_4       MOVE.W      (A0),D2             *reload opcode
-000013D8  0C42 4E71                247              CMPI.W      #$4E71,D2           *check for no-op value
-000013DC  6700 00EA                248              BEQ         NOP                 *if NOP go to SUB
-000013E0                           249              
-000013E0  0C42 4E75                250              CMPI.W      #$4E75,D2           *Compare with a constant value for RTS      
-000013E4  6700 00EA                251              BEQ         RTS                 *if RTS go to RTS subroutine
-000013E8                           252              
-000013E8  E84A                     253              LSR.W       #4,D2               *shift right 4 bits
-000013EA  E84A                     254              LSR.W       #4,D2               *shift right 4 bits
-000013EC  C47C 000F                255              AND.W       #$0F,D2             *bitmask first 4 bits  
-000013F0  0C42 000E                256              CMPI.W      #$E,D2              *compare final masked bits
-000013F4  6700 00F2                257              BEQ         JSR                 *if it equals E it is JSR
-000013F8                           258              
-000013F8  0C42 0004                259              CMPI.W      #$4,D2              *check for defining bits
-000013FC  6700 00F2                260              BEQ         NEG                 *branch to NEG routine
-00001400                           261              
-00001400  C47C 0001                262              AND.W       #$1,D2
-00001404  0C42 0001                263              CMPI.W      #1,D2
-00001408  6700 00CE                264              BEQ         LEA
-0000140C                           265              
-0000140C  0C42 0000                266              CMPI.W      #0,D2
-00001410  6700 00CE                267              BEQ         MOVEM
-00001414                           268              
-00001414  6000 00E2                269  BIN_5       BRA         SUBQ                *SUBQ is the only option for this bin so branch to SUB
-00001418                           270  
-00001418  3410                     271  BIN_6       MOVE.W      (A0),D2             *reload fresh op code
-0000141A  E84A                     272              LSR.W       #4,D2               *shift right 4
-0000141C  E84A                     273              LSR.W       #4,D2               *shift right 4
-0000141E  C47C 000F                274              AND.W       #$0F,D2             *Finds the condition code of the branch statement through bitmask
-00001422  0C42 0004                275              CMPI.W      #4,D2
-00001426  6700 00EE                276              BEQ         BCC                 *branch to BCC code     ;<-------------------Not correct, B(cc) isn't a standalone OPCODE
-0000142A                           277                                                                   ;<--- Also BLT is missing 
-0000142A                           278                                                                               
-0000142A  0C42 0008                279              CMPI.W      #8,D2
-0000142E  6700 00DE                280              BEQ         BVC                 *branch to BVC code
-00001432                           281              
-00001432  0C42 0005                282              CMPI.W      #5,D2
-00001436  6700 00CE                283              BEQ         BCS                 *branch to BCS code
-0000143A                           284              
-0000143A  0C42 000C                285              CMPI.W      #$C,D2
-0000143E  6700 00BC                286              BEQ         BGE                 *branch to BGE code
-00001442                           287  
-00001442                           288  BIN_7       *BRA        DATA                *If it goes into this bin it is DATA
-00001442                           289  
-00001442  3410                     290  BIN_8       MOVE.W      (A0),D2
-00001444  EC4A                     291              LSR.W       #6,D2
-00001446  C47C 0007                292              AND.W       #$07,D2   
-0000144A  0C42 0007                293              CMPI.W      #7,D2
-0000144E  6700 00CE                294              BEQ         DIVS
-00001452                           295              
-00001452  6000 00D2                296              BRA         OR  
-00001456                           297              
-00001456  6000 00D6                298  BIN_9       BRA         SUB                 *SUB is the only option for this bin so branch to SUB
-0000145A                           299  
-0000145A                           300  BIN_10      *BRA        DATA                *If it goes into this bin it is DATA
-0000145A                           301  
-0000145A  3410                     302  BIN_11      MOVE.W      (A0),D2             *reload opcode into D2
-0000145C  E84A                     303              LSR.W       #4,D2               *shift bits to the right 4
-0000145E  E84A                     304              LSR.W       #4,D2               *Shift bits to the right 4
-00001460  C47C 0001                305              AND.W       #$01,D2             *isolate the last bit
-00001464  0C42 0001                306              CMPI.W      #1,D2               *check if the bit is a 1
-00001468  6700 00C8                307              BEQ         EOR                 *if EOR go to the SUB
-0000146C                           308              
-0000146C  0C42 0000                309              CMPI.W      #0,D2               *check if the bit is a 0
-00001470  6700 00C4                310              BEQ         CMP                 *if CMP go to the SUB
-00001474                           311              
-00001474                           312              *BRA        DATA                *if neither EOR or CMP must be DATA
-00001474                           313              
-00001474  6000 00C4                314  BIN_12      BRA         MULS                *MULS is the only option for this bin so branch to SUB
-00001478                           315  
-00001478  3410                     316  BIN_13      MOVE.W      (A0),D2             *reload opcode into D2
-0000147A  EC4A                     317              LSR.W       #6,D2               *shift bits to the right 6
-0000147C  C47C 0007                318              AND.W       #$07,D2             *isolate the last 3 bits
-00001480  0C42 0003                319              CMPI.W      #$3,D2              *check if the bits are 011
-00001484  6700 00BC                320              BEQ         ADDA                *if ADDA go to SUB              ;<---------- One of these branches is not correct
-00001488                           321              
-00001488  0C42 0007                322              CMPI.W      #$7,D2              *check if the bits are 111
-0000148C  6700 00B4                323              BEQ         ADDA                *if ADDA go to SUB              ;<---------- One of these branches is not correct
-00001490                           324                                                          
-00001490  6000 00AC                325              BRA         ADD                 *if bits are not ADDA must be ADD and go to SUB
-00001494                           326              
-00001494  3410                     327  BIN_14      MOVE.W      (A0),D2             *Reload the opcode
-00001496  E64A                     328              LSR.W       #3,D2               *shift bits down
-00001498  C47C 0007                329              AND.W       #$07,D2             *mask bits
-0000149C  B47C 0001                330              CMP.W       #1,D2               *determin which kind of shift it is
-000014A0  6700 00A4                331              BEQ         LOGICSHIFT          *bra to logic shift
-000014A4                           332              
-000014A4  B47C 0000                333              CMP.W       #0,D2
-000014A8  6700 00BE                334              BEQ         ARITH_SHIFT         *bra to arthimetic shift
-000014AC                           335              
-000014AC  B47C 0003                336              CMP.W       #3,D2
-000014B0  6700 00C2                337              BEQ         ROTATE              *bra to rotate      ;<---- Is there a distinction between Left and right rotate?
-000014B4                           338              
-000014B4                           339                                                                  ; <--------- There should be a base case here
-000014B4                           340                                                                  
-000014B4                           341  
-000014B4                           342  BIN_15      *BRA        DATA                *IF it goes into this bin it is DATA
-000014B4                           343                                                                                               
-000014B4                           344  
-000014B4                           345  
-000014B4  38FC 15AC                346  ORI         MOVE.W      #S_ORI,(A4)+        *Load OPCODE string into (A4)
-000014B8                           347                        
-000014B8                           348              
-000014B8  38FC 15B0                349  CMPI        MOVE.W      #S_CMPI,(A4)+       *Load OPCODE string into (A4)
-000014BC                           350              
-000014BC                           351              
-000014BC  38FC 15B5                352  BCLR        MOVE.W      #S_BCLR,(A4)+       *Load OPCODE string into (A4)
-000014C0                           353              
-000014C0                           354  
-000014C0                           355             
-000014C0  38FC 15BA                356  MOVE        MOVE.W      #S_MOVE,(A4)+       *Load OPCODE string into (A4)
-000014C4                           357              
-000014C4  38FC 15BF                358  MOVEA       MOVE.W      #S_MOVEA,(A4)+      *Load OPCODE string into (A4)
-000014C8                           359              
-000014C8                           360  
-000014C8                           361  
-000014C8  38FC 1592                362  NOP         MOVE.W      #S_NOP,(A4)+        *Load OPCODE string into (A4)
-000014CC  6000 00C2                363              BRA         PRINT_OP
-000014D0                           364              
-000014D0                           365              
-000014D0  38FC 15D5                366  RTS         MOVE.W      #S_RTS,(A4)+        *Load OPCODE string into (A4)
-000014D4  6000 00BA                367              BRA         PRINT_OP       
-000014D8                           368              
-000014D8  38FC 15D9                369  LEA         MOVE.W      #S_LEA,(A4)+        *Load OPCODE string into (A4)
-000014DC  6000 00B2                370              BRA         PRINT_OP
-000014E0                           371              
-000014E0  38FC 15E1                372  MOVEM       MOVE.W      #S_MOVEM,(A4)+      *Load OPCODE string into (A4)
-000014E4  6000 00AA                373              BRA         PRINT_OP
-000014E8                           374              
-000014E8  38FC 15F9                375  JSR         MOVE.W      #S_JSR,(A4)+        *Load OPCODE string into (A4)
-000014EC  6000 00A2                376              BRA         PRINT_OP
-000014F0                           377              
-000014F0  38FC 15DD                378  NEG         MOVE.W      #S_NEG,(A4)+        *Load OPCODE string into (A4)
-000014F4  6000 009A                379              BRA         PRINT_OP
-000014F8                           380               
-000014F8                           381              
-000014F8                           382  
-000014F8  38FC 15E7                383  SUBQ        MOVE.W      #S_SUBQ,(A4)+       *Load OPCODE string into (A4)
-000014FC                           384                         
-000014FC                           385  
-000014FC  38F9 000015C5            386  BGE         MOVE.W      S_BGE,(A4)+         *Load OPCODE string into (A4)
-00001502  6000 008C                387              BRA         PRINT_OP
-00001506                           388              
-00001506                           389              
-00001506  38FC 15C9                390  BCS         MOVE.W      #S_BCS,(A4)+        *Load OPCODE string into (A4)
-0000150A  6000 0084                391              BRA         PRINT_OP
-0000150E                           392              
-0000150E  38FC 15CD                393  BVC         MOVE.W      #S_BVC,(A4)+        *Load OPCODE string into (A4)
-00001512  6000 007C                394              BRA         PRINT_OP
-00001516                           395              
-00001516  38FC 15D1                396  BCC         MOVE.W      #S_BCC,(A4)+        *Load OPCODE string into (A4)
-0000151A  6000 0074                397              BRA         PRINT_OP
-0000151E                           398              
-0000151E                           399  
-0000151E  38FC 15ED                400  DIVS        MOVE.W      #S_DIVS,(A4)+       *Load OPCODE string into (A4)
-00001522  6000 006C                401              BRA         PRINT_OP
-00001526                           402              
-00001526  38FC 15F2                403  OR          MOVE.W      #S_OR,(A4)+         *Load OPCODE string into (A4)
-0000152A  6000 0064                404              BRA         PRINT_OP  
-0000152E                           405  
-0000152E                           406  
-0000152E  38FC 15F5                407  SUB         MOVE.W      #S_SUB,(A4)+        *Load OPCODE string into (A4)
-00001532                           408              
-00001532                           409           
-00001532  38FC 1596                410  EOR         MOVE.W      #S_EOR,(A4)+        *Load OPCODE string into (A4)
-00001536                           411              
-00001536                           412  
-00001536  38FC 159A                413  CMP         MOVE.W      #S_CMP,(A4)+        *Load OPCODE string into (A4)
-0000153A                           414              
-0000153A                           415  
-0000153A                           416  
-0000153A  38FC 159E                417  MULS        MOVE.W      #S_MULS,(A4)+       *Load OPCODE string into (A4)
-0000153E                           418              
-0000153E                           419  
-0000153E  38FC 15A3                420  ADD         MOVE.W      #S_ADD,(A4)+        *Load OPCODE string into (A4)
-00001542                           421              
-00001542                           422  
-00001542  38FC 15A7                423  ADDA        MOVE.W      #S_ADDA,(A4)+       *Load OPCODE string into (A4)
-00001546                           424              
-00001546                           425       
-00001546                           426                                                                      ;<--Double check the flow of this bin, will it print out
-00001546                           427                                                                      ;<-LSL LSR ROL ROR correctly?
-00001546  38FC 1606                428  LOGICSHIFT  MOVE.W      #S_LEFT,(A4)+       *Load OPCODE string into (A4)                    
-0000154A  4EB9 00001590            429              JSR         PRINT_OP
-00001550  6000 0002                430              BRA         RIGHTORLEFT             
-00001554                           431                
-00001554  3410                     432  RIGHTORLEFT MOVE.W      (A0),D2             *reload op
-00001556  E14A                     433              LSL.W       #8,D2               *shift until dr bit is reached
-00001558  B47C 0000                434              CMP.W       #0,D2               *check if left
-0000155C  6700 0022                435              BEQ         LEFT
-00001560                           436              
-00001560  B47C 0001                437              CMP.W       #1,D2               *check if right
-00001564  6700 0022                438              BEQ         RIGHT  
-00001568                           439                                      
-00001568  38FC 1600                440  ARITH_SHIFT MOVE.W      #S_AS,(A4)+         *Load arithmetic shift OPCODE string into (A4)             
-0000156C  4EB9 00001590            441              JSR         PRINT_OP
-00001572  60E0                     442              BRA         RIGHTORLEFT         
-00001574                           443                  
-00001574  38FC 1603                444  ROTATE      MOVE.W      #S_RO,(A4)+         *Load rotate OPCODE string into (A4)
-00001578  4EB9 00001590            445              JSR         PRINT_OP
-0000157E  60D4                     446              BRA         RIGHTORLEFT
-00001580                           447              
-00001580  38FC 1606                448  LEFT        MOVE.W      #S_LEFT,(A4)+       *Load directional string into (A4)
-00001584  6000 000A                449              BRA         PRINT_OP                       
-00001588                           450             
-00001588                           451             
-00001588  38FC 1608                452  RIGHT       MOVE.W      #S_RIGHT,(A4)+      *Load directional string into (A4)
-0000158C  6000 0002                453              BRA         PRINT_OP 
-00001590                           454             
-00001590                           455             
-00001590                           456  
-00001590                           457  
-00001590                           458  
-00001590                           459  
-00001590  4E75                     460  PRINT_OP    RTS                             *Return program flow back to Dissasembler file(?)
-00001592                           461  
-00001592                           462              
-00001592                           463  
-00001592= 4E 4F 50 00              464  S_NOP       DC.B        'NOP',0   
-00001596= 45 4F 52 00              465  S_EOR       DC.B        'EOR',0
-0000159A= 43 4D 50 00              466  S_CMP       DC.B        'CMP',0
-0000159E= 4D 55 4C 53 00           467  S_MULS      DC.B        'MULS',0
-000015A3= 41 44 44 00              468  S_ADD       DC.B        'ADD',0
-000015A7= 41 44 44 41 00           469  S_ADDA      DC.B        'ADDA',0
-000015AC= 4F 52 49 00              470  S_ORI       DC.B        'ORI',0
-000015B0= 43 4D 50 49 00           471  S_CMPI      DC.B        'CMPI',0
-000015B5= 42 43 4C 52 00           472  S_BCLR      DC.B        'BCLR',0
-000015BA= 4D 4F 56 45 00           473  S_MOVE      DC.B        'MOVE',0
-000015BF= 4D 4F 56 45 41 00        474  S_MOVEA     DC.B        'MOVEA',0
-000015C5= 42 47 45 00              475  S_BGE       DC.B        'BGE',0
-000015C9= 42 43 53 00              476  S_BCS       DC.B        'BCS',0
-000015CD= 42 56 43 00              477  S_BVC       DC.B        'BVC',0
-000015D1= 42 43 43 00              478  S_BCC       DC.B        'BCC',0                       
-000015D5= 52 54 53 00              479  S_RTS       DC.B        'RTS',0
-000015D9= 4C 45 41 00              480  S_LEA       DC.B        'LEA',0
-000015DD= 4E 45 47 00              481  S_NEG       DC.B        'NEG',0 
-000015E1= 4D 4F 56 45 4D 00        482  S_MOVEM     DC.B        'MOVEM',0
-000015E7= 53 55 42 2E 51 00        483  S_SUBQ      DC.B        'SUB.Q',0
-000015ED= 44 49 56 53 00           484  S_DIVS      DC.B        'DIVS',0
-000015F2= 4F 52 00                 485  S_OR        DC.B        'OR',0
-000015F5= 53 55 42 00              486  S_SUB       DC.B        'SUB',0
-000015F9= 4A 53 52 00              487  S_JSR       DC.B        'JSR',0
-000015FD= 4C 53 00                 488  S_LS        DC.B        'LS',0
-00001600= 41 53 00                 489  S_AS        DC.B        'AS',0
-00001603= 52 30 00                 490  S_RO        DC.B        'R0',0
-00001606= 4C 00                    491  S_LEFT      DC.B        'L',0
-00001608= 52 00                    492  S_RIGHT     DC.B        'R',0
-0000160A                           493  
-0000160A                           494  
-0000160A                           495  
-0000160A                           496  
-0000160A                           497  
-0000160A                           498  -------------------- end include --------------------
-0000160A                           499              
-0000160A                           500              END         START               ;last line of source
+00001048  23D1 0000116E             35              MOVE.L      (A1),(START_ADDR)   ;Save the user input into the predefined storage address
+0000104E                            36              
+0000104E  43F9 0000133D             37              LEA         M_INPUT_E,A1        ;Load input request msg
+00001054  103C 000E                 38              MOVE.B      #14,D0              ;Trap Task 14 displays null terminated string
+00001058  4E4F                      39              TRAP        #15
+0000105A                            40              
+0000105A  43F9 0000118C             41              LEA         END_ADDR,A1
+00001060  103C 0002                 42              MOVE.B      #2,D0               ;Read string from keyboard and store in (A1)
+00001064  4E4F                      43              TRAP        #15
+00001066                            44              
+00001066  23D1 0000118C             45              MOVE.L      (A1),(END_ADDR)     ;Save the user input into the predefined storage address
+0000106C                            46  
+0000106C                            47              
+0000106C  4EB9 00001074             48              JSR         CNVRT_ADDR          ;Convert user ASCII input into usable hex addresses
+00001072                            49  
+00001072  4E75                      50              RTS                             ;Return to main START section
+00001074                            51  
+00001074                            52  
+00001074                            53  *-Convert User Input into Hex Address-----------------------
+00001074  41F9 0000116E             54  CNVRT_ADDR  LEA         START_ADDR,A0       ;Load start address into A0
+0000107A  163C 0008                 55              MOVE.B      #8,D3               ;Load counter var into D3. Count down from 8
+0000107E  4EB9 0000109E             56              JSR         C_LOOP
+00001084                            57              ;LEA         START_ADDR,A5       ;Save start address in A5
+00001084  2A42                      58              MOVE.L      D2,A5               ;Save converted input in (A5)
+00001086                            59              
+00001086  41F9 0000118C             60              LEA         END_ADDR,A0         ;Load end address into A0
+0000108C  163C 0008                 61              MOVE.B      #8,D3               ;Load counter var into D3. Count down from 8
+00001090  4282                      62              CLR.L       D2
+00001092  4EB9 0000109E             63              JSR         C_LOOP
+00001098                            64              ;LEA         END_ADDR,A6         ;Save end address in A6 
+00001098  2C42                      65              MOVE.L      D2,A6               ;Save converted input in (A6)
+0000109A                            66            
+0000109A  6000 00B2                 67              BRA         CNVRT_DONE          ;Finish by RTSing back  
+0000109E                            68              
+0000109E  1018                      69  C_LOOP      MOVE.B      (A0)+,D0            ;Load the ascii digit into D0
+000010A0  B03C 00FF                 70              CMP.B       #$FF,D0             ;If value is $FF, there is no digit
+000010A4  6700 006A                 71              BEQ         C_INVALID
+000010A8  B03C 0000                 72              CMP.B       #$00,D0             ;If value is $00, then probably done
+000010AC  6700 00A0                 73              BEQ         CNVRT_DONE              
+000010B0                            74              
+000010B0  B63C 0000                 75              CMP.B       #0,D3               ;If counter var == 0
+000010B4  6700 0098                 76              BEQ         CNVRT_DONE
+000010B8  5303                      77              SUBI.B      #1,D3               ;Else, decrement counter var
+000010BA                            78              
+000010BA                            79              ;Determine whether num, upper, or lower case ascii a-f                                    
+000010BA  B03C 0030                 80              CMP.B       #$30,D0             ;If <30, not a number
+000010BE  6D00 0050                 81              BLT         C_INVALID           
+000010C2  B03C 0046                 82              CMP.B       #$46,D0             ;If >46, it's possibly a lowercase letter 
+000010C6  6E00 0016                 83              BGT         C_IS_LC             ;Check if it's a valid lower ascii letter
+000010CA                            84              
+000010CA  B03C 0039                 85              CMP.B       #$39,D0             ;If <39, must be number
+000010CE  6D00 0022                 86              BLT         C_NUMERIC
+000010D2  B03C 0041                 87              CMP.B       #$41,D0             ;If >41, must be upper case ascii
+000010D6  6E00 0024                 88              BGT         C_ALPHA_U
+000010DA                            89  
+000010DA  6000 0034                 90              BRA         C_INVALID           ;If none of the above, the input is not valid 
+000010DE                            91              
+000010DE  B03C 0061                 92  C_IS_LC     CMP.B       #$61,D0             ;If >61, input is invalid
+000010E2  6D00 002C                 93              BLT         C_INVALID
+000010E6  B03C 0066                 94              CMP.B       #$66,D0             ;If >66, input is invalid
+000010EA  6E00 0024                 95              BGT         C_INVALID
+000010EE                            96              
+000010EE  6000 0016                 97              BRA         C_ALPHA_L           ;Else must be a valid lowercase input
+000010F2                            98  
+000010F2  0400 0030                 99  C_NUMERIC   SUBI.B      #$30,D0             ;Subtract 0x30 to convert to hex
+000010F6  E98A                     100              LSL.L       #4,D2               ;Shift by 1 digit to make room for next digit
+000010F8  D400                     101              ADD.B       D0,D2               ;Accumulate digits into D2
+000010FA  60A2                     102              BRA         C_LOOP  
+000010FC                           103  
+000010FC                           104  
+000010FC  0400 0037                105  C_ALPHA_U   SUBI.B      #$37,D0             ;Subtract 0x37 to convert to hex
+00001100  E98A                     106              LSL.L       #4,D2               ;Shift by 1 digit to make room for next digit
+00001102  D400                     107              ADD.B       D0,D2               ;Accumulate digits into D2
+00001104  6098                     108              BRA         C_LOOP
+00001106                           109  
+00001106  0400 0057                110  C_ALPHA_L   SUBI.B      #$57,D0             ;Subtract 0x57 to convert to hex
+0000110A  E98A                     111              LSL.L       #4,D2               ;Shift by 1 digit to make room for next digit
+0000110C  D400                     112              ADD.B       D0,D2               ;Accumulate digits into D2
+0000110E  608E                     113              BRA         C_LOOP
+00001110                           114          
+00001110                           115                          
+00001110                           116                                   
+00001110  103C 000B                117  C_INVALID   MOVE.B      #11,D0              ;Clear screen
+00001114  323C FF00                118              MOVE.W      #$FF00,D1
+00001118  4E4F                     119              TRAP        #15
+0000111A                           120              
+0000111A  4BF9 0000116E            121              LEA         START_ADDR,A5       ;Clear memory where old input was  
+00001120  4DF9 0000118C            122              LEA         END_ADDR,A6                                
+00001126  2ABC 00000000            123              MOVE.L      #$00000000,(A5)        
+0000112C  2CBC 00000000            124              MOVE.L      #$00000000,(A6)
+00001132  2A7C 00000000            125              MOVE.L      #$00000000,A5       ;Clear registers
+00001138  2C7C 00000000            126              MOVE.L      #$00000000,A6 
+0000113E                           127       
+0000113E                           128              
+0000113E  43F9 00001361            129              LEA         M_INV_INPUT,A1      ;Load error message
+00001144  103C 000E                130              MOVE.B      #14,D0              ;Trap Task 14 displays null terminated string
+00001148  4E4F                     131              TRAP        #15
+0000114A                           132              
+0000114A  6000 FEB4                133              BRA         START 
+0000114E                           134   
+0000114E  B63C 0008                135  CNVRT_DONE  CMP.B       #8,D3               ;If no input, invalid
+00001152  67BC                     136              BEQ         C_INVALID           
+00001154                           137              
+00001154  4E75                     138              RTS                             ;Else, done
+00001156                           139  
+00001156                           140  *-Prepare OPCODE--------------------------------------------
+00001156  287C 000011AA            141  PREPARE_OP  MOVE.L      #OP_ADDR,A4         ;Define a location in memory to write an OPCODE string to
+0000115C  4E75                     142              RTS
+0000115E                           143              
+0000115E                           144  
+0000115E                           145  *-Main Loop-------------------------------------------------
+0000115E  4EB8 1156                146  MAIN_LOOP   JSR         PREPARE_OP          ;Define a location in memory to write an OPCODE string to
+00001162                           147              
+00001162  4EB9 00001392            148              JSR         JT_START
+00001168                           149      
+00001168                           150  *-END-------------------------------------------------------
+00001168  103C 0009                151  END         MOVE.B      #9,D0               ;End program
+0000116C  4E4F                     152              TRAP        #15                      
+0000116E                           153              
+0000116E                           154  *-Variables and constants-----------------------------------
+0000116E  =0000000D                155  CR          EQU         $0D
+0000116E  =0000000A                156  LF          EQU         $0A
+0000116E                           157  
+0000116E                           158  START_ADDR  DS.B        30                  ;Machine code start address stored here
+0000118C                           159  END_ADDR    DS.B        30                  ;Machine code end address stored here
+000011AA                           160  
+000011AA                           161  OP_ADDR     DS.B        20                  ;Storage for a line of OPCODE data to calculate and print upon            
+000011BE                           162  
+000011BE                           163  
+000011BE                           164  *-Strings---------------------------------------------------
+000011BE= 54 65 61 6D 20 56 ...    165  M_INTRO     DC.B        'Team Visual Basic',CR,LF
+000011D1= 4D 6F 74 6F 72 6F ...    166              DC.B        'Motorola 68000 Disassembler',CR,LF
+000011EE= 42 79 20 41 75 73 ...    167              DC.B        'By Austin Abeyta, Dylan Desmond, and Henry Hong',CR,LF,CR,LF,0 
+00001222                           168  
+00001222= 50 6C 65 61 73 65 ...    169  M_IN_RULES  DC.B        'Please limit address input to numeric (0-9) and/or ALL CAPS alphabet A-F',CR,LF
+0000126C= 50 6C 65 61 73 65 ...    170              DC.B        'Please limit address input to a range of [005000-FFFFFFFF]!',CR,LF
+000012A9= 49 6E 70 75 74 20 ...    171              DC.B        'Input less than 8 digits will be padded on left',CR,LF    
+000012DA= 49 6E 70 75 74 20 ...    172              DC.B        'Input greater than 8 digits will be truncated on the right',CR,LF,0
+00001317                           173              
+00001317= 50 6C 65 61 73 65 ...    174  M_INPUT_S   DC.B        'Please Input the Starting Address: ',CR,LF,0
+0000133D= 50 6C 65 61 73 65 ...    175  M_INPUT_E   DC.B        'Please Input the Ending Address: ',CR,LF,0
+00001361                           176  
+00001361= 49 6E 70 75 74 20 ...    177  M_INV_INPUT DC.B        'Input address is invalid! Please re-enter: ',CR,LF,CR,LF,0
+00001391                           178                      
+00001391                           179              
+00001391                           180  
+00001391                           181  *-Files-----------------------------------------------------
+00001391                           182              INCLUDE     'TeamVisualBasic_JumpTable.X68'    ;Include Jump Table File
+00001391                           183  
+00001391                           184  
+00001392  3EBC 4E71                185  JT_START    MOVE.W      #$4E71,(A7)         *Load test for Nop into (A7)       ;<---- Don't use A7, switch this to another register
+00001396                           186                                                                                 ;<-A0 and A1 are good registers for temporary calculations
+00001396                           187              
+00001396  3410                     188              MOVE.W      (A0),D2             *move op code into d2 to bit shift
+00001398  E84A                     189              LSR.W       #4,D2               *Shift right 4 bits
+0000139A  E84A                     190              LSR.W       #4,D2               *shift right 4 bits
+0000139C  E84A                     191              LSR.W       #4,D2               *shift right 4 bits
+0000139E                           192              
+0000139E  0C42 0000                193              CMPI.W      #0,D2               *check if it falls into 0 bin
+000013A2  6700 007A                194              BEQ         BIN_0
+000013A6                           195      
+000013A6  0C42 0001                196              CMPI.W      #1,D2               *check if it is a MOVE
+000013AA  6700 009E                197              BEQ         BIN_MOVE
+000013AE                           198              
+000013AE  0C42 0002                199              CMPI.W      #2,D2               *check if it is a MOVE
+000013B2  6700 0096                200              BEQ         BIN_MOVE
+000013B6                           201              
+000013B6  0C42 0003                202              CMPI.W      #3,D2               *check if it is a MOVE
+000013BA  6700 008E                203              BEQ         BIN_MOVE
+000013BE                           204              
+000013BE  0C42 0004                205              CMPI.W      #4,D2               *check if it falls into 4 bin
+000013C2  6700 009A                206              BEQ         BIN_4
+000013C6                           207  
+000013C6  0C42 0005                208              CMPI.W      #5,D2               *check if it falls into 5 bin
+000013CA  6700 00D0                209              BEQ         BIN_5
+000013CE                           210  
+000013CE  0C42 0006                211              CMPI.W      #6,D2               *check if it falls into 6 bin
+000013D2  6700 00CC                212              BEQ         BIN_6
+000013D6                           213  
+000013D6  0C42 0007                214              CMPI.W      #7,D2               *check if it falls into 7 bin
+000013DA  6700 00EE                215              BEQ         BIN_7
+000013DE                           216  
+000013DE  0C42 0008                217              CMPI.W      #8,D2               *check if it falls into 8 bin
+000013E2  6700 00E6                218              BEQ         BIN_8
+000013E6                           219  
+000013E6  0C42 0009                220              CMPI.W      #9,D2               *check if it falls into 9 bin
+000013EA  6700 00F2                221              BEQ         BIN_9
+000013EE                           222  
+000013EE  0C42 000A                223              CMPI.W      #10,D2              *check if it falls into 10 bin
+000013F2  6700 00EE                224              BEQ         BIN_10
+000013F6                           225  
+000013F6  0C42 000B                226              CMPI.W      #11,D2              *check if it falls into 11 bin
+000013FA  6700 00E6                227              BEQ         BIN_11
+000013FE                           228  
+000013FE  0C42 000C                229              CMPI.W      #12,D2              *check if it falls into 12 bin
+00001402  6700 00F8                230              BEQ         BIN_12
+00001406                           231  
+00001406  0C42 000D                232              CMPI.W      #13,D2              *check if it falls into 12 bin
+0000140A  6700 00F4                233              BEQ         BIN_13
+0000140E                           234  
+0000140E  0C42 000E                235              CMPI.W      #14,D2              *check if it falls into 14 bin
+00001412  6700 0108                236              BEQ         BIN_14
+00001416                           237  
+00001416  0C42 000F                238              CMPI.W      #15,D2              *check if it falls into 15 bin
+0000141A  6700 0120                239              BEQ         BIN_15
+0000141E                           240  
+0000141E  3410                     241  BIN_0       MOVE.W      (A0),D2             *reload opcode
+00001420  E04A                     242              LSR.W       #8,D2               *shift bits to the right 8
+00001422  C47C 000F                243              AND.W       #$0F,D2             *Isolate the last 4 bits
+00001426                           244              
+00001426  0C42 000C                245              CMPI.W      #12,D2              *Check if the bit is C
+0000142A  6700 0114                246              BEQ         CMPI                *if CMPI go to the subroutine
+0000142E                           247              
+0000142E  0C42 0000                248              CMPI.W      #0,D2               *Check if the bit is a 0
+00001432  6700 0108                249              BEQ         ORI                 *if ORI go to the subroutine
+00001436                           250              
+00001436  0C42 0008                251              CMPI.W      #8,D2               *Check if the bit is an 8
+0000143A  6700 0108                252              BEQ         BCLR                *if BCLR immediate go to subroutine
+0000143E                           253              
+0000143E  C47C 0001                254              AND.W       #$01,D2             *isolate the last bit
+00001442  0C42 0001                255              CMPI.W      #1,D2               *Check if the bit is a 1
+00001446  6700 00FC                256              BEQ         BCLR                *if BCLR register go to subroutine
+0000144A                           257              
+0000144A                           258              *BRA         DATA           
+0000144A                           259  
+0000144A  3410                     260  BIN_MOVE    MOVE.W      (A0),D2             *reload opcode
+0000144C  EC4A                     261              LSR.W       #6,D2               *shift bits to the right 6
+0000144E  C47C 0007                262              AND.W       #$07,D2             *isolate the last 3 bits
+00001452  0C42 0001                263              CMPI.W      #1,D2               *check if the bits are 001
+00001456  6700 00F4                264              BEQ         MOVEA               *if MOVEA go to SUB
+0000145A                           265              
+0000145A                           266              *CMPI.W      #7,D2              *check if the bits are 111
+0000145A                           267              *BEQ         DATA               *if 111 must be DATA
+0000145A  6000 00EC                268              BRA         MOVE                *otherwise must be MOVE
+0000145E                           269              
+0000145E  3410                     270  BIN_4       MOVE.W      (A0),D2             *reload opcode
+00001460  0C42 4E71                271              CMPI.W      #$4E71,D2           *check for no-op value
+00001464  6700 00EA                272              BEQ         NOP                 *if NOP go to SUB
+00001468                           273              
+00001468  0C42 4E75                274              CMPI.W      #$4E75,D2           *Compare with a constant value for RTS      
+0000146C  6700 00EA                275              BEQ         RTS                 *if RTS go to RTS subroutine
+00001470                           276              
+00001470  E84A                     277              LSR.W       #4,D2               *shift right 4 bits
+00001472  E84A                     278              LSR.W       #4,D2               *shift right 4 bits
+00001474  C47C 000F                279              AND.W       #$0F,D2             *bitmask first 4 bits  
+00001478  0C42 000E                280              CMPI.W      #$E,D2              *compare final masked bits
+0000147C  6700 00F2                281              BEQ         JSR                 *if it equals E it is JSR
+00001480                           282              
+00001480  0C42 0004                283              CMPI.W      #$4,D2              *check for defining bits
+00001484  6700 00F2                284              BEQ         NEG                 *branch to NEG routine
+00001488                           285              
+00001488  C47C 0001                286              AND.W       #$1,D2
+0000148C  0C42 0001                287              CMPI.W      #1,D2
+00001490  6700 00CE                288              BEQ         LEA
+00001494                           289              
+00001494  0C42 0000                290              CMPI.W      #0,D2
+00001498  6700 00CE                291              BEQ         MOVEM
+0000149C                           292              
+0000149C  6000 00E2                293  BIN_5       BRA         SUBQ                *SUBQ is the only option for this bin so branch to SUB
+000014A0                           294  
+000014A0  3410                     295  BIN_6       MOVE.W      (A0),D2             *reload fresh op code
+000014A2  E84A                     296              LSR.W       #4,D2               *shift right 4
+000014A4  E84A                     297              LSR.W       #4,D2               *shift right 4
+000014A6  C47C 000F                298              AND.W       #$0F,D2             *Finds the condition code of the branch statement through bitmask
+000014AA  0C42 0004                299              CMPI.W      #4,D2
+000014AE  6700 00EE                300              BEQ         BCC                 *branch to BCC code     ;<-------------------Not correct, B(cc) isn't a standalone OPCODE
+000014B2                           301                                                                   ;<--- Also BLT is missing 
+000014B2                           302                                                                               
+000014B2  0C42 0008                303              CMPI.W      #8,D2
+000014B6  6700 00DE                304              BEQ         BVC                 *branch to BVC code
+000014BA                           305              
+000014BA  0C42 0005                306              CMPI.W      #5,D2
+000014BE  6700 00CE                307              BEQ         BCS                 *branch to BCS code
+000014C2                           308              
+000014C2  0C42 000C                309              CMPI.W      #$C,D2
+000014C6  6700 00BC                310              BEQ         BGE                 *branch to BGE code
+000014CA                           311  
+000014CA                           312  BIN_7       *BRA        DATA                *If it goes into this bin it is DATA
+000014CA                           313  
+000014CA  3410                     314  BIN_8       MOVE.W      (A0),D2
+000014CC  EC4A                     315              LSR.W       #6,D2
+000014CE  C47C 0007                316              AND.W       #$07,D2   
+000014D2  0C42 0007                317              CMPI.W      #7,D2
+000014D6  6700 00CE                318              BEQ         DIVS
+000014DA                           319              
+000014DA  6000 00D2                320              BRA         OR  
+000014DE                           321              
+000014DE  6000 00D6                322  BIN_9       BRA         SUB                 *SUB is the only option for this bin so branch to SUB
+000014E2                           323  
+000014E2                           324  BIN_10      *BRA        DATA                *If it goes into this bin it is DATA
+000014E2                           325  
+000014E2  3410                     326  BIN_11      MOVE.W      (A0),D2             *reload opcode into D2
+000014E4  E84A                     327              LSR.W       #4,D2               *shift bits to the right 4
+000014E6  E84A                     328              LSR.W       #4,D2               *Shift bits to the right 4
+000014E8  C47C 0001                329              AND.W       #$01,D2             *isolate the last bit
+000014EC  0C42 0001                330              CMPI.W      #1,D2               *check if the bit is a 1
+000014F0  6700 00C8                331              BEQ         EOR                 *if EOR go to the SUB
+000014F4                           332              
+000014F4  0C42 0000                333              CMPI.W      #0,D2               *check if the bit is a 0
+000014F8  6700 00C4                334              BEQ         CMP                 *if CMP go to the SUB
+000014FC                           335              
+000014FC                           336              *BRA        DATA                *if neither EOR or CMP must be DATA
+000014FC                           337              
+000014FC  6000 00C4                338  BIN_12      BRA         MULS                *MULS is the only option for this bin so branch to SUB
+00001500                           339  
+00001500  3410                     340  BIN_13      MOVE.W      (A0),D2             *reload opcode into D2
+00001502  EC4A                     341              LSR.W       #6,D2               *shift bits to the right 6
+00001504  C47C 0007                342              AND.W       #$07,D2             *isolate the last 3 bits
+00001508  0C42 0003                343              CMPI.W      #$3,D2              *check if the bits are 011
+0000150C  6700 00BC                344              BEQ         ADDA                *if ADDA go to SUB              ;<---------- One of these branches is not correct
+00001510                           345              
+00001510  0C42 0007                346              CMPI.W      #$7,D2              *check if the bits are 111
+00001514  6700 00B4                347              BEQ         ADDA                *if ADDA go to SUB              ;<---------- One of these branches is not correct
+00001518                           348                                                          
+00001518  6000 00AC                349              BRA         ADD                 *if bits are not ADDA must be ADD and go to SUB
+0000151C                           350              
+0000151C  3410                     351  BIN_14      MOVE.W      (A0),D2             *Reload the opcode
+0000151E  E64A                     352              LSR.W       #3,D2               *shift bits down
+00001520  C47C 0007                353              AND.W       #$07,D2             *mask bits
+00001524  B47C 0001                354              CMP.W       #1,D2               *determin which kind of shift it is
+00001528  6700 00A4                355              BEQ         LOGICSHIFT          *bra to logic shift
+0000152C                           356              
+0000152C  B47C 0000                357              CMP.W       #0,D2
+00001530  6700 00BE                358              BEQ         ARITH_SHIFT         *bra to arthimetic shift
+00001534                           359              
+00001534  B47C 0003                360              CMP.W       #3,D2
+00001538  6700 00C2                361              BEQ         ROTATE              *bra to rotate      ;<---- Is there a distinction between Left and right rotate?
+0000153C                           362              
+0000153C                           363                                                                  ; <--------- There should be a base case here
+0000153C                           364                                                                  
+0000153C                           365  
+0000153C                           366  BIN_15      *BRA        DATA                *IF it goes into this bin it is DATA
+0000153C                           367                                                                                               
+0000153C                           368  
+0000153C                           369  
+0000153C  38FC 1634                370  ORI         MOVE.W      #S_ORI,(A4)+        *Load OPCODE string into (A4)
+00001540                           371                        
+00001540                           372              
+00001540  38FC 1638                373  CMPI        MOVE.W      #S_CMPI,(A4)+       *Load OPCODE string into (A4)
+00001544                           374              
+00001544                           375              
+00001544  38FC 163D                376  BCLR        MOVE.W      #S_BCLR,(A4)+       *Load OPCODE string into (A4)
+00001548                           377              
+00001548                           378  
+00001548                           379             
+00001548  38FC 1642                380  MOVE        MOVE.W      #S_MOVE,(A4)+       *Load OPCODE string into (A4)
+0000154C                           381              
+0000154C  38FC 1647                382  MOVEA       MOVE.W      #S_MOVEA,(A4)+      *Load OPCODE string into (A4)
+00001550                           383              
+00001550                           384  
+00001550                           385  
+00001550  38FC 161A                386  NOP         MOVE.W      #S_NOP,(A4)+        *Load OPCODE string into (A4)
+00001554  6000 00C2                387              BRA         PRINT_OP
+00001558                           388              
+00001558                           389              
+00001558  38FC 165D                390  RTS         MOVE.W      #S_RTS,(A4)+        *Load OPCODE string into (A4)
+0000155C  6000 00BA                391              BRA         PRINT_OP       
+00001560                           392              
+00001560  38FC 1661                393  LEA         MOVE.W      #S_LEA,(A4)+        *Load OPCODE string into (A4)
+00001564  6000 00B2                394              BRA         PRINT_OP
+00001568                           395              
+00001568  38FC 1669                396  MOVEM       MOVE.W      #S_MOVEM,(A4)+      *Load OPCODE string into (A4)
+0000156C  6000 00AA                397              BRA         PRINT_OP
+00001570                           398              
+00001570  38FC 1681                399  JSR         MOVE.W      #S_JSR,(A4)+        *Load OPCODE string into (A4)
+00001574  6000 00A2                400              BRA         PRINT_OP
+00001578                           401              
+00001578  38FC 1665                402  NEG         MOVE.W      #S_NEG,(A4)+        *Load OPCODE string into (A4)
+0000157C  6000 009A                403              BRA         PRINT_OP
+00001580                           404               
+00001580                           405              
+00001580                           406  
+00001580  38FC 166F                407  SUBQ        MOVE.W      #S_SUBQ,(A4)+       *Load OPCODE string into (A4)
+00001584                           408                         
+00001584                           409  
+00001584  38F9 0000164D            410  BGE         MOVE.W      S_BGE,(A4)+         *Load OPCODE string into (A4)
+0000158A  6000 008C                411              BRA         PRINT_OP
+0000158E                           412              
+0000158E                           413              
+0000158E  38FC 1651                414  BCS         MOVE.W      #S_BCS,(A4)+        *Load OPCODE string into (A4)
+00001592  6000 0084                415              BRA         PRINT_OP
+00001596                           416              
+00001596  38FC 1655                417  BVC         MOVE.W      #S_BVC,(A4)+        *Load OPCODE string into (A4)
+0000159A  6000 007C                418              BRA         PRINT_OP
+0000159E                           419              
+0000159E  38FC 1659                420  BCC         MOVE.W      #S_BCC,(A4)+        *Load OPCODE string into (A4)
+000015A2  6000 0074                421              BRA         PRINT_OP
+000015A6                           422              
+000015A6                           423  
+000015A6  38FC 1675                424  DIVS        MOVE.W      #S_DIVS,(A4)+       *Load OPCODE string into (A4)
+000015AA  6000 006C                425              BRA         PRINT_OP
+000015AE                           426              
+000015AE  38FC 167A                427  OR          MOVE.W      #S_OR,(A4)+         *Load OPCODE string into (A4)
+000015B2  6000 0064                428              BRA         PRINT_OP  
+000015B6                           429  
+000015B6                           430  
+000015B6  38FC 167D                431  SUB         MOVE.W      #S_SUB,(A4)+        *Load OPCODE string into (A4)
+000015BA                           432              
+000015BA                           433           
+000015BA  38FC 161E                434  EOR         MOVE.W      #S_EOR,(A4)+        *Load OPCODE string into (A4)
+000015BE                           435              
+000015BE                           436  
+000015BE  38FC 1622                437  CMP         MOVE.W      #S_CMP,(A4)+        *Load OPCODE string into (A4)
+000015C2                           438              
+000015C2                           439  
+000015C2                           440  
+000015C2  38FC 1626                441  MULS        MOVE.W      #S_MULS,(A4)+       *Load OPCODE string into (A4)
+000015C6                           442              
+000015C6                           443  
+000015C6  38FC 162B                444  ADD         MOVE.W      #S_ADD,(A4)+        *Load OPCODE string into (A4)
+000015CA                           445              
+000015CA                           446  
+000015CA  38FC 162F                447  ADDA        MOVE.W      #S_ADDA,(A4)+       *Load OPCODE string into (A4)
+000015CE                           448              
+000015CE                           449       
+000015CE                           450                                                                      ;<--Double check the flow of this bin, will it print out
+000015CE                           451                                                                      ;<-LSL LSR ROL ROR correctly?
+000015CE  38FC 168E                452  LOGICSHIFT  MOVE.W      #S_LEFT,(A4)+       *Load OPCODE string into (A4)                    
+000015D2  4EB9 00001618            453              JSR         PRINT_OP
+000015D8  6000 0002                454              BRA         RIGHTORLEFT             
+000015DC                           455                
+000015DC  3410                     456  RIGHTORLEFT MOVE.W      (A0),D2             *reload op
+000015DE  E14A                     457              LSL.W       #8,D2               *shift until dr bit is reached
+000015E0  B47C 0000                458              CMP.W       #0,D2               *check if left
+000015E4  6700 0022                459              BEQ         LEFT
+000015E8                           460              
+000015E8  B47C 0001                461              CMP.W       #1,D2               *check if right
+000015EC  6700 0022                462              BEQ         RIGHT  
+000015F0                           463                                      
+000015F0  38FC 1688                464  ARITH_SHIFT MOVE.W      #S_AS,(A4)+         *Load arithmetic shift OPCODE string into (A4)             
+000015F4  4EB9 00001618            465              JSR         PRINT_OP
+000015FA  60E0                     466              BRA         RIGHTORLEFT         
+000015FC                           467                  
+000015FC  38FC 168B                468  ROTATE      MOVE.W      #S_RO,(A4)+         *Load rotate OPCODE string into (A4)
+00001600  4EB9 00001618            469              JSR         PRINT_OP
+00001606  60D4                     470              BRA         RIGHTORLEFT
+00001608                           471              
+00001608  38FC 168E                472  LEFT        MOVE.W      #S_LEFT,(A4)+       *Load directional string into (A4)
+0000160C  6000 000A                473              BRA         PRINT_OP                       
+00001610                           474             
+00001610                           475             
+00001610  38FC 1690                476  RIGHT       MOVE.W      #S_RIGHT,(A4)+      *Load directional string into (A4)
+00001614  6000 0002                477              BRA         PRINT_OP 
+00001618                           478             
+00001618                           479             
+00001618                           480  
+00001618                           481  
+00001618                           482  
+00001618                           483  
+00001618  4E75                     484  PRINT_OP    RTS                             *Return program flow back to Dissasembler file(?)
+0000161A                           485  
+0000161A                           486              
+0000161A                           487  
+0000161A= 4E 4F 50 00              488  S_NOP       DC.B        'NOP',0   
+0000161E= 45 4F 52 00              489  S_EOR       DC.B        'EOR',0
+00001622= 43 4D 50 00              490  S_CMP       DC.B        'CMP',0
+00001626= 4D 55 4C 53 00           491  S_MULS      DC.B        'MULS',0
+0000162B= 41 44 44 00              492  S_ADD       DC.B        'ADD',0
+0000162F= 41 44 44 41 00           493  S_ADDA      DC.B        'ADDA',0
+00001634= 4F 52 49 00              494  S_ORI       DC.B        'ORI',0
+00001638= 43 4D 50 49 00           495  S_CMPI      DC.B        'CMPI',0
+0000163D= 42 43 4C 52 00           496  S_BCLR      DC.B        'BCLR',0
+00001642= 4D 4F 56 45 00           497  S_MOVE      DC.B        'MOVE',0
+00001647= 4D 4F 56 45 41 00        498  S_MOVEA     DC.B        'MOVEA',0
+0000164D= 42 47 45 00              499  S_BGE       DC.B        'BGE',0
+00001651= 42 43 53 00              500  S_BCS       DC.B        'BCS',0
+00001655= 42 56 43 00              501  S_BVC       DC.B        'BVC',0
+00001659= 42 43 43 00              502  S_BCC       DC.B        'BCC',0                       
+0000165D= 52 54 53 00              503  S_RTS       DC.B        'RTS',0
+00001661= 4C 45 41 00              504  S_LEA       DC.B        'LEA',0
+00001665= 4E 45 47 00              505  S_NEG       DC.B        'NEG',0 
+00001669= 4D 4F 56 45 4D 00        506  S_MOVEM     DC.B        'MOVEM',0
+0000166F= 53 55 42 2E 51 00        507  S_SUBQ      DC.B        'SUB.Q',0
+00001675= 44 49 56 53 00           508  S_DIVS      DC.B        'DIVS',0
+0000167A= 4F 52 00                 509  S_OR        DC.B        'OR',0
+0000167D= 53 55 42 00              510  S_SUB       DC.B        'SUB',0
+00001681= 4A 53 52 00              511  S_JSR       DC.B        'JSR',0
+00001685= 4C 53 00                 512  S_LS        DC.B        'LS',0
+00001688= 41 53 00                 513  S_AS        DC.B        'AS',0
+0000168B= 52 30 00                 514  S_RO        DC.B        'R0',0
+0000168E= 4C 00                    515  S_LEFT      DC.B        'L',0
+00001690= 52 00                    516  S_RIGHT     DC.B        'R',0
+00001692                           517  
+00001692                           518  
+00001692                           519  
+00001692                           520  
+00001692                           521  
+00001692                           522  -------------------- end include --------------------
+00001692                           523              
+00001692                           524              END         START               ;last line of source
 
 No errors detected
 No warnings generated
@@ -510,101 +534,102 @@ No warnings generated
 SYMBOL TABLE INFORMATION
 Symbol-name         Value
 -------------------------
-ADD                 153E
-ADDA                1542
-ARITH_SHIFT         1568
-BCC                 1516
-BCLR                14BC
-BCS                 1506
-BGE                 14FC
-BIN_0               1396
-BIN_10              145A
-BIN_11              145A
-BIN_12              1474
-BIN_13              1478
-BIN_14              1494
-BIN_15              14B4
-BIN_4               13D6
-BIN_5               1414
-BIN_6               1418
-BIN_7               1442
-BIN_8               1442
-BIN_9               1456
-BIN_MOVE            13C2
-BVC                 150E
-CMP                 1536
-CMPI                14B8
-CNVRT_ADDR          1068
-CNVRT_DONE          1116
+ADD                 15C6
+ADDA                15CA
+ARITH_SHIFT         15F0
+BCC                 159E
+BCLR                1544
+BCS                 158E
+BGE                 1584
+BIN_0               141E
+BIN_10              14E2
+BIN_11              14E2
+BIN_12              14FC
+BIN_13              1500
+BIN_14              151C
+BIN_15              153C
+BIN_4               145E
+BIN_5               149C
+BIN_6               14A0
+BIN_7               14CA
+BIN_8               14CA
+BIN_9               14DE
+BIN_MOVE            144A
+BVC                 1596
+CMP                 15BE
+CMPI                1540
+CNVRT_ADDR          1074
+CNVRT_DONE          114E
 CR                  D
-C_ALPHA_L           10F2
-C_ALPHA_U           10E8
-C_INVALID           10FC
-C_IS_LC             10CA
-C_LOOP              1092
-C_NUMERIC           10DE
+C_ALPHA_L           1106
+C_ALPHA_U           10FC
+C_INVALID           1110
+C_IS_LC             10DE
+C_LOOP              109E
+C_NUMERIC           10F2
 DISP_INTRO          1016
-DIVS                151E
-END                 1124
-END_ADDR            113E
-EOR                 1532
+DIVS                15A6
+END                 1168
+END_ADDR            118C
+EOR                 15BA
 INPUT_ADDR          1024
-JSR                 14E8
-JT_START            130A
-LEA                 14D8
-LEFT                1580
+JSR                 1570
+JT_START            1392
+LEA                 1560
+LEFT                1608
 LF                  A
-LOGICSHIFT          1546
-MAIN_LOOP           111E
-MOVE                14C0
-MOVEA               14C4
-MOVEM               14E0
-MULS                153A
-M_INPUT_E           12B8
-M_INPUT_S           1292
-M_INTRO             115C
-M_INV_INPUT         12DC
-M_IN_RULES          11C0
-NEG                 14F0
-NOP                 14C8
-OPCODE              1152
-OR                  1526
-ORI                 14B4
-PRINT_OP            1590
-RIGHT               1588
-RIGHTORLEFT         1554
-ROTATE              1574
-RTS                 14D0
+LOGICSHIFT          15CE
+MAIN_LOOP           115E
+MOVE                1548
+MOVEA               154C
+MOVEM               1568
+MULS                15C2
+M_INPUT_E           133D
+M_INPUT_S           1317
+M_INTRO             11BE
+M_INV_INPUT         1361
+M_IN_RULES          1222
+NEG                 1578
+NOP                 1550
+OP_ADDR             11AA
+OR                  15AE
+ORI                 153C
+PREPARE_OP          1156
+PRINT_OP            1618
+RIGHT               1610
+RIGHTORLEFT         15DC
+ROTATE              15FC
+RTS                 1558
 START               1000
-START_ADDR          112A
-SUB                 152E
-SUBQ                14F8
-S_ADD               15A3
-S_ADDA              15A7
-S_AS                1600
-S_BCC               15D1
-S_BCLR              15B5
-S_BCS               15C9
-S_BGE               15C5
-S_BVC               15CD
-S_CMP               159A
-S_CMPI              15B0
-S_DIVS              15ED
-S_EOR               1596
-S_JSR               15F9
-S_LEA               15D9
-S_LEFT              1606
-S_LS                15FD
-S_MOVE              15BA
-S_MOVEA             15BF
-S_MOVEM             15E1
-S_MULS              159E
-S_NEG               15DD
-S_NOP               1592
-S_OR                15F2
-S_ORI               15AC
-S_RIGHT             1608
-S_RO                1603
-S_RTS               15D5
-S_SUB               15F5
-S_SUBQ              15E7
+START_ADDR          116E
+SUB                 15B6
+SUBQ                1580
+S_ADD               162B
+S_ADDA              162F
+S_AS                1688
+S_BCC               1659
+S_BCLR              163D
+S_BCS               1651
+S_BGE               164D
+S_BVC               1655
+S_CMP               1622
+S_CMPI              1638
+S_DIVS              1675
+S_EOR               161E
+S_JSR               1681
+S_LEA               1661
+S_LEFT              168E
+S_LS                1685
+S_MOVE              1642
+S_MOVEA             1647
+S_MOVEM             1669
+S_MULS              1626
+S_NEG               1665
+S_NOP               161A
+S_OR                167A
+S_ORI               1634
+S_RIGHT             1690
+S_RO                168B
+S_RTS               165D
+S_SUB               167D
+S_SUBQ              166F
