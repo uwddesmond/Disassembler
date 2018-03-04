@@ -7,17 +7,16 @@
 *               Main Driver File
 *-----------------------------------------------------------
     
-START       ORG         $1000               ;Start @ address $1000
-            ORG         $1234               
+START       ORG         $1000                              ;Start @ address $1000             
             JSR         DISP_INTRO          ;Display Intro Message
             JSR         INPUT_ADDR          ;Take start and ending address as user input
             JSR         MAIN_LOOP           ;Meat of the program: Check for validity, OPCODE match, and print to screen
-            
+                                                        
             BRA         END                 ;If loop improperly terminated, base case BRA to END program         
 *-Intro Message---------------------------------------------
 DISP_INTRO  LEA         M_INTRO,A1          ;Load intro msg
             MOVE.B      #14,D0              ;Trap Task 14 displays null terminated string
-            TRAP        #15    
+            TRAP        #15                     
     
             RTS                             ;Return to main START section
 *-Take Start and End Address as Input-----------------------
@@ -122,7 +121,7 @@ CNVRT_DONE  CMP.B       #8,D3               ;If no input, invalid
             RTS                             ;Else, done
 
 *-Main Loop-------------------------------------------------
-MAIN_LOOP   
+MAIN_LOOP   JSR         JT_START
     
 *-END-------------------------------------------------------
 END         MOVE.B      #9,D0               ;End program
@@ -157,6 +156,7 @@ M_INV_INPUT DC.B        'Input address is invalid! Please re-enter: ',CR,LF,0
             INCLUDE     'TeamVisualBasic_JumpTable.X68'    ;Include Jump Table File
             
             END         START               ;last line of source
+
 
 
 
