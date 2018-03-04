@@ -12,20 +12,16 @@
 *-Start determining OPCODE based off the first four bits
 *-and branching off into 16 bin possibilities
 *-----------------------------------------------------------
+
             MOVE.W      #$4E71,(A7)     *Load test for Nop into (A7)
-            MOVE.W      #$D0C0,(A7)     *Load test for Nop into (A7)
+            
             MOVE.W      (A0),D2         *move op code into d2 to bit shift
             LSR.W       #4,D2           *Shift right 4 bits
             LSR.W       #4,D2           *shift right 4 bits
             LSR.W       #4,D2           *shift right 4 bits
-            LSR.W       #2,D2           *shift right 2 bits to check if
+            
             CMPI.W      #0,D2           *check if it falls into 0 bin
             BEQ         BIN_0
-            
-            MOVE.W      (A0),D2         *reload op code into d2 to bit shift
-            LSR.W       #4,D2           *Shift right 4 bits
-            LSR.W       #4,D2           *shift right 4 bits
-            LSR.W       #4,D2           *shift right 4 bits
     
             CMPI.W      #1,D2           *check if it is a MOVE
             BEQ         BIN_MOVE
@@ -75,7 +71,7 @@
     
 BIN_0       MOVE.W      (A0),D2         *reload opcode
             LSR.W       #8,D2           *shift bits to the right 8
-            ;AND.W       #$0F            *Isolate the last 4 bits      <------ Fix this line----------
+            AND.W       #$0F,D2         *Isolate the last 4 bits
             CMPI.W      #12,D2          *Check if the bit is C
             BEQ         CMPI            *if CMPI go to the SUB
             CMPI.W      #0,D2           *Check if the bit is a 0
@@ -116,7 +112,7 @@ BIN_4       MOVE.W      (A0),D2         *reload opcode
             CMPI.W      #0,D2
             BEQ         MOVEM
     
-BIN_5
+BIN_5       BRA         SUBQ            *SUBQ is the only option for this bin so branch to SUB
     
 BIN_6       MOVE.W      (A0),D2         *reload fresh op code
             LSR.W       #4,D2           *shift right 4
@@ -131,7 +127,7 @@ BIN_6       MOVE.W      (A0),D2         *reload fresh op code
             CMPI.W      #$C,D2
             BEQ         BGE             *branch to BGE code
     
-BIN_7
+BIN_7       *BRA        DATA            *If it goes into this bin it is DATA
       
 BIN_8       MOVE.W      (A0),D2
             LSR.W       #6,D2
@@ -140,9 +136,9 @@ BIN_8       MOVE.W      (A0),D2
             BEQ         DIVS
             BRA         OR  
     
-BIN_9
+BIN_9       BRA         SUB             *SUB is the only option for this bin so branch to SUB
     
-BIN_10
+BIN_10      *BRA        DATA            *If it goes into this bin it is DATA
     
 BIN_11      MOVE.W      (A0),D2             *reload opcode into D2
             LSR.W       #4,D2               *shift bits to the right 4
@@ -154,7 +150,7 @@ BIN_11      MOVE.W      (A0),D2             *reload opcode into D2
             BEQ.S       CMP                 *if CMP go to the SUB
             *BRA        DATA                *if neither EOR or CMP must be DATA
     
-BIN_12
+BIN_12      BRA         MULS                *MULS is the only option for this bin so branch to SUB
     
 BIN_13      MOVE.W      (A0),D2             *reload opcode into D2
             LSR.W       #6,D2               *shift bits to the right 6
@@ -166,9 +162,7 @@ BIN_13      MOVE.W      (A0),D2             *reload opcode into D2
             BRA         ADD                 *if bits are not ADDA must be ADD and go to SUB
             
     
-BIN_14
-    
-BIN_15      MOVE.W      (A0),D2             *Reload the opcode
+BIN_14      MOVE.W      (A0),D2             *Reload the opcode
             LSR.W       #3,D2               *shift bits down
             AND.W       #$07,D2             *mask bits
             CMP.W       #1,D2               *determin which kind of shift it is
@@ -177,37 +171,18 @@ BIN_15      MOVE.W      (A0),D2             *Reload the opcode
             BEQ         ARITH_SHIFT         *bra to arthimetic shift
             CMP.W       #3,D2
             BEQ         ROTATE              *bra to rotate
+    
+BIN_15      *BRA        DATA                *IF it goes into this bin it is DATA
       
 
 
-*-BIN 4-----------------------------------------------------
+*-PRINT OP-----------------------------
 
-NOP
-            LEA         S_NOP,A1
-            JSR         PRINT_OP
 PRINT_OP
             MOVE.B      #14,D0
             TRAP        #15
-            
-EOR
-            LEA         S_EOR,A1
-            MOVE.B      #14,D0
-            TRAP        #15
-
-CMP
-            LEA         S_CMP,A1
-            MOVE.B      #14,D0
-            TRAP        #15
-
-ADD
-            LEA         S_ADD,A1
-            MOVE.B      #14,D0
-            TRAP        #15
-
-ADDA
-            LEA         S_ADDA,A1
-            MOVE.B      #14,D0
-            TRAP        #15
+ 
+*-BIN 0--------------------------------------------------------
             
 ORI
             LEA         S_ORI,A1
@@ -223,7 +198,9 @@ BCLR
             LEA         S_BCLR,A1
             MOVE.B      #14,D0
             TRAP        #15
-            
+
+*-BIN MOVE----------------------------------------------------- 
+           
 MOVE
             LEA         S_MOVE,A1
             MOVE.B      #14,D0
@@ -233,6 +210,12 @@ MOVEA
             MOVE.B      #14,D0
             TRAP        #15
 
+*-BIN 4-----------------------------------------------------
+
+NOP
+            LEA         S_NOP,A1
+            JSR         PRINT_OP
+            
 RTS         LEA         S_RTS,A1
             JSR         PRINT_OP       
             
@@ -247,9 +230,16 @@ JSR
             JSR         PRINT_OP
 NEG
             LEA         S_NEG,A1
-            JSR         PRINT_OP
+            JSR         PRINT_OP 
             
+*-BIN 5-----------------------------------------------------
+
+SUBQ        LEA         S_SUBQ,A1
+            MOVE.B      #14,D0
+            TRAP        #15
+                       
 *-BIN 6-----------------------------------------------------
+
 BGE
             LEA         S_BGE,A1
             JSR         PRINT_OP
@@ -262,15 +252,52 @@ BVC         LEA         S_BVC,A1
             
 BCC         LEA         S_BCC,A1
             JSR         PRINT_OP
+            
 *-BIN 8-----------------------------------------------------
 
 DIVS        LEA         S_DIVS,A1
             JSR         PRINT_OP
             
 OR          LEA         S_OR,A1
+            JSR         PRINT_OP  
 
-            JSR         PRINT_OP       
-*-BIN 15----------------------------------------------------
+*-BIN 9------------------------------------------------------
+
+SUB         LEA         S_SUB,A1
+            MOVE.B      #14,D0
+            TRAP        #15
+            
+*-BIN 11-----------------------------------------------------  
+         
+EOR
+            LEA         S_EOR,A1
+            MOVE.B      #14,D0
+            TRAP        #15
+
+CMP
+            LEA         S_CMP,A1
+            MOVE.B      #14,D0
+            TRAP        #15
+
+*-BIN 12------------------------------------------------------
+
+MULS        LEA         S_MULS,A1
+            MOVE.B      #14,D0
+            TRAP        #15
+            
+*-BIN 13------------------------------------------------------
+
+ADD
+            LEA         S_ADD,A1
+            MOVE.B      #14,D0
+            TRAP        #15
+
+ADDA
+            LEA         S_ADDA,A1
+            MOVE.B      #14,D0
+            TRAP        #15
+     
+*-BIN 14----------------------------------------------------
 
 LOGICSHIFT  LEA         S_LEFT,A1
             JSR         PRINT_OP
@@ -303,13 +330,11 @@ RIGHT      LEA          S_RIGHT,A1
             JSR         PRINT_OP    
             
 
-
-
-
 *-OPCODE Names----------------------------------------------
 S_NOP       DC.B        'NOP',0   
 S_EOR       DC.B        'EOR',0
 S_CMP       DC.B        'CMP',0
+S_MULS      DC.B        'MULS',0
 S_ADD       DC.B        'ADD',0
 S_ADDA      DC.B        'ADDA',0
 S_ORI       DC.B        'ORI',0
@@ -325,14 +350,17 @@ S_RTS       DC.B        'RTS',0
 S_LEA       DC.B        'LEA',0
 S_NEG       DC.B        'NEG',0 
 S_MOVEM     DC.B        'MOVEM',0
+S_SUBQ      DC.B        'SUB.Q',0
 S_DIVS      DC.B        'DIVS',0
 S_OR        DC.B        'OR',0
+S_SUB       DC.B        'SUB',0
 S_JSR       DC.B        'JSR',0
 S_LS        DC.B        'LS',0
 S_AS        DC.B        'AS',0
 S_RO        DC.B        'R0',0
 S_LEFT      DC.B        'L',0
 S_RIGHT     DC.B        'R',0
+
 
 
 
