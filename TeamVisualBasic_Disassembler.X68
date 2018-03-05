@@ -19,15 +19,36 @@ DISP_INTRO  LEA         M_INTRO,A1          ;Load intro msg
             TRAP        #15                     
     
             RTS                             ;Return to main START section
-*-Prepare OPCODE--------------------------------------------
-PREPARE_OP  MOVE.L      #OP_ADDR,A4         ;Define a location in memory to write an OPCODE string to
+*-Prepare OPCODE REG----------------------------------------
+PREPARE_OP  MOVE.W      #OP_ADDR,A4         ;Define a location in memory to write an OPCODE string to
             RTS
             
+*-Print OPCODE----------------------------------------------
+PRINT_OP    MOVE.W      #OP_ADDR,A1         ;Move the OPCODE's beginning addr to A1
+            MOVE.B      #14,D0              ;Trap Task 14 displays null terminated string
+            TRAP        #15
+            
+            MOVE.W      #M_NEWLINE,A1       ;Print a new line after this OPCODE line is finished
+            MOVE.B      #14,D0              ;Trap Task 14 displays null terminated string
+            TRAP        #15
+            
+            RTS
+
 
 *-Main Loop-------------------------------------------------
 MAIN_LOOP   JSR         PREPARE_OP          ;Define a location in memory to write an OPCODE string to
             
-            JSR         JT_START
+            JSR         JT_START            ;Send OPCODE to jump table for decoding                               
+            JSR         PRINT_OP            ;Print a line of OPCODE info to console
+            
+            ADD.L       #WORD,A5            ;Increment current address (A5)
+      
+            CMP.W       A5,A6               ;If current address (A5) is now equal to end address (A6), end
+            BEQ         END
+            
+            BRA         MAIN_LOOP
+            
+            
     
 *-END-------------------------------------------------------
 END         MOVE.B      #9,D0               ;End program
@@ -36,6 +57,10 @@ END         MOVE.B      #9,D0               ;End program
 *-Variables and constants-----------------------------------
 CR          EQU         $0D
 LF          EQU         $0A
+
+BYTE        EQU         $2
+WORD        EQU         $4
+LONG        EQU         $8
 
 START_ADDR  DS.B        30                  ;Machine code start address stored here
 END_ADDR    DS.B        30                  ;Machine code end address stored here
@@ -53,7 +78,7 @@ M_IN_RULES  DC.B        'Please limit address input to numeric (0-9) and/or ALL 
             DC.B        'Input less than 8 digits will be padded on left',CR,LF    
             DC.B        'Input greater than 8 digits will be truncated on the right',CR,LF,0
             
-M_INPUT_S   DC.B        'Please Input the Starting Address: ',CR,LF,0
+M_INPUT_S   DC.B        'Please Input the Starting Address (test code is ORG @ 7F00): ',CR,LF,0
 M_INPUT_E   DC.B        'Please Input the Ending Address: ',CR,LF,0
 
 M_INV_INPUT DC.B        'Input address is invalid! Please re-enter: ',CR,LF,CR,LF,0
@@ -62,6 +87,8 @@ M_ERR_ADDR1 DC.B        'ERR: START address > END address',CR,LF,0
 M_ERR_ADDR2 DC.B        'ERR: START address too low, danger of overwriting program logic',CR,LF,0
 M_ERR_ADDR3 DC.B        'ERR: ODD START address',CR,LF,0
 M_ERR_ADDR4 DC.B        'ERR: ODD END address',CR,LF,0
+
+M_NEWLINE   DC.B        '',CR,LF,0
                     
             
 
