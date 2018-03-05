@@ -1,0 +1,225 @@
+00001000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 3/4/2018 4:33:07 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      :  Team Visual Basic's Disassembler: Input 
+00000000                             3  * Written by :  Henry Hong, Dylan Desmond, Austin Abeyta
+00000000                             4  * Date       :  3/4/2018
+00000000                             5  * Description:  CSS422 Final Project
+00000000                             6  *               Machine code to Motorola 68000 Assembly
+00000000                             7  *               Input Class
+00000000                             8  *-----------------------------------------------------------
+00000000                             9  
+00000000                            10  *-Take Start and End Address as Input-----------------------
+Line 11 ERROR: Undefined symbol
+00000000  43F9 004DBB8E             11  INPUT_ADDR  LEA         M_IN_RULES,A1       ;Load input restriction and rules msg
+00000006  103C 000E                 12              MOVE.B      #14,D0              ;Trap Task 14 displays null terminated string
+0000000A  4E4F                      13              TRAP        #15                 
+0000000C                            14  
+Line 15 ERROR: Undefined symbol
+0000000C  43F9 004DBB8E             15              LEA         M_INPUT_S,A1        ;Load input request msg
+00000012  103C 000E                 16              MOVE.B      #14,D0              ;Trap Task 14 displays null terminated string
+00000016  4E4F                      17              TRAP        #15
+00000018                            18              
+Line 19 ERROR: Undefined symbol
+00000018  43F9 004DBB8E             19              LEA         START_ADDR,A1
+0000001E  103C 0002                 20              MOVE.B      #2,D0               ;Read string from keyboard and store in (A1)
+00000022  4E4F                      21              TRAP        #15          
+00000024                            22              
+Line 23 ERROR: Undefined symbol
+00000024  43F9 004DBB8E             23              LEA         M_INPUT_E,A1        ;Load input request msg
+0000002A  103C 000E                 24              MOVE.B      #14,D0              ;Trap Task 14 displays null terminated string
+0000002E  4E4F                      25              TRAP        #15
+00000030                            26              
+Line 27 ERROR: Undefined symbol
+00000030  43F9 004DBB8E             27              LEA         END_ADDR,A1
+00000036  103C 0002                 28              MOVE.B      #2,D0               ;Read string from keyboard and store in (A1)
+0000003A  4E4F                      29              TRAP        #15
+0000003C                            30              
+0000003C  4EB9 00000044             31              JSR         CNVRT_ADDR          ;Convert user ASCII input into usable hex addresses
+00000042                            32  
+00000042  4E75                      33              RTS                             ;Return to main START section
+00000044                            34  
+00000044                            35  
+00000044                            36  *-Convert User Input into Hex Address-----------------------
+Line 37 ERROR: Undefined symbol
+00000044  43F9 004DBB8E             37  CNVRT_ADDR  LEA         START_ADDR,A1       ;Load start address into A1
+0000004A  163C 0008                 38              MOVE.B      #8,D3               ;Load counter var into D3. Count down from 8
+0000004E  4EB9 00000072             39              JSR         C_LOOP
+00000054  2A42                      40              MOVE.L      D2,A5               ;Save converted input in (A5)
+00000056                            41              
+00000056  4282                      42              CLR.L       D2                  ;Clear accumulator
+Line 43 ERROR: Undefined symbol
+00000058  43F9 004DBB8E             43              LEA         END_ADDR,A1         ;Load end address into A1
+0000005E  163C 0008                 44              MOVE.B      #8,D3               ;Load counter var into D3. Count down from 8
+00000062  4EB9 00000072             45              JSR         C_LOOP
+00000068  2C42                      46              MOVE.L      D2,A6               ;Save converted input in (A6)
+0000006A                            47                  
+0000006A  4EB9 000000EE             48              JSR         C_VALIDATE          ;Make sure input is not ODD and end addr is not before start
+00000070  4E75                      49              RTS                             ;Finish by RTSing back to main dissasembler file
+00000072                            50   
+00000072                            51  *-Main convert loop logic-----------------------------------            
+00000072  1019                      52  C_LOOP      MOVE.B      (A1)+,D0            ;Load the ascii digit into D0
+00000074  B03C 00FF                 53              CMP.B       #$FF,D0             ;If value is $FF, there is no digit
+00000078  6700 009A                 54              BEQ         C_INVALID
+0000007C  B03C 0000                 55              CMP.B       #$00,D0             ;If value is $00, then probably done
+00000080  6700 0062                 56              BEQ         CNVRT_DONE              
+00000084                            57              
+00000084  B63C 0000                 58              CMP.B       #0,D3               ;If counter var == 0
+00000088  6700 005A                 59              BEQ         CNVRT_DONE
+0000008C  5303                      60              SUBI.B      #1,D3               ;Else, decrement counter var
+0000008E                            61              
+0000008E                            62              ;Determine whether num, upper, or lower case ascii a-f                                    
+0000008E  B03C 0030                 63              CMP.B       #$30,D0             ;If <30, not a number
+00000092  6D00 0080                 64              BLT         C_INVALID           
+00000096  B03C 0046                 65              CMP.B       #$46,D0             ;If >46, it's possibly a lowercase letter 
+0000009A  6E00 0016                 66              BGT         C_IS_LC             ;Check if it's a valid lower ascii letter
+0000009E                            67              
+0000009E  B03C 0040                 68              CMP.B       #$40,D0             ;If <40, must be number
+000000A2  6D00 0022                 69              BLT         C_NUMERIC
+000000A6  B03C 0041                 70              CMP.B       #$41,D0             ;If >41, must be upper case ascii
+000000AA  6E00 0024                 71              BGT         C_ALPHA_U
+000000AE                            72  
+000000AE  6000 0064                 73              BRA         C_INVALID           ;If none of the above, the input is not valid 
+000000B2                            74              
+000000B2                            75  *-Helper logic to determine the ascii type and convert to hex            
+000000B2  B03C 0061                 76  C_IS_LC     CMP.B       #$61,D0             ;If >61, input is invalid
+000000B6  6D00 005C                 77              BLT         C_INVALID
+000000BA  B03C 0066                 78              CMP.B       #$66,D0             ;If >66, input is invalid
+000000BE  6E00 0054                 79              BGT         C_INVALID
+000000C2                            80              
+000000C2  6000 0016                 81              BRA         C_ALPHA_L           ;Else must be a valid lowercase input
+000000C6                            82  
+000000C6  0400 0030                 83  C_NUMERIC   SUBI.B      #$30,D0             ;Subtract 0x30 to convert to hex
+000000CA  E98A                      84              LSL.L       #4,D2               ;Shift by 1 digit to make room for next digit
+000000CC  D400                      85              ADD.B       D0,D2               ;Accumulate digits into D2
+000000CE  60A2                      86              BRA         C_LOOP  
+000000D0                            87  
+000000D0                            88  
+000000D0  0400 0037                 89  C_ALPHA_U   SUBI.B      #$37,D0             ;Subtract 0x37 to convert to hex
+000000D4  E98A                      90              LSL.L       #4,D2               ;Shift by 1 digit to make room for next digit
+000000D6  D400                      91              ADD.B       D0,D2               ;Accumulate digits into D2
+000000D8  6098                      92              BRA         C_LOOP
+000000DA                            93  
+000000DA  0400 0057                 94  C_ALPHA_L   SUBI.B      #$57,D0             ;Subtract 0x57 to convert to hex
+000000DE  E98A                      95              LSL.L       #4,D2               ;Shift by 1 digit to make room for next digit
+000000E0  D400                      96              ADD.B       D0,D2               ;Accumulate digits into D2
+000000E2  608E                      97              BRA         C_LOOP
+000000E4                            98          
+000000E4                            99                         
+000000E4                           100  *-Helper logic for loop-------------------------------------                                            
+000000E4  B63C 0008                101  CNVRT_DONE  CMP.B       #8,D3               ;If no input, invalid
+000000E8  6700 002A                102              BEQ         C_INVALID           
+000000EC                           103              
+000000EC  4E75                     104              RTS                             ;Else, done
+000000EE                           105              
+000000EE                           106  
+000000EE                           107  *-Final validation logic that rejects certain address patterns         
+000000EE  BDCD                     108  C_VALIDATE  CMPA.L      A5,A6               ;If end address < start address     
+000000F0  6D00 002C                109              BLT         C_ERR1
+000000F4                           110                                                
+000000F4  BBFC 00005000            111              CMPA.L      #$00005000,A5       ;If start address is <0x5000
+000000FA  6D00 0038                112              BLT         C_ERR2
+000000FE                           113              
+000000FE  200D                     114              MOVE.L      A5,D0               ;Check rightmost input address bit
+00000100  0800 0000                115              BTST        #0,D0               ;If rightmost (least sig) bit is 1 (aka ODD address)
+00000104  6600 0044                116              BNE         C_ERR3           
+00000108                           117              
+00000108  200E                     118              MOVE.L      A6,D0               ;Check rightmost input address bit
+0000010A  0800 0000                119              BTST        #0,D0               ;If rightmost (least sig) bit is 1 (aka ODD address)
+0000010E  6600 0050                120              BNE         C_ERR4
+00000112                           121              
+00000112  4E75                     122              RTS                             ;If none of the above, input is valid
+00000114                           123              
+00000114                           124  *-Convert error subroutines---------------------------------
+00000114  4EB9 00000176            125  C_INVALID   JSR         C_ERR_BASE1         ;Clear screen and clear registers
+0000011A  6000 008C                126              BRA         C_ERR_BASE2         ;Print generic error msg and branch to start
+0000011E                           127  
+0000011E  4EB9 00000176            128  C_ERR1      JSR         C_ERR_BASE1         ;Clear screen and registers
+Line 129 ERROR: Undefined symbol
+00000124  43F9 004DBB8E            129              LEA         M_ERR_ADDR1,A1      ;Load error message
+0000012A  103C 000E                130              MOVE.B      #14,D0              ;Trap Task 14 displays null terminated string
+0000012E  4E4F                     131              TRAP        #15
+00000130                           132              
+00000130  6000 0076                133              BRA         C_ERR_BASE2         ;Print generic err msg, then go back to input loop and ask for new input
+00000134                           134  
+00000134  4EB9 00000176            135  C_ERR2      JSR         C_ERR_BASE1         ;Clear screen and registers
+Line 136 ERROR: Undefined symbol
+0000013A  43F9 004DBB8E            136              LEA         M_ERR_ADDR2,A1      ;Load error message
+00000140  103C 000E                137              MOVE.B      #14,D0              ;Trap Task 14 displays null terminated string
+00000144  4E4F                     138              TRAP        #15
+00000146                           139              
+00000146  6000 0060                140              BRA         C_ERR_BASE2         ;Print generic err msg, then go back to input loop and ask for new input
+0000014A                           141  
+0000014A                           142  
+0000014A                           143              
+0000014A  4EB9 00000176            144  C_ERR3      JSR         C_ERR_BASE1         ;Clear screen and registers
+Line 145 ERROR: Undefined symbol
+00000150  43F9 004DBB8E            145              LEA         M_ERR_ADDR3,A1      ;Load error message
+00000156  103C 000E                146              MOVE.B      #14,D0              ;Trap Task 14 displays null terminated string
+0000015A  4E4F                     147              TRAP        #15
+0000015C                           148              
+0000015C  6000 004A                149              BRA         C_ERR_BASE2         ;Print generic err msg, then go back to input loop and ask for new input
+00000160                           150  
+00000160  4EB9 00000176            151  C_ERR4      JSR         C_ERR_BASE1         ;Clear screen and registers
+Line 152 ERROR: Undefined symbol
+00000166  43F9 004DBB8E            152              LEA         M_ERR_ADDR4,A1      ;Load error message
+0000016C  103C 000E                153              MOVE.B      #14,D0              ;Trap Task 14 displays null terminated string
+00000170  4E4F                     154              TRAP        #15
+00000172                           155              
+00000172  6000 0034                156              BRA         C_ERR_BASE2         ;Print generic err msg, then go back to input loop and ask for new input
+00000176                           157  
+00000176                           158  
+00000176  103C 000B                159  C_ERR_BASE1 MOVE.B      #11,D0              ;Clear screen
+0000017A  323C FF00                160              MOVE.W      #$FF00,D1
+0000017E  4E4F                     161              TRAP        #15
+00000180                           162              
+00000180  4282                     163              CLR.L       D2
+00000182  4285                     164              CLR.L       D5
+00000184  4286                     165              CLR.L       D6
+00000186                           166                                
+00000186                           167  
+Line 168 ERROR: Undefined symbol
+00000186  23FC FFFFFFFF 00544480   168              MOVE.L      #$FFFFFFFF,(START_ADDR)        
+Line 169 ERROR: Undefined symbol
+00000190  23FC FFFFFFFF 00544480   169              MOVE.L      #$FFFFFFFF,(END_ADDR)
+0000019A  2A7C 00000000            170              MOVEA.L     #$00000000,A5       ;Clear registers
+000001A0  2C7C 00000000            171              MOVEA.L     #$00000000,A6 
+000001A6                           172       
+000001A6  4E75                     173              RTS
+000001A8                           174  
+Line 175 ERROR: Undefined symbol
+000001A8  43F9 004DBB8E            175  C_ERR_BASE2 LEA         M_INV_INPUT,A1      ;Load error message
+000001AE  103C 000E                176              MOVE.B      #14,D0              ;Trap Task 14 displays null terminated string
+000001B2  4E4F                     177              TRAP        #15
+000001B4                           178              
+Line 179 ERROR: Undefined symbol
+000001B4  6000 B9D8                179              BRA         START 
+000001B8                           180             
+000001B8                           181  
+Line 182 WARNING: END directive missing, starting address not set
+
+15 errors detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+CNVRT_ADDR          44
+CNVRT_DONE          E4
+C_ALPHA_L           DA
+C_ALPHA_U           D0
+C_ERR1              11E
+C_ERR2              134
+C_ERR3              14A
+C_ERR4              160
+C_ERR_BASE1         176
+C_ERR_BASE2         1A8
+C_INVALID           114
+C_IS_LC             B2
+C_LOOP              72
+C_NUMERIC           C6
+C_VALIDATE          EE
+INPUT_ADDR          0

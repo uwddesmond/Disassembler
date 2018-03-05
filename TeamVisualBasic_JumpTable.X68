@@ -13,7 +13,7 @@
 *-then Branch off into 16 bin possibilities
 *-----------------------------------------------------------
 
-JT_START    MOVE.W      #$4E71,(A7)         *Load test for Nop into (A7)       ;<---- Don't use A7, switch this to another register
+JT_START    ;MOVE.W      #$4E71,(A7)         *Load test for Nop into (A7)       ;<---- Don't use A7, switch this to another register
                                                                                ;<-A0 and A1 are good registers for temporary calculations
             
             MOVE.W      (A0),D2             *move op code into d2 to bit shift
