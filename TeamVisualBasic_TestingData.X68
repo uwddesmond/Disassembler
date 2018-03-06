@@ -15,6 +15,11 @@ START       ORG         $00007F00            ; first instruction of program
             NOP
             JSR         label1
             RTS
+            MOVE.L      #$22222222,D7
+            MOVE.L      #$22222,D7
+            MOVE.L      #$2222,D7
+            MOVE.W      #$2222,D7
+            ;MOVE.W      #$22222,D7
 
 
 label1      NOP
@@ -24,6 +29,7 @@ label1      NOP
     
     
     
+
 
 
 *~Font name~Courier New~

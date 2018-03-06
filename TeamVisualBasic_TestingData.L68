@@ -1,6 +1,6 @@
 00007F00 Starting Address
 Assembler used: EASy68K Editor/Assembler v5.15.04
-Created On: 3/4/2018 11:06:17 AM
+Created On: 3/6/2018 10:41:53 AM
 
 00000000                             1  *-----------------------------------------------------------
 00000000                             2  * Title      :  Team Visual Basic's Dissasembler: Testing File
@@ -13,25 +13,20 @@ Created On: 3/4/2018 11:06:17 AM
 00000000                             9      
 00007F00                            10  START       ORG         $00007F00            ; first instruction of program
 00007F00                            11  
-00007F00  4E71                      12              NOP                         
-00007F02  4E71                      13              NOP
-00007F04  4E71                      14              NOP
-00007F06  4E71                      15              NOP
-00007F08  4EB9 00007F10             16              JSR         label1
-00007F0E  4E75                      17              RTS
-00007F10                            18  
-00007F10                            19  
-00007F10  4E71                      20  label1      NOP
-00007F12                            21  
-00007F12  FFFF FFFF                 22              SIMHALT                     ; halt simulator
-00007F16                            23              END         START                ; last line of source
+Line 12 ERROR: Immediate data exceeds 16 bits
+00007F00  3E3C 2222                 12              MOVE.W      #$22222,D7
+00007F04                            13  
+00007F04                            14  
+00007F04                            15                          ;label1      NOP
+00007F04                            16  
+00007F04  FFFF FFFF                 17              SIMHALT                     ; halt simulator
+00007F08                            18              END         START                ; last line of source
 
-No errors detected
+1 error detected
 No warnings generated
 
 
 SYMBOL TABLE INFORMATION
 Symbol-name         Value
 -------------------------
-LABEL1              7F10
 START               7F00

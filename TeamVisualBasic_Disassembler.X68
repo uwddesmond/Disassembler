@@ -19,11 +19,25 @@ DISP_INTRO  LEA         M_INTRO,A1          ;Load intro msg
             TRAP        #15                     
     
             RTS                             ;Return to main START section
-*-Prepare OPCODE REG----------------------------------------
-PREPARE_OP  MOVE.W      #OP_ADDR,A4         ;Define a location in memory to write an OPCODE string to
+            
+*-Main Loop-------------------------------------------------
+MAIN_LOOP   JSR         BUILD_STR           ;Build and accumulate the 0xADDR OPCODE $OPERAND string into memory @ OP_ADDR                            
+            JSR         PRINT_OP            ;Print the built string to console           
+            JSR         LOOP_COND
+            
+            
+            
+            BRA         MAIN_LOOP
+            
+            
+*-Loop Condition Logic--------------------------------------
+LOOP_COND   ADD.L       #WORD,A5            ;Increment current address (A5)
+            CMP.W       A5,A6               ;If current address (A5) is now equal to end address (A6), end
+            BEQ         END
+            
             RTS
             
-*-Print OPCODE----------------------------------------------
+*-Print OPCODE STRING---------------------------------------
 PRINT_OP    MOVE.W      #OP_ADDR,A1         ;Move the OPCODE's beginning addr to A1
             MOVE.B      #14,D0              ;Trap Task 14 displays null terminated string
             TRAP        #15
@@ -33,21 +47,6 @@ PRINT_OP    MOVE.W      #OP_ADDR,A1         ;Move the OPCODE's beginning addr to
             TRAP        #15
             
             RTS
-
-
-*-Main Loop-------------------------------------------------
-MAIN_LOOP   JSR         PREPARE_OP          ;Define a location in memory to write an OPCODE string to
-            
-            JSR         JT_START            ;Send OPCODE to jump table for decoding                               
-            JSR         PRINT_OP            ;Print a line of OPCODE info to console
-            
-            ADD.L       #WORD,A5            ;Increment current address (A5)
-      
-            CMP.W       A5,A6               ;If current address (A5) is now equal to end address (A6), end
-            BEQ         END
-            
-            BRA         MAIN_LOOP
-            
             
     
 *-END-------------------------------------------------------
@@ -65,7 +64,7 @@ LONG        EQU         $8
 START_ADDR  DS.B        30                  ;Machine code start address stored here
 END_ADDR    DS.B        30                  ;Machine code end address stored here
 
-OP_ADDR     DS.B        20                  ;Storage for a line of OPCODE data to calculate and print upon            
+OP_ADDR     DS.B        30                  ;Storage to accumulate OPCODE address, name, and data string at            
 
 
 *-Strings---------------------------------------------------
@@ -93,10 +92,12 @@ M_NEWLINE   DC.B        '',CR,LF,0
             
 
 *-Files-----------------------------------------------------
-            INCLUDE     'TeamVisualBasic_Disassembler_Input.X68'    ;Include Input class file
-            INCLUDE     'TeamVisualBasic_JumpTable.X68'             ;Include Jump Table File
+            INCLUDE     'TeamVisualBasic_Disassembler_Input.X68'            ;Include Input class file
+            INCLUDE     'TeamVisualBasic_Disassembler_OutputBuilder.X68'    ;Include OutputBuilder class file
+            INCLUDE     'TeamVisualBasic_JumpTable.X68'                     ;Include Jump Table file
             
             END         START               ;last line of source
+
 
 
 
