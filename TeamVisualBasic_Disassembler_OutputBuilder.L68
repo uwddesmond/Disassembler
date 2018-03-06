@@ -1,0 +1,61 @@
+00000000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 3/6/2018 2:19:07 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Title      :  Team Visual Basic's Disassembler: Output Builder
+00000000                             3  * Written by :  Henry Hong, Dylan Desmond, Austin Abeyta
+00000000                             4  * Date       :  3/6/2018
+00000000                             5  * Description:  CSS422 Final Project
+00000000                             6  *               Machine code to Motorola 68000 Assembly
+00000000                             7  *               Output Builder generates the 
+00000000                             8  *                   0xADDR OPCODE $OPERAND
+00000000                             9  *               Sequence in order for printing purpose
+00000000                            10  *-----------------------------------------------------------
+00000000                            11  
+00000000  4EB9 00000014             12  BUILD_STR   JSR         PREPARE_OP          ;Define a location in memory to write an OPCODE string to
+00000006  4EB9 0000001A             13              JSR         GET_ADDR            ;Accumulate the OPCODE's address into the A4 string [0xADDR]
+Line 14 ERROR: Undefined symbol
+0000000C  4EB9 004DBB8E             14              JSR         JT_START            ;Send OPCODE to jump table for decoding [OPCODE $OPERAND]
+00000012                            15              
+00000012  4E75                      16              RTS                             ;Return back to main disassembler loop
+00000014                            17  
+00000014                            18  
+00000014                            19  *-Prepare OPCODE REG----------------------------------------
+Line 20 ERROR: Undefined symbol
+00000014  387C BB8E                 20  PREPARE_OP  MOVE.W      #OP_ADDR,A4         ;Define a location in memory to write an OPCODE string to
+00000018  4E75                      21              RTS
+0000001A                            22              
+0000001A                            23  *-Accumulate the 0xADDR Into String-------------------------
+0000001A  200D                      24  GET_ADDR    MOVE.L      A5,D0               ;Save the address pointer into D0
+0000001C  4282                      25              CLR.L       D2                  ;Clear D2
+0000001E  143C 0008                 26              MOVE.B      #8,D2               ;Counter var starts at 8
+00000022                            27              
+00000022  4EB9 00000032             28  GA_LOOP     JSR         HEX_2_ASCII         ;Convert the hex to ascii for printing
+00000028  5342                      29              SUBI        #1,D2               ;Decrement counter var
+0000002A  B43C 0000                 30              CMP.B       #0,D2               ;Is counter var == 0?
+0000002E  6EF2                      31              BGT         GA_LOOP             ;If not, loop         
+00000030                            32              
+00000030  4E75                      33              RTS                             ;Otherwise, we are done. Return back to main disassembler loop
+00000032                            34  
+00000032                            35  *-Accumulate the 0xADDR Into String-------------------------
+00000032  E998                      36  HEX_2_ASCII ROL.L       #4,D0               ;Get the most significant hex digit into the right 4 bits
+00000034  1200                      37              MOVE.B      D0,D1               ;Save that byte into D1
+00000036  0241 000F                 38              ANDI        #$0F,D1             ;Isolate the hex digit 
+0000003A                            39              
+0000003A                            40   
+0000003A                            41   
+Line 42 WARNING: END directive missing, starting address not set
+
+2 errors detected
+1 warning generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+BUILD_STR           0
+GA_LOOP             22
+GET_ADDR            1A
+HEX_2_ASCII         32
+PREPARE_OP          14

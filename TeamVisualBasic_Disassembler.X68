@@ -21,9 +21,10 @@ DISP_INTRO  LEA         M_INTRO,A1          ;Load intro msg
             RTS                             ;Return to main START section
             
 *-Main Loop-------------------------------------------------
-MAIN_LOOP   JSR         BUILD_STR           ;Build and accumulate the 0xADDR OPCODE $OPERAND string into memory @ OP_ADDR                            
+MAIN_LOOP   
+            JSR         BUILD_STR           ;Build and accumulate the 0xADDR OPCODE $OPERAND string into memory @ OP_ADDR                            
             JSR         PRINT_OP            ;Print the built string to console           
-            JSR         LOOP_COND
+            JSR         LOOP_COND           ;
             
             
             
@@ -31,7 +32,8 @@ MAIN_LOOP   JSR         BUILD_STR           ;Build and accumulate the 0xADDR OPC
             
             
 *-Loop Condition Logic--------------------------------------
-LOOP_COND   ADD.L       #WORD,A5            ;Increment current address (A5)
+LOOP_COND   ADD.W       D7,A5               ;Increment current address (A5) by the length of the last OPCODE+OPERAND stored in D7
+            CLR.L       D7                  ;Reset opcode length var D7
             CMP.W       A5,A6               ;If current address (A5) is now equal to end address (A6), end
             BEQ         END
             
@@ -75,10 +77,13 @@ M_INTRO     DC.B        'Team Visual Basic',CR,LF
 M_IN_RULES  DC.B        'Please limit address input to numeric (0-9) and/or ALL CAPS alphabet A-F',CR,LF
             DC.B        'Please limit address input to a range of [00005000-FFFFFFFF]!',CR,LF
             DC.B        'Input less than 8 digits will be padded on left',CR,LF    
-            DC.B        'Input greater than 8 digits will be truncated on the right',CR,LF,0
+            DC.B        'Input greater than 8 digits will be truncated on the right',CR,LF,CR,LF0
             
 M_INPUT_S   DC.B        'Please Input the Starting Address (test code is ORG @ 7F00): ',CR,LF,0
 M_INPUT_E   DC.B        'Please Input the Ending Address: ',CR,LF,0
+
+M_IN_WAIT   DC.B        'Press Enter to Continue'
+
 
 M_INV_INPUT DC.B        'Input address is invalid! Please re-enter: ',CR,LF,CR,LF,0
 
@@ -97,6 +102,7 @@ M_NEWLINE   DC.B        '',CR,LF,0
             INCLUDE     'TeamVisualBasic_JumpTable.X68'                     ;Include Jump Table file
             
             END         START               ;last line of source
+
 
 
 

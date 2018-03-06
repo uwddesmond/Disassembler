@@ -1,6 +1,6 @@
 00007F00 Starting Address
 Assembler used: EASy68K Editor/Assembler v5.15.04
-Created On: 3/6/2018 10:41:53 AM
+Created On: 3/6/2018 2:08:48 PM
 
 00000000                             1  *-----------------------------------------------------------
 00000000                             2  * Title      :  Team Visual Basic's Dissasembler: Testing File
@@ -13,20 +13,30 @@ Created On: 3/6/2018 10:41:53 AM
 00000000                             9      
 00007F00                            10  START       ORG         $00007F00            ; first instruction of program
 00007F00                            11  
-Line 12 ERROR: Immediate data exceeds 16 bits
-00007F00  3E3C 2222                 12              MOVE.W      #$22222,D7
-00007F04                            13  
-00007F04                            14  
-00007F04                            15                          ;label1      NOP
-00007F04                            16  
-00007F04  FFFF FFFF                 17              SIMHALT                     ; halt simulator
-00007F08                            18              END         START                ; last line of source
+00007F00  4E71                      12              NOP                         
+00007F02  4E71                      13              NOP
+00007F04  4E71                      14              NOP
+00007F06  4E71                      15              NOP
+00007F08  4EB9 00007F26             16              JSR         label1
+00007F0E  4E75                      17              RTS
+00007F10  2E3C 22222222             18              MOVE.L      #$22222222,D7
+00007F16  2E3C 00022222             19              MOVE.L      #$22222,D7
+00007F1C  2E3C 00002222             20              MOVE.L      #$2222,D7
+00007F22  3E3C 2222                 21              MOVE.W      #$2222,D7
+00007F26                            22              ;MOVE.W      #$22222,D7
+00007F26                            23  
+00007F26                            24  
+00007F26  4E71                      25  label1      NOP
+00007F28                            26  
+00007F28  FFFF FFFF                 27              SIMHALT                     ; halt simulator
+00007F2C                            28              END         START                ; last line of source
 
-1 error detected
+No errors detected
 No warnings generated
 
 
 SYMBOL TABLE INFORMATION
 Symbol-name         Value
 -------------------------
+LABEL1              7F26
 START               7F00
