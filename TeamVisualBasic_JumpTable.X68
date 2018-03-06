@@ -148,8 +148,8 @@ BIN_6       MOVE.W      (A5),D0             *reload fresh op code
             BEQ         BRA_SUB             *branch to BRA SUB
             
             CMPI.W      #4,D0
-            BEQ         BCC                 *branch to BCC code     ;<-------------------Not correct, B(cc) isn't a standalone OPCODE
-                                                                    ;<--- Also BLT is missing 
+            BEQ         BCC                 *branch to BCC code 
+                                                                     
             CMPI.W      #$D,D0
             BEQ         BLT                 *branch to BLT SUB            
                                                                  
@@ -216,16 +216,16 @@ BIN_12      BRA         MULS                *MULS is the only option for this bi
 
 *--------------------------------------------------------------            
 *-BIN 13 Possible OPCODES:
-*-ADD, ADDA, SUB
+*-ADD, ADDA
 *--------------------------------------------------------------    
 BIN_13      MOVE.W      (A5),D0             *reload opcode into D0
             LSR.W       #6,D0               *shift bits to the right 6
             AND.W       #$07,D0             *isolate the last 3 bits
             CMPI.W      #$3,D0              *check if the bits are 011
-            BEQ         ADDA                *if ADDA go to SUB              ;<---------- One of these branches is not correct
+            BEQ         ADDA                *if ADDA go to SUB        
             
             CMPI.W      #$7,D0              *check if the bits are 111
-            BEQ         ADDA                *if ADDA go to SUB              ;<---------- One of these branches is not correct
+            BEQ         ADDA                *if ADDA go to SUB 
                                                         
             BRA         ADD                 *if bits are not ADDA must be ADD and go to SUB
             
@@ -243,9 +243,9 @@ BIN_14      MOVE.W      (A5),D0             *Reload the opcode
             BEQ         ARITH_SHIFT         *bra to arthimetic shift
             
             CMP.W       #3,D0
-            BEQ         ROTATE              *bra to rotate                  ;<---- Is there a distinction between Left and right rotate?
+            BEQ         ROTATE              *bra to rotate      
             
-            BRA         DATA                *if not a shift must be DATA    ; <--------- There should be a base case here
+            BRA         DATA                *if not a shift must be DATA 
                                                                 
 
 *--------------------------------------------------------------            
@@ -363,8 +363,7 @@ ADDA        MOVE.W      #S_ADDA,(A4)+       *Load OPCODE string into (A4)
             RTS
      
 *-BIN 14-------------------------------------------------------
-                                                                    ;<--Double check the flow of this bin, will it print out
-                                                                    ;<-LSL LSR ROL ROR correctly?
+                                                                    
 LOGICSHIFT  MOVE.W      #S_LS,(A4)+         *Load logical shift OPCODE string into (A4)                    
             BRA         RIGHTORLEFT             
               
@@ -440,6 +439,7 @@ S_RO        DC.B        'R0',0
 S_LEFT      DC.B        'L',0
 S_RIGHT     DC.B        'R',0
 S_DATA      DC.B        'DATA',0
+
 
 
 
