@@ -48,10 +48,7 @@ APPND_ALPHA ADDI.B      #$37,D1             ;Add $37 to make it a ascii alphabet
 APPND_NUM   ADDI.B      #$30,D1             ;Add $30 to make it a ascii numeric char
             MOVE.B      D1,(A4)+            ;Append this character to string
             RTS
-            
- 
- 
-
+       
 
 *~Font name~Courier New~
 *~Font size~10~

@@ -148,8 +148,8 @@ BIN_6       MOVE.W      (A5),D0             *reload fresh op code
             BEQ         BRA_SUB             *branch to BRA SUB
             
             CMPI.W      #4,D0
-            BEQ         BCC                 *branch to BCC code     ;<-------------------Not correct, B(cc) isn't a standalone OPCODE
-                                                                    ;<--- Also BLT is missing 
+            BEQ         BCC                 *branch to BCC code 
+                                                                     
             CMPI.W      #$D,D0
             BEQ         BLT                 *branch to BLT SUB            
                                                                  
@@ -216,16 +216,16 @@ BIN_12      BRA         MULS                *MULS is the only option for this bi
 
 *--------------------------------------------------------------            
 *-BIN 13 Possible OPCODES:
-*-ADD, ADDA, SUB
+*-ADD, ADDA
 *--------------------------------------------------------------    
 BIN_13      MOVE.W      (A5),D0             *reload opcode into D0
             LSR.W       #6,D0               *shift bits to the right 6
             AND.W       #$07,D0             *isolate the last 3 bits
             CMPI.W      #$3,D0              *check if the bits are 011
-            BEQ         ADDA                *if ADDA go to SUB              ;<---------- One of these branches is not correct
+            BEQ         ADDA                *if ADDA go to SUB        
             
             CMPI.W      #$7,D0              *check if the bits are 111
-            BEQ         ADDA                *if ADDA go to SUB              ;<---------- One of these branches is not correct
+            BEQ         ADDA                *if ADDA go to SUB 
                                                         
             BRA         ADD                 *if bits are not ADDA must be ADD and go to SUB
             
@@ -243,9 +243,9 @@ BIN_14      MOVE.W      (A5),D0             *Reload the opcode
             BEQ         ARITH_SHIFT         *bra to arthimetic shift
             
             CMP.W       #3,D0
-            BEQ         ROTATE              *bra to rotate                  ;<---- Is there a distinction between Left and right rotate?
+            BEQ         ROTATE              *bra to rotate      
             
-            BRA         DATA                *if not a shift must be DATA    ; <--------- There should be a base case here
+            BRA         DATA                *if not a shift must be DATA 
                                                                 
 
 *--------------------------------------------------------------            
@@ -263,9 +263,11 @@ BIN_15      BRA        DATA                *IF it goes into this bin it is DATA
 
 *-BIN 0--------------------------------------------------------           
 ORI         MOVE.W      #S_ORI,(A4)+        *Load OPCODE string into (A4)
+            JSR         GET_SIZE_67
             RTS
             
 CMPI        MOVE.W      #S_CMPI,(A4)+       *Load OPCODE string into (A4)
+            JSR         GET_SIZE_67
             RTS
             
 BCLR        MOVE.W      #S_BCLR,(A4)+       *Load OPCODE string into (A4)
@@ -280,7 +282,8 @@ MOVEA       MOVE.W      #S_MOVEA,(A4)+      *Load OPCODE string into (A4)
 
 *-BIN 4--------------------------------------------------------
 
-NOP         MOVE.B      #'N',(A4)+          *Load OPCODE string into (A4)
+NOP         ADDI        #BYTE,D7            *NOP is 2 Bytes; Increment length var by 2
+            MOVE.B      #'N',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'O',(A4)+
             MOVE.B      #'P',(A4)+
             MOVE.B      #' ',(A4)+
@@ -307,11 +310,13 @@ JSR         MOVE.W      #S_JSR,(A4)+        *Load OPCODE string into (A4)
             RTS
             
 NEG         MOVE.W      #S_NEG,(A4)+        *Load OPCODE string into (A4)
+            JSR         GET_SIZE_67
             RTS
              
             
 *-BIN 5--------------------------------------------------------
 SUBQ        MOVE.W      #S_SUBQ,(A4)+       *Load OPCODE string into (A4)
+            JSR         GET_SIZE_67
             RTS
            
 *-BIN 6--------------------------------------------------------
@@ -346,9 +351,11 @@ SUB         MOVE.W      #S_SUB,(A4)+        *Load OPCODE string into (A4)
             
 *-BIN 11--------------------------------------------------------          
 EOR         MOVE.W      #S_EOR,(A4)+        *Load OPCODE string into (A4)
+            JSR         GET_SIZE_67
             RTS
 
 CMP         MOVE.W      #S_CMP,(A4)+        *Load OPCODE string into (A4)
+            JSR         GET_SIZE_67
             RTS
 
 *-BIN 12---------------------------------------------------------
@@ -363,8 +370,7 @@ ADDA        MOVE.W      #S_ADDA,(A4)+       *Load OPCODE string into (A4)
             RTS
      
 *-BIN 14-------------------------------------------------------
-                                                                    ;<--Double check the flow of this bin, will it print out
-                                                                    ;<-LSL LSR ROL ROR correctly?
+                                                                    
 LOGICSHIFT  MOVE.W      #S_LS,(A4)+         *Load logical shift OPCODE string into (A4)                    
             BRA         RIGHTORLEFT             
               
@@ -404,6 +410,28 @@ DATA        MOVE.B      #'D',(A4)+          *Write DATA into string
             
             RTS                             *Return program flow back to Dissasembler file
 
+*-Size Subroutines---------------------------------------------
+* This helper is applicable for: 
+* NEG, ORI, CMPI, LSL/LSR, ASL/ASR, ROL/ROR, EOR, CMP, SUBQ
+GET_SIZE_67 MOVE.W      (A5),D0             *reload OPCODE into (A5)
+            LSR.W       #6,D0               *shift bits right 6
+            AND.W       #$03,D0             *Isolate last 2 bits
+            CMPI.W      #0,D0
+            BEQ         APPND_BYTE          *Is a Byte operation
+            CMPI        #1,D0
+            BEQ         WORD                *Is a Word operation
+            CMPI        #2,D0
+            BEQ         LONG                *Is a Long operation
+            BRA         DATA                *Not a valid size must be data 
+
+APPND_BYTE  MOVE.W      #S_BYTE,(A4)+       *load size into (A4)
+            RTS
+
+APPND_WORD  MOVE.W      #S_WORD,(A4)+       *load size into (A4)
+            RTS
+
+APPND_LONG  MOVE.W      #S_LONG,(A4)+       *load size into (A4)
+            RTS                
             
 *-STRINGS------------------------------------------------------
 
@@ -440,6 +468,11 @@ S_RO        DC.B        'R0',0
 S_LEFT      DC.B        'L',0
 S_RIGHT     DC.B        'R',0
 S_DATA      DC.B        'DATA',0
+S_BYTE      DC.B        '.B',0
+S_WORD      DC.B        '.W',0
+S_LONG      DC.B        '.L',0
+
+
 
 
 
