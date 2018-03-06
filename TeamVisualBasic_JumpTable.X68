@@ -137,16 +137,22 @@ BIN_5       BRA         SUBQ                *SUBQ is the only option for this bi
 
 *--------------------------------------------------------------            
 *-BIN 6 Possible OPCODES:
-*-Bcc(CS, GE, LT, VC)
+*-Bcc(BCC, BCS, BGE, BLT, BVC), BRA
 *--------------------------------------------------------------    
 BIN_6       MOVE.W      (A5),D0             *reload fresh op code
             LSR.W       #4,D0               *shift right 4
             LSR.W       #4,D0               *shift right 4
             AND.W       #$0F,D0             *Finds the condition code of the branch statement through bitmask
+            
+            CMPI.W      #0,D0               *check if the 4 bits == 0000
+            BEQ         BRA_SUB             *branch to BRA SUB
+            
             CMPI.W      #4,D0
             BEQ         BCC                 *branch to BCC code     ;<-------------------Not correct, B(cc) isn't a standalone OPCODE
-                                                                 ;<--- Also BLT is missing 
-                                                                             
+                                                                    ;<--- Also BLT is missing 
+            CMPI.W      #$D,D0
+            BEQ         BLT                 *branch to BLT SUB            
+                                                                 
             CMPI.W      #8,D0
             BEQ         BVC                 *branch to BVC code
             
@@ -237,9 +243,9 @@ BIN_14      MOVE.W      (A5),D0             *Reload the opcode
             BEQ         ARITH_SHIFT         *bra to arthimetic shift
             
             CMP.W       #3,D0
-            BEQ         ROTATE              *bra to rotate      ;<---- Is there a distinction between Left and right rotate?
+            BEQ         ROTATE              *bra to rotate                  ;<---- Is there a distinction between Left and right rotate?
             
-                                                                ; <--------- There should be a base case here
+            BRA         DATA                *if not a shift must be DATA    ; <--------- There should be a base case here
                                                                 
 
 *--------------------------------------------------------------            
@@ -321,6 +327,12 @@ BVC         MOVE.W      #S_BVC,(A4)+        *Load OPCODE string into (A4)
 BCC         MOVE.W      #S_BCC,(A4)+        *Load OPCODE string into (A4)
             RTS
             
+BLT         MOVE.W      #S_BLT,(A4)+        *Load OPCODE string into (A4)
+            RTS
+
+BRA_SUB     MOVE.W      #S_BRA,(A4)+        *Load OPCODE string into (A4)
+            RTS
+            
 *-BIN 8--------------------------------------------------------
 DIVS        MOVE.W      #S_DIVS,(A4)+       *Load OPCODE string into (A4)
             RTS
@@ -353,7 +365,7 @@ ADDA        MOVE.W      #S_ADDA,(A4)+       *Load OPCODE string into (A4)
 *-BIN 14-------------------------------------------------------
                                                                     ;<--Double check the flow of this bin, will it print out
                                                                     ;<-LSL LSR ROL ROR correctly?
-LOGICSHIFT  MOVE.W      #S_LEFT,(A4)+       *Load OPCODE string into (A4)                    
+LOGICSHIFT  MOVE.W      #S_LS,(A4)+         *Load logical shift OPCODE string into (A4)                    
             BRA         RIGHTORLEFT             
               
 RIGHTORLEFT MOVE.W      (A0),D0             *reload op
@@ -410,7 +422,9 @@ S_MOVEA     DC.B        'MOVEA',0
 S_BGE       DC.B        'BGE',0
 S_BCS       DC.B        'BCS',0
 S_BVC       DC.B        'BVC',0
-S_BCC       DC.B        'BCC',0                       
+S_BCC       DC.B        'BCC',0 
+S_BLT       DC.B        'BLT',0
+S_BRA       DC.B        'BRA',0                      
 S_RTS       DC.B        'RTS',0
 S_LEA       DC.B        'LEA',0
 S_NEG       DC.B        'NEG',0 
@@ -426,6 +440,7 @@ S_RO        DC.B        'R0',0
 S_LEFT      DC.B        'L',0
 S_RIGHT     DC.B        'R',0
 S_DATA      DC.B        'DATA',0
+
 
 
 
