@@ -263,9 +263,11 @@ BIN_15      BRA        DATA                *IF it goes into this bin it is DATA
 
 *-BIN 0--------------------------------------------------------           
 ORI         MOVE.W      #S_ORI,(A4)+        *Load OPCODE string into (A4)
+            JSR         GET_SIZE_67
             RTS
             
 CMPI        MOVE.W      #S_CMPI,(A4)+       *Load OPCODE string into (A4)
+            JSR         GET_SIZE_67
             RTS
             
 BCLR        MOVE.W      #S_BCLR,(A4)+       *Load OPCODE string into (A4)
@@ -280,7 +282,8 @@ MOVEA       MOVE.W      #S_MOVEA,(A4)+      *Load OPCODE string into (A4)
 
 *-BIN 4--------------------------------------------------------
 
-NOP         MOVE.B      #'N',(A4)+          *Load OPCODE string into (A4)
+NOP         ADDI        #BYTE,D7            *NOP is 2 Bytes; Increment length var by 2
+            MOVE.B      #'N',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'O',(A4)+
             MOVE.B      #'P',(A4)+
             MOVE.B      #' ',(A4)+
@@ -307,11 +310,13 @@ JSR         MOVE.W      #S_JSR,(A4)+        *Load OPCODE string into (A4)
             RTS
             
 NEG         MOVE.W      #S_NEG,(A4)+        *Load OPCODE string into (A4)
+            JSR         GET_SIZE_67
             RTS
              
             
 *-BIN 5--------------------------------------------------------
 SUBQ        MOVE.W      #S_SUBQ,(A4)+       *Load OPCODE string into (A4)
+            JSR         GET_SIZE_67
             RTS
            
 *-BIN 6--------------------------------------------------------
@@ -346,9 +351,11 @@ SUB         MOVE.W      #S_SUB,(A4)+        *Load OPCODE string into (A4)
             
 *-BIN 11--------------------------------------------------------          
 EOR         MOVE.W      #S_EOR,(A4)+        *Load OPCODE string into (A4)
+            JSR         GET_SIZE_67
             RTS
 
 CMP         MOVE.W      #S_CMP,(A4)+        *Load OPCODE string into (A4)
+            JSR         GET_SIZE_67
             RTS
 
 *-BIN 12---------------------------------------------------------
@@ -403,6 +410,28 @@ DATA        MOVE.B      #'D',(A4)+          *Write DATA into string
             
             RTS                             *Return program flow back to Dissasembler file
 
+*-Size Subroutines---------------------------------------------
+* This helper is applicable for: 
+* NEG, ORI, CMPI, LSL/LSR, ASL/ASR, ROL/ROR, EOR, CMP, SUBQ
+GET_SIZE_67 MOVE.W      (A5),D0             *reload OPCODE into (A5)
+            LSR.W       #6,D0               *shift bits right 6
+            AND.W       #$03,D0             *Isolate last 2 bits
+            CMPI.W      #0,D0
+            BEQ         BYTE_SUB            *Is a Byte operation
+            CMPI        #1,D0
+            BEQ         WORD                *Is a Word operation
+            CMPI        #2,D0
+            BEQ         LONG                *Is a Long operation
+            BRA         DATA                *Not a valid size must be data 
+
+BYTE_SUB    MOVE.W      #S_BYTE,(A4)+       *load size into (A4)
+            RTS
+
+WORD        MOVE.W      #S_WORD,(A4)+       *load size into (A4)
+            RTS
+
+LONG        MOVE.W      #S_LONG,(A4)+       *load size into (A4)
+            RTS                
             
 *-STRINGS------------------------------------------------------
 
@@ -439,6 +468,9 @@ S_RO        DC.B        'R0',0
 S_LEFT      DC.B        'L',0
 S_RIGHT     DC.B        'R',0
 S_DATA      DC.B        'DATA',0
+S_BYTE      DC.B        '.B',0
+S_WORD      DC.B        '.W',0
+S_LONG      DC.B        '.L',0
 
 
 
