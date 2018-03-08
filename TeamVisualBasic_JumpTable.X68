@@ -275,9 +275,18 @@ BCLR        MOVE.W      #S_BCLR,(A4)+       *Load OPCODE string into (A4)
 
 *-BIN_MOVE (Bins 1, 2, and 3)---------------------------------- 
 MOVE        MOVE.W      #S_MOVE,(A4)+       *Load OPCODE string into (A4)
+            JSR         MOVE_SIZE
             RTS
             
 MOVEA       MOVE.W      #S_MOVEA,(A4)+      *Load OPCODE string into (A4)
+            MOVE.W      (A5),D0             *reload OPCODE into (A5)
+            LSR.W       #4,D0               *shift bits right 4
+            LSR.W       #4,D0
+            LSR.W       #4,D0               *shift bits a total of 12 right
+            AND.W       #$03,D0             *isolate the last 2 bits
+            CMPI.W      #1,D0
+            BEQ         DATA                *byte operations are not supported for MOVEA
+            JSR         MOVE_SIZE
             RTS   
 
 *-BIN 4--------------------------------------------------------
@@ -288,7 +297,7 @@ NOP         ADDI        #BYTE,D7            *NOP is 2 Bytes; Increment length va
             MOVE.B      #'P',(A4)+
             MOVE.B      #' ',(A4)+
             MOVE.B      #0,(A4)+            *End the string with a 0 delimiter 
-            
+            MOVE.W      #2,D7
             RTS
             
             
@@ -297,16 +306,19 @@ RTS         MOVE.B      #'R',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'S',(A4)+
             MOVE.B      #' ',(A4)+
             MOVE.B      #0,(A4)+            *End the string with a 0 delimiter 
-            
+            MOVE.W      #2,D7
             RTS       
             
 LEA         MOVE.W      #S_LEA,(A4)+        *Load OPCODE string into (A4)
+            MOVE.W      #2,D7
             RTS
             
 MOVEM       MOVE.W      #S_MOVEM,(A4)+      *Load OPCODE string into (A4)
+            JSR         MOVEM_SIZE
             RTS
             
 JSR         MOVE.W      #S_JSR,(A4)+        *Load OPCODE string into (A4)
+            MOVE.W      #2,D7
             RTS
             
 NEG         MOVE.W      #S_NEG,(A4)+        *Load OPCODE string into (A4)
@@ -321,21 +333,27 @@ SUBQ        MOVE.W      #S_SUBQ,(A4)+       *Load OPCODE string into (A4)
            
 *-BIN 6--------------------------------------------------------
 BGE         MOVE.W      S_BGE,(A4)+         *Load OPCODE string into (A4)
+            MOVE.W      #2,D7               *saving the OPCODE size into D7
             RTS           
             
 BCS         MOVE.W      #S_BCS,(A4)+        *Load OPCODE string into (A4)
+            MOVE.W      #2,D7               *saving the OPCODE size into D7
             RTS
             
 BVC         MOVE.W      #S_BVC,(A4)+        *Load OPCODE string into (A4)
+            MOVE.W      #2,D7               *saving the OPCODE size into D7
             RTS
             
 BCC         MOVE.W      #S_BCC,(A4)+        *Load OPCODE string into (A4)
+            MOVE.W      #2,D7               *saving the OPCODE size into D7
             RTS
             
 BLT         MOVE.W      #S_BLT,(A4)+        *Load OPCODE string into (A4)
+            MOVE.W      #2,D7               *saving the OPCODE size into D7
             RTS
 
 BRA_SUB     MOVE.W      #S_BRA,(A4)+        *Load OPCODE string into (A4)
+            MOVE.W      #2,D7               *saving the OPCODE size into D7
             RTS
             
 *-BIN 8--------------------------------------------------------
@@ -343,10 +361,12 @@ DIVS        MOVE.W      #S_DIVS,(A4)+       *Load OPCODE string into (A4)
             RTS
             
 OR          MOVE.W      #S_OR,(A4)+         *Load OPCODE string into (A4)
+            JSR         SIZE_678
             RTS
             
 *-BIN 9---------------------------------------------------------
 SUB         MOVE.W      #S_SUB,(A4)+        *Load OPCODE string into (A4)
+            JSR         SIZE_678
             RTS
             
 *-BIN 11--------------------------------------------------------          
@@ -364,6 +384,7 @@ MULS        MOVE.W      #S_MULS,(A4)+       *Load OPCODE string into (A4)
             
 *-BIN 13---------------------------------------------------------
 ADD         MOVE.W      #S_ADD,(A4)+        *Load OPCODE string into (A4)
+            JSR         SIZE_678
             RTS
 
 ADDA        MOVE.W      #S_ADDA,(A4)+       *Load OPCODE string into (A4)
@@ -372,7 +393,19 @@ ADDA        MOVE.W      #S_ADDA,(A4)+       *Load OPCODE string into (A4)
 *-BIN 14-------------------------------------------------------
                                                                     
 LOGICSHIFT  MOVE.W      #S_LS,(A4)+         *Load logical shift OPCODE string into (A4)                    
-            BRA         RIGHTORLEFT             
+            JSR         RIGHTORLEFT 
+            JSR         GET_SIZE_67
+            RTS            
+
+ARITH_SHIFT MOVE.W      #S_AS,(A4)+         *Load arithmetic shift OPCODE string into (A4)             
+            JSR         RIGHTORLEFT
+            JSR         GET_SIZE_67
+            RTS         
+                
+ROTATE      MOVE.W      #S_RO,(A4)+         *Load rotate OPCODE string into (A4)           
+            JSR         RIGHTORLEFT
+            JSR         GET_SIZE_67
+            RTS
               
 RIGHTORLEFT MOVE.W      (A0),D0             *reload op
             LSL.W       #8,D0               *shift until dr bit is reached
@@ -381,13 +414,7 @@ RIGHTORLEFT MOVE.W      (A0),D0             *reload op
             
             CMP.W       #1,D0               *check if right
             BEQ         RIGHT  
-                                    
-ARITH_SHIFT MOVE.W      #S_AS,(A4)+         *Load arithmetic shift OPCODE string into (A4)             
-            BRA         RIGHTORLEFT         
-                
-ROTATE      MOVE.W      #S_RO,(A4)+         *Load rotate OPCODE string into (A4)           
-            BRA         RIGHTORLEFT
-            
+                                              
 LEFT        MOVE.W      #S_LEFT,(A4)+       *Load directional string into (A4)
             RTS                      
            
@@ -418,19 +445,70 @@ GET_SIZE_67 MOVE.W      (A5),D0             *reload OPCODE into (A5)
             AND.W       #$03,D0             *Isolate last 2 bits
             CMPI.W      #0,D0
             BEQ         APPND_BYTE          *Is a Byte operation
-            CMPI        #1,D0
-            BEQ         WORD                *Is a Word operation
-            CMPI        #2,D0
-            BEQ         LONG                *Is a Long operation
+            CMPI.W      #1,D0
+            BEQ         APPND_WORD          *Is a Word operation
+            CMPI.W      #2,D0
+            BEQ         APPND_LONG          *Is a Long operation
             BRA         DATA                *Not a valid size must be data 
 
+MOVEM_SIZE  MOVE.W      (A5),D0             *reload OPCODE into (A5)
+            LSR.W       #6,D0               *shift bits right 6
+            AND.W       #$01,D0             *isolate last bit
+            CMPI.W      #0,D0
+            BEQ         APPND_WORD          *is a word operation
+            CMPI.W      #1,D0
+            BEQ         APPND_LONG          *is a long operation
+            BRA         DATA
+            
+MOVE_SIZE   MOVE.W      (A5),D0             *reload OPCODE into (A5)
+            LSR.W       #4,D0               *shift bits right 4
+            LSR.W       #4,D0
+            LSR.W       #4,D0               *shift bits a total of 12 right
+            AND.W       #$03,D0             *isolate the last 2 bits
+            CMPI.W      #1,D0               
+            BEQ         APPND_BYTE          *is a byte operation
+            CMPI.W      #3,D0               
+            BEQ         APPND_WORD          *is a word operation
+            CMPI.W      #2,D0               
+            BEQ         APPND_LONG          *is a long operation
+            BRA         DATA
+            
+SIZE_678    MOVE.W      (A5),D0             *reload OPCODE into (A5)
+            LSR.W       #6,D0               *shift the bits right 6
+            AND.W       #$07,D0             *isolate the last 3 bits
+            CMPI.W      #0,D0               
+            BEQ         APPND_BYTE          *is a byte operation
+            CMPI.W      #4,D0
+            BEQ         APPND_BYTE          *is a byte operation
+            CMPI.W      #1,D0               
+            BEQ         APPND_WORD          *is a word operation
+            CMPI.W      #5,D0               
+            BEQ         APPND_WORD          *is a word operation
+            CMPI.W      #2,D0
+            BEQ         APPND_LONG          *is a long operation
+            CMPI.W      #6,D0
+            BEQ         APPND_LONG          *is a long operation
+            BRA         DATA                *is not one of the supported sizes
+            
+ADDA_SIZE   MOVE.W      (A5),D0             *reload OPCODE into (A5)
+            LSR.W       #6,D0               *shift the bits right 6
+            AND.W       #$07,D0             *isolate the last 3 bits
+            CMPI.W      #3,D0
+            BEQ         APPND_WORD          *is a word operation
+            CMPI.W      #7,D0
+            BEQ         APPND_LONG          *is a long operation
+            BRA         DATA                *is not one of the supported sizes
+
 APPND_BYTE  MOVE.W      #S_BYTE,(A4)+       *load size into (A4)
+            MOVE.W      #4,D7               *saving length of OPCODE + size in D7
             RTS
 
 APPND_WORD  MOVE.W      #S_WORD,(A4)+       *load size into (A4)
+            MOVE.W      #6,D7               *saving length of OPCODE + size in D7
             RTS
 
 APPND_LONG  MOVE.W      #S_LONG,(A4)+       *load size into (A4)
+            MOVE.W      #10,D7              *saving length of OPCODE + size in D7
             RTS                
             
 *-STRINGS------------------------------------------------------
@@ -471,6 +549,7 @@ S_DATA      DC.B        'DATA',0
 S_BYTE      DC.B        '.B',0
 S_WORD      DC.B        '.W',0
 S_LONG      DC.B        '.L',0
+
 
 
 
