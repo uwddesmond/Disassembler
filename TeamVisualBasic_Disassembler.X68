@@ -10,6 +10,7 @@
 START       ORG         $1000               ;Start @ address $1000             
             JSR         DISP_INTRO          ;Display Intro Message
             JSR         INPUT_ADDR          ;Take start and ending address as user input
+            JSR         DISP_WAIT           ;Display Press Enter to Continue msg
             JSR         MAIN_LOOP           ;Meat of the program: Check for validity, OPCODE match, and print to screen
                                                         
             BRA         END                 ;If loop improperly terminated, base case BRA to END program         
@@ -23,6 +24,13 @@ DISP_INTRO  LEA         M_INTRO,A1          ;Load intro msg
 *-Press Enter to Continue message---------------------------            
 DISP_WAIT   LEA         M_WAIT,A1           ;Load wait message
             MOVE.B      #14,D0              ;Trap Task 14 displays null terminated string
+            TRAP        #15
+            
+            MOVE.B      #5,D0               ;Trap Task 5 takes in a single character input (aka press enter)
+            TRAP        #15
+            
+            MOVE.B      #11,D0              ;Clear screen
+            MOVE.W      #$FF00,D1
             TRAP        #15
 
             RTS        
@@ -43,7 +51,8 @@ LOOP_COND   ADD.L       #WORD,A5            ;Increment current address (A5)
             BEQ         END
             
             RTS
-            
+*-Print a Page worth of OPCODES-----------------------------
+           
 *-Print OPCODE STRING---------------------------------------
 PRINT_OP    MOVE.W      #OP_ADDR,A1         ;Move the OPCODE's beginning addr to A1
             MOVE.B      #14,D0              ;Trap Task 14 displays null terminated string
@@ -79,10 +88,10 @@ M_INTRO     DC.B        'Team Visual Basic',CR,LF
             DC.B        'Motorola 68000 Disassembler',CR,LF
             DC.B        'By Austin Abeyta, Dylan Desmond, and Henry Hong',CR,LF,CR,LF,0 
 
-M_IN_RULES  DC.B        'Please limit address input to numeric (0-9) and/or ALL CAPS alphabet A-F',CR,LF
+M_IN_RULES  DC.B        'Please limit address input to numeric (0-9) and/or alphabet A-F',CR,LF
             DC.B        'Please limit address input to a range of [00005000-FFFFFFFF]!',CR,LF
             DC.B        'Input less than 8 digits will be padded on left',CR,LF    
-            DC.B        'Input greater than 8 digits will be truncated on the right',CR,LF,0
+            DC.B        'Input greater than 8 digits will be truncated on the right',CR,LF,CR,LF,0
             
 M_INPUT_S   DC.B        'Please Input the Starting Address (test code is ORG @ 7F00): ',CR,LF,0
 M_INPUT_E   DC.B        'Please Input the Ending Address: ',CR,LF,0
@@ -106,6 +115,8 @@ M_NEWLINE   DC.B        '',CR,LF,0
             INCLUDE     'TeamVisualBasic_JumpTable.X68'                     ;Include Jump Table file
             
             END         START               ;last line of source
+
+
 
 
 
