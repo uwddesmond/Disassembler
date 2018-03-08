@@ -29,7 +29,7 @@ GA_LOOP     JSR         HEX_2_ASCII         ;Convert the hex to ascii for printi
             CMP.B       #0,D2               ;Is counter var == 0?
             BGT         GA_LOOP             ;If not, loop         
             
-            MOVE.B      #' ',(A4)+           ;Otherwise, we are done. Append a space
+            MOVE.B      #09,(A4)+           ;Otherwise, we are done. Append a tab
             RTS                             ;Return back to main disassembler loop    
 
 *-Accumulate the 0xADDR Into String-------------------------
@@ -49,6 +49,7 @@ APPND_NUM   ADDI.B      #$30,D1             ;Add $30 to make it a ascii numeric 
             MOVE.B      D1,(A4)+            ;Append this character to string
             RTS
        
+
 
 *~Font name~Courier New~
 *~Font size~10~
