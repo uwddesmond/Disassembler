@@ -52,8 +52,8 @@ NEXT_OP     JSR         BUILD_STR           ;Build and accumulate the 0xADDR OPC
             
 *-Loop Condition Logic--------------------------------------
 LOOP_COND   ADD.L       D7,A5            ;Increment current address (A5) by the length of the last instruction + operand data (D7)
-            CMP.W       A5,A6            ;If current address (A5) is now equal to or greater than end address (A6), end
-            BGE         DSMBL_DONE           ;<---------- check conditional
+            CMPA.W      A5,A6            ;If current address (A5) is now equal to or greater than end address (A6), end
+            BLT         DSMBL_DONE           ;<---------- check conditional
             
             RTS            
            
@@ -73,7 +73,6 @@ DSMBL_DONE  LEA         M_DONE,A1           ;Print DONE message
             MOVE.B      #14,D0              ;Trap Task 14 displays null terminated string
             TRAP        #15 
             
-            JSR         DISP_WAIT           ;Tell user to press enter to continue then clear screen
             JSR         PROMPT_NEW          ;Ask user if they want to restart
             
 *-Ask user if they want to start program again--------------            
@@ -85,9 +84,11 @@ PROMPT_NEW  LEA         M_NPROMPT,A1        ;Ask user if they would like to run 
             TRAP        #15
             
             CMP.B       #'y',D1             ;Is input y
+            JSR         DISP_WAIT           ;Clear Screen
             BEQ         START               ;if so restart program
             
             CMP.B       #'Y',D1             ;Is input Y capital
+            JSR         DISP_WAIT           ;Clear Screen
             BEQ         START               ;if so restart program
     
             CMP.B       #'n',D1             ;Is input n
@@ -157,6 +158,8 @@ M_NEWLINE   DC.B        '',CR,LF,0
             INCLUDE     'TeamVisualBasic_JumpTable.X68'                     ;Include Jump Table file
             
             END         START               ;last line of source
+
+
 
 
 
