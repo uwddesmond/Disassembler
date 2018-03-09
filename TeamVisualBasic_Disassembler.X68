@@ -10,7 +10,6 @@
 START       ORG         $1000               ;Start @ address $1000             
             JSR         DISP_INTRO          ;Display Intro Message
             JSR         INPUT_ADDR          ;Take start and ending address as user input
-            JSR         DISP_WAIT           ;Display Press Enter to Continue msg
             JSR         MAIN_LOOP           ;Meat of the program: Check for validity, OPCODE match, and print to screen
                                                         
             BRA         END                 ;If loop improperly terminated, base case BRA to END program         
@@ -36,22 +35,27 @@ DISP_WAIT   LEA         M_WAIT,A1           ;Load wait message
             RTS        
             
 *-Main Loop-------------------------------------------------
-MAIN_LOOP   JSR         BUILD_STR           ;Build and accumulate the 0xADDR OPCODE $OPERAND string into memory @ OP_ADDR                            
-            JSR         PRINT_OP            ;Print the built string to console           
-            JSR         LOOP_COND
+MAIN_LOOP   JSR         DISP_WAIT           ;Display Press Enter to Continue msg
+            MOVE.B      #20,D4              ;D4 loop var - print 20 lines per page
             
+NEXT_OP     JSR         BUILD_STR           ;Build and accumulate the 0xADDR OPCODE $OPERAND string into memory @ OP_ADDR                            
+            JSR         PRINT_OP            ;Print the built string to console 
             
+            JSR         LOOP_COND           ;Check if address is still valid. END program if it isnt
+  
+            SUBI        #1,D4               ;Decrement counter
+            CMP.B       #0,D4               ;Is counter == 0?
+            BEQ         MAIN_LOOP           ;Then print the next page
             
-            BRA         MAIN_LOOP
-            
+            BRA         NEXT_OP             ;Otherwise, in the same page, print the next OP         
+
             
 *-Loop Condition Logic--------------------------------------
-LOOP_COND   ADD.L       #WORD,A5            ;Increment current address (A5)
-            CMP.W       A5,A6               ;If current address (A5) is now equal to end address (A6), end
-            BEQ         END
+LOOP_COND   ADD.L       D7,A5            ;Increment current address (A5) by the length of the last instruction + operand data (D7)
+            CMP.W       A5,A6            ;If current address (A5) is now equal to or greater than end address (A6), end
+            BGE         DSMBL_DONE           ;<---------- check conditional
             
-            RTS
-*-Print a Page worth of OPCODES-----------------------------
+            RTS            
            
 *-Print OPCODE STRING---------------------------------------
 PRINT_OP    MOVE.W      #OP_ADDR,A1         ;Move the OPCODE's beginning addr to A1
@@ -64,7 +68,41 @@ PRINT_OP    MOVE.W      #OP_ADDR,A1         ;Move the OPCODE's beginning addr to
             
             RTS
             
+*-Print to user DONE message--------------------------------
+DSMBL_DONE  LEA         M_DONE,A1           ;Print DONE message
+            MOVE.B      #14,D0              ;Trap Task 14 displays null terminated string
+            TRAP        #15 
+            
+            JSR         DISP_WAIT           ;Tell user to press enter to continue then clear screen
+            JSR         PROMPT_NEW          ;Ask user if they want to restart
+            
+*-Ask user if they want to start program again--------------            
+PROMPT_NEW  LEA         M_NPROMPT,A1        ;Ask user if they would like to run program again
+            MOVE.B      #14,D0              ;Trap Task 14 displays null terminated string
+            TRAP        #15                     
+            
+            MOVE.B      #5,D0               ;Read user input into D1
+            TRAP        #15
+            
+            CMP.B       #'y',D1             ;Is input y
+            BEQ         START               ;if so restart program
+            
+            CMP.B       #'Y',D1             ;Is input Y capital
+            BEQ         START               ;if so restart program
     
+            CMP.B       #'n',D1             ;Is input n
+            BEQ         END                 ;if so restart program
+            
+            CMP.B       #'N',D1             ;Is input N capital
+            BEQ         END                 ;if so restart program
+            
+            LEA         M_ERR_GEN,A1        ;Input is invalid! Prompt again
+            MOVE.B      #14,D0              ;Trap Task 14 displays null terminated string
+            TRAP        #15 
+            
+            BRA         PROMPT_NEW          ;Re prompt            
+
+
 *-END-------------------------------------------------------
 END         MOVE.B      #9,D0               ;End program
             TRAP        #15                      
@@ -105,6 +143,10 @@ M_ERR_ADDR2 DC.B        'ERR: START address too low, danger of overwriting progr
 M_ERR_ADDR3 DC.B        'ERR: ODD START address',CR,LF,0
 M_ERR_ADDR4 DC.B        'ERR: ODD END address',CR,LF,0
 
+M_NPROMPT   DC.B        'Would you like to run program again @ another address? (y/n)',CR,LF,0
+M_ERR_GEN   DC.B        'Invalid input!',CR,LF,0  
+M_DONE      DC.B        'Done!',CR,LF,0  
+
 M_NEWLINE   DC.B        '',CR,LF,0
                     
             
@@ -115,6 +157,7 @@ M_NEWLINE   DC.B        '',CR,LF,0
             INCLUDE     'TeamVisualBasic_JumpTable.X68'                     ;Include Jump Table file
             
             END         START               ;last line of source
+
 
 
 

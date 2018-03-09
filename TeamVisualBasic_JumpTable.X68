@@ -512,7 +512,7 @@ APPND_LONG  MOVE.W      #S_LONG,(A4)+       *load size into (A4)
             RTS                
             
 *-FILES--------------------------------------------------------
-            INCLUDE     'TeamVisualBasic_OP_Decoder.X68'    ;Helper file for jump table
+            ;INCLUDE     'TeamVisualBasic_OP_Decoder.X68'    ;Helper file for jump table
             
 *-OPCODE Names-------------------------------------------------
 S_NOP       DC.B        'NOP',0   
@@ -550,6 +550,7 @@ S_DATA      DC.B        'DATA',0
 S_BYTE      DC.B        '.B',0
 S_WORD      DC.B        '.W',0
 S_LONG      DC.B        '.L',0
+
 
 
 
