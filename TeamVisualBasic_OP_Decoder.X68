@@ -19,7 +19,7 @@
 *-----------------------------------------------------------
 
 *-OPCODE Decode Type A--------------------------------------
-*-OPCODEs: MOVE,
+*-OPCODEs: MOVE,MOVEA,
 *-xxxx Dest Reg(3) Dest Mode(3) Src Mode(3) Src Reg(3)  
 
 DECODE_A    MOVE.W      (A5),D2             *Copy OPCODE into D2
@@ -36,17 +36,96 @@ DECODE_A    MOVE.W      (A5),D2             *Copy OPCODE into D2
             RTS                             *Return back to jump table
 
 *-OPCODE Decode Type B--------------------------------------
-*-OPCODEs: 
+*-OPCODEs: LSL/LSR,ASL/ASR,ROL/ROR
 *-xxxx Register(3) OP Mode(3) EA Mode(3) EA Reg(3)  
                
-DECODE_B
+DECODE_B    MOVE.W      (A5),D2
+            LSR.W       #6,D2
+            AND.W       $0003,D2
+            CMP.W       #3,D2
+            BEQ         B_ADDMODE
+            MOVE.W      (A5),D2             
+            LSR.W       #5,D2
+            AND.W       #$0003,D2
+            CMP.W       #1,D2
+            BEQ         B_SCOUNT
+            CMP.W       #2,D2
+            BEQ         B_DATAREG
+            MOVE.B      #'D',(A4)+
+            MOVE.W      (A5),D2
+            AND.W       #$0007,D2
+            MOVE.W      D2,D5
+            JSR         PrintD5Num
+            RTS
+
+*-------------------------------------------------------
+*Shift on address is occuring           
+B_ADDMODE
+           MOVE.W       (A5),D2
+           LSR.W        #3,D2
+           AND.W        #$0007,D2
+           JSR          GETDSTMODE
+           MOVE.W       (A5),D2
+           AND.W        #$0007,D2
+           MOVE.W       D2,D5
+           JSR          PrintD5Num
+           RTS
+            
+            
+*-----------------------------------------------------------
+*-OPTYPE_B HELPER FUNCTIONS
+*Helps determine the size of shifts or registers
+*-----------------------------------------------------------
+
+*-----------------------------------------------------------
+*Value stored in cont/reg is a number of bits to shift
+*Display as #number
+B_SCOUNT    MOVE.W      (A5),D2
+            LSR.W       #6,D2
+            LSR.W       #3,D2
+            AND.W       #$0007,D2
+            MOVE.W      D2,D5
+            MOVE.B      #'#',(A4)+
+            JSR         PrintD5Num
+            RTS
+   
+*------------------------------------------------------------
+*Display proper register number
+B_DATAREG   MOVE.B      #'D',(A4)+
+            MOVE.W      (A5),D2
+            LSR.W       #6,D2
+            LSR.W       #3,D2
+            AND.W       #$0007,D2
+            MOVE.W      D2,D5
+            JSR         PrintD5Num
+            RTS
+       
 
 
 *-OPCODE Decode Type C--------------------------------------
-*-OPCODEs: 
-*-xxxx Count/Reg(3) dr(1) Size(2) i/r(1) 01 Register(3)       
+*-OPCODEs:ADDI,SUBI 
+*-xxxxxxxx Size2, Ea mode(3) Ea Reg(3)
+*STILL NEED TO PRINT DATA THAT FOLLOWS FIRST       
   
-DECODE_C
+DECODE_C    MOVE.W      (A5),D2
+            *ENTER PRINT DATA CODE HERE
+            JSR.W       C_SRC
+            
+
+
+*-----------------------------------------------------------
+*-OPTYPE_c HELPER FUNCTIONS
+*Helps print second argument
+*-----------------------------------------------------------
+
+C_SRC       MOVE.W      (A5),D2
+            LSR.W       #3,D2
+            AND.W       #$0007,D2
+            JSR         GET_DSTMODE
+            MOVE.W      (A5),D2
+            AND.W       #$0007,D2
+            JSR         GET_SRCMODE
+            RTS
 
 
 *-OPCODE Decode Type D--------------------------------------
@@ -117,12 +196,12 @@ GET_DSTMODE CMP.W       #0,D2
 *-----------------------------------------------------------
 SregMode    MOVE.B      #'D',(A4)+
             JSR         T1_GrabSreg
-            JSR         PrintD5Number   
+            JSR         PrintD5Num   
             RTS  
         
 SaddMode    MOVE.B      #'A',(A4)+
             JSR         T1_GrabSreg
-            JSR         PrintD5Number
+            JSR         PrintD5Num
             RTS
     
     
@@ -130,7 +209,7 @@ SaddMode    MOVE.B      #'A',(A4)+
 SaddInMode  MOVE.B      #'(',(A4)+
             MOVE.B      #'A',(A4)+
             JSR         T1_GrabSreg
-            JSR         PrintD5Number
+            JSR         PrintD5Num
             MOVE.B      #')',(A4)+
             RTS
     
@@ -138,14 +217,14 @@ SaddINpre   MOVE.B      #'-',(A4)+
             MOVE.B      #'(',(A4)+
             MOVE.B      #'A',(A4)+
             JSR         T1_GrabSreg
-            JSR         PrintD5Number
+            JSR         PrintD5Num
             MOVE.B      #')',(A4)+
             RTS
     
 SaddINpost  MOVE.B      #'(',(A4)+
             MOVE.B      #'A',(A4)+
             JSR         T1_GrabSreg
-            JSR         PrintD5Number
+            JSR         PrintD5Num
             MOVE.B      #')',(A4)+
             MOVE.B      #'+',(A4)+
             RTS
@@ -160,12 +239,12 @@ S8AnXn
 *-----------------------------------------------------------
 DregMode    MOVE.B      #'D',(A4)+
             JSR         T1_GrabDreg
-            JSR         PrintD5Number   
+            JSR         PrintD5Num   
             RTS
          
 DaddMode    MOVE.B      #'A',(A4)+
             JSR         T1_GrabDreg
-            JSR         PrintD5Number
+            JSR         PrintD5Num
             RTS
     
     
@@ -173,7 +252,7 @@ DaddMode    MOVE.B      #'A',(A4)+
 DaddInMode  MOVE.B      #'(',(A4)+
             MOVE.B      #'A',(A4)+
             JSR         T1_GrabDreg
-            JSR         PrintD5Number
+            JSR         PrintD5Num
             MOVE.B      #')',(A4)+
             RTS
     
@@ -181,21 +260,20 @@ DaddINpre   MOVE.B      #'-',(A4)+
             MOVE.B      #'(',(A4)+
             MOVE.B      #'A',(A4)+
             JSR         T1_GrabDreg
-            JSR         PrintD5Number
+            JSR         PrintD5Num
             MOVE.B      #')',(A4)+
             RTS
     
 DaddINpost  MOVE.B      #'(',(A4)+
             MOVE.B      #'A',(A4)+
             JSR         T1_GrabDreg
-            JSR         PrintD5Number
+            JSR         PrintD5Num
             MOVE.B      #')',(A4)+
             MOVE.B      #'+',(A4)+
             RTS
     
 D16An
 D8AnXn
-
 
 *----------------------------------------------------------- 
 *-Assorted(?) Helper Functions
@@ -207,14 +285,14 @@ T1_GrabSreg MOVE.W      (A5),D2         *recopy op code
             MOVE.W      D2,D5           *copy D2 to D5
             RTS
     
-T1_GrabDreg MOVE.W      (A5),D2
-            LSR.W       #6,D2
-            LSR.W       #3,D2
-            AND.W       #$0007,D2
-            MOVE.W      D2,D5
+T1_GrabDreg MOVE.W      (A5),D2         *type one grab register bits
+            LSR.W       #6,D2           *shift bits over
+            LSR.W       #3,D2           
+            AND.W       #$0007,D2       *mask so only relevent bits left
+            MOVE.W      D2,D5           *move to d5 for printing
             RTS
     
-PrintD5Num  CMP.B       #0,D5
+PrintD5Num  CMP.B       #0,D5           *print the numeber in d5
             BEQ         PRINT0
             CMP.B       #1,D5
             BEQ         PRINT1
@@ -261,6 +339,7 @@ PRINT7      MOVE.B      #'7',(A4)+
 PRINT8      MOVE.B      #'8',(A4)+
             RTS
     
+
 
 
 

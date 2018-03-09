@@ -1,6 +1,6 @@
-00001000 Starting Address
+00000000 Starting Address
 Assembler used: EASy68K Editor/Assembler v5.15.04
-Created On: 3/8/2018 2:13:04 PM
+Created On: 3/8/2018 9:04:32 PM
 
 00000000                             1  *-----------------------------------------------------------
 00000000                             2  * Title      :  Team Visual Basic's Disassembler
@@ -15,316 +15,337 @@ Created On: 3/8/2018 2:13:04 PM
 00000000                            11  
 00000000                            12  *-----------------------------------------------------------
 00000000                            13  *-Starting Point: Branch into one of many OPCODE Types 
-00000000                            14  *-----------------------------------------------------------
-00000000                            15  
-00000000                            16  *-----------------------------------------------------------
-00000000                            17  *-OPCODE Type A
-00000000                            18  *-xx Size(2) Dest Reg(3) Dest Mode(3) Src Mode(3) Src Reg(3)       
+00000000                            14  *-Size bits are not handled here, that is handled in the jump table
+00000000                            15  *-
+00000000                            16  *-Bit Format:
+00000000                            17  *-15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
+00000000                            18  *-Most Significant    Least Significant   
 00000000                            19  *-----------------------------------------------------------
-00000000  3415                      20  DECODE_A     MOVE.W      (A5),D2
-00000002  E64A                      21              LSR.W       #3,D2           *shift left to grab source mode
-00000004  C47C 0007                 22              AND.W       #$0007,D2       *Mask out other bits
-00000008  4EB9 00000022             23              JSR         GET_SRCMODE
-0000000E  18FC 002C                 24              MOVE.B      #',',(A4)+
-00000012  3415                      25              MOVE.W      (A5),D2
-00000014  EC4A                      26              LSR.W       #6,D2
-00000016  C47C 0007                 27              AND.W       #$0007,D2
-0000001A  4EB9 0000005A             28              JSR         GET_DSTMODE
-00000020  4E75                      29              RTS
-00000022                            30  
-00000022                            31  *-----------------------------------------------------------
-00000022                            32  *-OPCODE Type B
-00000022                            33  *-xxxx Register(3) OP Mode(3) EA Mode(3) EA Reg(3)       
-00000022                            34  *-----------------------------------------------------------            
-00000022                            35  DECODE_B
-00000022                            36  
-00000022                            37  *-----------------------------------------------------------
-00000022                            38  *-OPCODE Type C
-00000022                            39  *-xxxx Count/Reg(3) dr(1) Size(2) i/r(1) 01 Register(3)       
-00000022                            40  *-----------------------------------------------------------   
-00000022                            41  DECODE_C
-00000022                            42  
-00000022                            43  *-----------------------------------------------------------
-00000022                            44  *-OPCODE Type D
-00000022                            45  *-xxxx Register(3) x Size(2) EA Mode(3) EA Reg(3)       
-00000022                            46  *-----------------------------------------------------------   
-00000022                            47  DECODE_D
-00000022                            48  
-00000022                            49  *-----------------------------------------------------------
-00000022                            50  *-OPCODE Type E
-00000022                            51  *-xxxx Condition(4) 8 Bit Displacement       
-00000022                            52  *-----------------------------------------------------------   
-00000022                            53  DECODE_E
-00000022                            54  
-00000022                            55  *-----------------------------------------------------------
-00000022                            56  *-OPCODE Type F
-00000022                            57  *-xxxx Data(3) 1 Size(2) EA Mode(3) EA Reg(3)       
-00000022                            58  *-----------------------------------------------------------   
-00000022                            59  DECODE_F
-00000022                            60  
-00000022                            61     
-00000022                            62      *--------------determine which mode and send to appropiate sub routine----------------
-00000022                            63      *pre load = source mode bits saved into d2 register
-00000022  B47C 0000                 64  GET_SRCMODE CMP.W       #0,D2
-00000026  6700 006A                 65              BEQ         SregMode        *register mode ---Dn
-0000002A  B47C 0001                 66              CMP.W       #1,D2
-0000002E  6700 0074                 67              BEQ         SaddMode        *address mode ---An
-00000032  B47C 0002                 68              CMP.W       #2,D2
-00000036  6700 007E                 69              BEQ         SaddINmode      *addres indirect mode ---(An)
-0000003A  B47C 0003                 70              CMP.W       #3,D2
-0000003E  6700 0090                 71              BEQ         SaddINpre       *addess indirect pre dec ----(An)
-00000042  B47C 0004                 72              CMP.W       #4,D2
-00000046  6700 00A6                 73              BEQ         SaddINpost      *address indirect post inc --- (An)+
-0000004A  B47C 0005                 74              CMP.W       #5,D2
-0000004E  6700 00BC                 75              BEQ         S16An           *source number of word size --- (d16,An)
-00000052  B47C 0006                 76              CMP.W       #6,D2
-00000056  6700 00B4                 77              BEQ         S8AnXn          *source number byte size --- (d8,An,Xn)
-0000005A                            78      
-0000005A                            79  
-0000005A  B47C 0000                 80  GET_DSTMODE CMP.W       #0,D2
-0000005E  6700 00AC                 81              BEQ         DregMode        *register mode ---Dn
-00000062  B47C 0001                 82              CMP.W       #1,D2
-00000066  6700 00B6                 83              BEQ         DaddMode        *address mode ---An
-0000006A  B47C 0002                 84              CMP.W       #2,D2
-0000006E  6700 00C0                 85              BEQ         DaddINmode      *addres indirect mode ---(An)
-00000072  B47C 0003                 86              CMP.W       #3,D2
-00000076  6700 00D2                 87              BEQ         DaddINpre       *addess indirect pre dec ----(An)
-0000007A  B47C 0004                 88              CMP.W       #4,D2
-0000007E  6700 00E8                 89              BEQ         DaddINpost      *address indirect post inc --- (An)+
-00000082  B47C 0005                 90              CMP.W       #5,D2
-00000086  6700 00FE                 91              BEQ         D16An           *source number of word size --- (d16,An)
-0000008A  B47C 0006                 92              CMP.W       #6,D2
-0000008E  6700 00F6                 93              BEQ         D8AnXn          *source number byte size --- (d8,An,Xn)
-00000092                            94      
-00000092                            95    
-00000092                            96  *---------------Source Helper Functions-------------------------------
-00000092  18FC 0044                 97  SregMode    MOVE.B      #'D',(A4)+
-00000096  4EB9 00000186             98              JSR         T1_GrabSreg
-Line 99 ERROR: Undefined symbol
-0000009C  4EB9 004DBB8E             99              JSR         PrintD5Number   
-000000A2  4E75                     100              RTS  
-000000A4                           101          
-000000A4  18FC 0041                102  SaddMode    MOVE.B      #'A',(A4)+
-000000A8  4EB9 00000186            103              JSR         T1_GrabSreg
-Line 104 ERROR: Undefined symbol
-000000AE  4EB9 004DBB8E            104              JSR         PrintD5Number
-000000B4  4E75                     105              RTS
-000000B6                           106      
-000000B6                           107      
-000000B6                           108      
-000000B6  18FC 0028                109  SaddInMode  MOVE.B      #'(',(A4)+
-000000BA  18FC 0041                110              MOVE.B      #'A',(A4)+
-000000BE  4EB9 00000186            111              JSR         T1_GrabSreg
-Line 112 ERROR: Undefined symbol
-000000C4  4EB9 004DBB8E            112              JSR         PrintD5Number
-000000CA  18FC 0029                113              MOVE.B      #')',(A4)+
-000000CE  4E75                     114              RTS
-000000D0                           115      
-000000D0  18FC 002D                116  SaddINpre   MOVE.B      #'-',(A4)+
-000000D4  18FC 0028                117              MOVE.B      #'(',(A4)+
-000000D8  18FC 0041                118              MOVE.B      #'A',(A4)+
-000000DC  4EB9 00000186            119              JSR         T1_GrabSreg
-Line 120 ERROR: Undefined symbol
-000000E2  4EB9 004DBB8E            120              JSR         PrintD5Number
-000000E8  18FC 0029                121              MOVE.B      #')',(A4)+
-000000EC  4E75                     122              RTS
-000000EE                           123      
-000000EE  18FC 0028                124  SaddINpost  MOVE.B      #'(',(A4)+
-000000F2  18FC 0041                125              MOVE.B      #'A',(A4)+
-000000F6  4EB9 00000186            126              JSR         T1_GrabSreg
-Line 127 ERROR: Undefined symbol
-000000FC  4EB9 004DBB8E            127              JSR         PrintD5Number
-00000102  18FC 0029                128              MOVE.B      #')',(A4)+
-00000106  18FC 002B                129              MOVE.B      #'+',(A4)+
-0000010A  4E75                     130              RTS
-0000010C                           131      
-0000010C                           132  S16An
-0000010C                           133  S8AnXn
-0000010C                           134  
-0000010C                           135  *--------------Destination helper functions------------------
-0000010C  18FC 0044                136  DregMode    MOVE.B      #'D',(A4)+
-00000110  4EB9 00000190            137              JSR         T1_GrabDreg
-Line 138 ERROR: Undefined symbol
-00000116  4EB9 004DBB8E            138              JSR         PrintD5Number   
-0000011C  4E75                     139              RTS
-0000011E                           140           
-0000011E  18FC 0041                141  DaddMode    MOVE.B      #'A',(A4)+
-00000122  4EB9 00000190            142              JSR         T1_GrabDreg
-Line 143 ERROR: Undefined symbol
-00000128  4EB9 004DBB8E            143              JSR         PrintD5Number
-0000012E  4E75                     144              RTS
-00000130                           145      
-00000130                           146      
-00000130                           147      
-00000130  18FC 0028                148  DaddInMode  MOVE.B      #'(',(A4)+
-00000134  18FC 0041                149              MOVE.B      #'A',(A4)+
-00000138  4EB9 00000190            150              JSR         T1_GrabDreg
-Line 151 ERROR: Undefined symbol
-0000013E  4EB9 004DBB8E            151              JSR         PrintD5Number
-00000144  18FC 0029                152              MOVE.B      #')',(A4)+
-00000148  4E75                     153              RTS
-0000014A                           154      
-0000014A  18FC 002D                155  DaddINpre   MOVE.B      #'-',(A4)+
-0000014E  18FC 0028                156              MOVE.B      #'(',(A4)+
-00000152  18FC 0041                157              MOVE.B      #'A',(A4)+
-00000156  4EB9 00000190            158              JSR         T1_GrabDreg
-Line 159 ERROR: Undefined symbol
-0000015C  4EB9 004DBB8E            159              JSR         PrintD5Number
-00000162  18FC 0029                160              MOVE.B      #')',(A4)+
-00000166  4E75                     161              RTS
-00000168                           162      
-00000168  18FC 0028                163  DaddINpost  MOVE.B      #'(',(A4)+
-0000016C  18FC 0041                164              MOVE.B      #'A',(A4)+
-00000170  4EB9 00000190            165              JSR         T1_GrabDreg
-Line 166 ERROR: Undefined symbol
-00000176  4EB9 004DBB8E            166              JSR         PrintD5Number
-0000017C  18FC 0029                167              MOVE.B      #')',(A4)+
-00000180  18FC 002B                168              MOVE.B      #'+',(A4)+
-00000184  4E75                     169              RTS
-00000186                           170      
-00000186                           171  D16An
-00000186                           172  D8AnXn
-00000186                           173      *-----------helper subroutines--------------
-00000186                           174      
-00000186  3415                     175  T1_GrabSreg MOVE.W      (A5),D2         *recopy op code
-00000188  C47C 0007                176              AND.W       #$0007,D2       *mask other bits
-0000018C  3A02                     177              MOVE.W      D2,D5           *copy D2 to D5
-0000018E  4E75                     178              RTS
-00000190                           179      
-00000190  3415                     180  T1_GrabDreg MOVE.W      (A5),D2
-00000192  EC4A                     181              LSR.W       #6,D2
-00000194  E64A                     182              LSR.W       #3,D2
-00000196  C47C 0007                183              AND.W       #$0007,D2
-0000019A  3A02                     184              MOVE.W      D2,D5
-0000019C  4E75                     185              RTS
-0000019E                           186      
-0000019E  BA3C 0000                187  PrintD5Num  CMP.B       #0,D5
-000001A2  6700 0042                188              BEQ         PRINT0
-000001A6  BA3C 0001                189              CMP.B       #1,D5
-000001AA  6700 0040                190              BEQ         PRINT1
-000001AE  BA3C 0002                191              CMP.B       #2,D5
-000001B2  6700 003E                192              BEQ         PRINT2
-000001B6  BA3C 0003                193              CMP.B       #3,D5
-000001BA  6700 003C                194              BEQ         PRINT3
-000001BE  BA3C 0004                195              CMP.B       #4,D5
-000001C2  6700 003A                196              BEQ         PRINT4
-000001C6  BA3C 0005                197              CMP.B       #5,D5
-000001CA  6700 0038                198              BEQ         PRINT5
-000001CE  BA3C 0006                199              CMP.B       #6,D5
-000001D2  6700 0036                200              BEQ         PRINT6
-000001D6  BA3C 0007                201              CMP.B       #7,D5
-000001DA  6700 0034                202              BEQ         PRINT7
-000001DE  BA3C 0008                203              CMP.B       #8,D5
-000001E2  6700 0032                204              BEQ         PRINT8  
-000001E6                           205      
-000001E6                           206      
-000001E6  18FC 0030                207  PRINT0      MOVE.B      #'0',(A4)+
-000001EA  4E75                     208              RTS
-000001EC                           209      
-000001EC  18FC 0031                210  PRINT1      MOVE.B      #'1',(A4)+
-000001F0  4E75                     211              RTS
-000001F2                           212      
-000001F2  18FC 0032                213  PRINT2      MOVE.B      #'2',(A4)+
-000001F6  4E75                     214              RTS
-000001F8                           215      
-000001F8  18FC 0033                216  PRINT3      MOVE.B      #'3',(A4)+
-000001FC  4E75                     217              RTS
-000001FE                           218      
-000001FE  18FC 0034                219  PRINT4      MOVE.B      #'4',(A4)+
-00000202  4E75                     220              RTS
-00000204                           221      
-00000204  18FC 0035                222  PRINT5      MOVE.B      #'5',(A4)+
-00000208  4E75                     223              RTS
-0000020A                           224  
-0000020A  18FC 0036                225  PRINT6      MOVE.B      #'6',(A4)+
-0000020E  4E75                     226              RTS
-00000210                           227      
-00000210  18FC 0037                228  PRINT7      MOVE.B      #'7',(A4)+
-00000214  4E75                     229              RTS  
-00000216                           230         
-00000216  18FC 0038                231  PRINT8      MOVE.B      #'8',(A4)+
-0000021A  4E75                     232              RTS
-0000021C                           233      
-0000021C                           234  
-0000021C                           235  ERROR  ;<-----------This should not exist----------
-0000021C                           236      ;SIMHALT   
-0000021C                           237  
-0000021C                           238  
-0000021C= 30                       239  S_0         DC.B        '0'
-0000021D= 31                       240  S_1         DC.B        '1'
-0000021E= 32                       241  S_2         DC.B        '2'
-0000021F= 33                       242  S_3         DC.B        '3'
-00000220= 34                       243  S_4         DC.B        '4'
-00000221= 35                       244  S_5         DC.B        '5'
-00000222= 36                       245  S_6         DC.B        '6'
-00000223= 37                       246  S_7         DC.B        '7'
-00000224= 38                       247  S_8         DC.B        '8'
-00000225= 39                       248  S_9         DC.B        '9'
-00000226= 41                       249  S_A         DC.B        'A'
-00000227= 42                       250  S_B         DC.B        'B'
-00000228= 43                       251  S_C         DC.B        'C'
-00000229= 44                       252  S_D         DC.B        'D'
-0000022A= 45                       253  S_E         DC.B        'E'
-0000022B= 46                       254  S_F         DC.B        'F'
-0000022C                           255  
-0000022C                           256  
-Line 257 WARNING: END directive missing, starting address not set
+00000000                            20  
+00000000                            21  *-OPCODE Decode Type A--------------------------------------
+00000000                            22  *-OPCODEs: MOVE,MOVEA,
+00000000                            23  *-xxxx Dest Reg(3) Dest Mode(3) Src Mode(3) Src Reg(3)  
+00000000                            24  
+00000000  3415                      25  DECODE_A    MOVE.W      (A5),D2             *Copy OPCODE into D2
+00000002  E64A                      26              LSR.W       #3,D2               *Shift right 3 - isolate Src Mode
+00000004  C47C 0007                 27              AND.W       #$0007,D2           *Mask out other bits
+00000008  4EB9 0000005C             28              JSR         GET_SRCMODE         *Append SRC string to (A4)          
+0000000E  18FC 002C                 29              MOVE.B      #',',(A4)+
+00000012                            30              
+00000012  3415                      31              MOVE.W      (A5),D2             *Recopy OPCODE into D2  
+00000014  EC4A                      32              LSR.W       #6,D2               *Shift right 6 - isolate Dest Mode
+00000016  C47C 0007                 33              AND.W       #$0007,D2           *Mask out other bits
+0000001A  4EB9 00000094             34              JSR         GET_DSTMODE         *Append DST string to (A4)
+00000020                            35              
+00000020  4E75                      36              RTS                             *Return back to jump table
+00000022                            37  
+00000022                            38  *-OPCODE Decode Type B--------------------------------------
+00000022                            39  *-OPCODEs: LSL/LSR,ASL/ASR,ROL/ROR
+00000022                            40  *-xxxx Register(3) OP Mode(3) EA Mode(3) EA Reg(3)  
+00000022                            41                 
+00000022  3415                      42  DECODE_B    MOVE.W      (A5),D2
+00000024  EC4A                      43              LSR.W       #6,D2
+00000026  C478 0003                 44              AND.W       $0003,D2
+0000002A  B47C 0003                 45              CMP.W       #3,D2
+Line 46 ERROR: Undefined symbol
+0000002E  6700 BB5E                 46              BEQ         B_ADDMODE
+00000032  3415                      47              MOVE.W      (A5),D2             
+00000034  EA4A                      48              LSR.W       #5,D2
+00000036  C47C 0003                 49              AND.W       #$0003,D2
+0000003A  B47C 0001                 50              CMP.W       #1,D2
+0000003E  6700 0180                 51              BEQ         B_SCOUNT
+00000042  B47C 0002                 52              CMP.W       #2,D2
+00000046  6700 018E                 53              BEQ         B_DATAREG
+0000004A  18FC 0044                 54              MOVE.B      #'D',(A4)+
+0000004E  3415                      55              MOVE.W      (A5),D2
+00000050  C47C 0007                 56              AND.W       #$0007,D2
+00000054  3A02                      57              MOVE.W      D2,D5
+00000056  4EB9 000001EE             58              JSR         PrintD5Num
+0000005C                            59             
+0000005C                            60              
+0000005C                            61              
+0000005C                            62              
+0000005C                            63  
+0000005C                            64  
+0000005C                            65  *-OPCODE Decode Type C--------------------------------------
+0000005C                            66  *-OPCODEs: 
+0000005C                            67  *-xxxx Count/Reg(3) dr(1) Size(2) i/r(1) 01 Register(3)       
+0000005C                            68    
+0000005C                            69  DECODE_C
+0000005C                            70  
+0000005C                            71  
+0000005C                            72  *-OPCODE Decode Type D--------------------------------------
+0000005C                            73  *-OPCODEs: 
+0000005C                            74  *-xxxx Register(3) x Size(2) EA Mode(3) EA Reg(3)       
+0000005C                            75     
+0000005C                            76  DECODE_D
+0000005C                            77  
+0000005C                            78  
+0000005C                            79  *-OPCODE Decode Type E--------------------------------------
+0000005C                            80  *-OPCODEs: 
+0000005C                            81  *-xxxx Condition(4) 8 Bit Displacement       
+0000005C                            82    
+0000005C                            83  DECODE_E
+0000005C                            84  
+0000005C                            85  
+0000005C                            86  *-OPCODE Decode Type F--------------------------------------
+0000005C                            87  *-OPCODEs: 
+0000005C                            88  *-xxxx Data(3) 1 Size(2) EA Mode(3) EA Reg(3)       
+0000005C                            89    
+0000005C                            90  DECODE_F
+0000005C                            91  
+0000005C                            92  
+0000005C                            93     
+0000005C                            94  
+0000005C                            95  *-SRC_MODE--------------------------------------------------
+0000005C                            96  *-Determines SRC Mode from bits 5,4,3, and branch to appropriate subroutine
+0000005C                            97  *-Assumption is that the SRC Mode bits are pre-isolated in D2
+0000005C                            98  
+0000005C  B47C 0000                 99  GET_SRCMODE CMP.W       #0,D2
+00000060  6700 006A                100              BEQ         SregMode        *register mode: Dn
+00000064  B47C 0001                101              CMP.W       #1,D2
+00000068  6700 0074                102              BEQ         SaddMode        *address mode ---An
+0000006C  B47C 0002                103              CMP.W       #2,D2
+00000070  6700 007E                104              BEQ         SaddINmode      *addres indirect mode ---(An)
+00000074  B47C 0003                105              CMP.W       #3,D2
+00000078  6700 0090                106              BEQ         SaddINpre       *addess indirect pre dec ----(An)
+0000007C  B47C 0004                107              CMP.W       #4,D2
+00000080  6700 00A6                108              BEQ         SaddINpost      *address indirect post inc --- (An)+
+00000084  B47C 0005                109              CMP.W       #5,D2
+00000088  6700 00BC                110              BEQ         S16An           *source number of word size --- (d16,An)
+0000008C  B47C 0006                111              CMP.W       #6,D2
+00000090  6700 00B4                112              BEQ         S8AnXn          *source number byte size --- (d8,An,Xn)
+00000094                           113      
+00000094                           114  *-DST_MODE--------------------------------------------------
+00000094                           115  *-Determines DST Mode from bits 8,7,6, and branch to appropriate subroutine
+00000094                           116  *-Assumption is that the DST Mode bits are pre-isolated in D2
+00000094                           117  
+00000094  B47C 0000                118  GET_DSTMODE CMP.W       #0,D2
+00000098  6700 00AC                119              BEQ         DregMode        *register mode ---Dn
+0000009C  B47C 0001                120              CMP.W       #1,D2
+000000A0  6700 00B6                121              BEQ         DaddMode        *address mode ---An
+000000A4  B47C 0002                122              CMP.W       #2,D2
+000000A8  6700 00C0                123              BEQ         DaddINmode      *addres indirect mode ---(An)
+000000AC  B47C 0003                124              CMP.W       #3,D2
+000000B0  6700 00D2                125              BEQ         DaddINpre       *addess indirect pre dec ----(An)
+000000B4  B47C 0004                126              CMP.W       #4,D2
+000000B8  6700 00E8                127              BEQ         DaddINpost      *address indirect post inc --- (An)+
+000000BC  B47C 0005                128              CMP.W       #5,D2
+000000C0  6700 00FE                129              BEQ         D16An           *source number of word size --- (d16,An)
+000000C4  B47C 0006                130              CMP.W       #6,D2
+000000C8  6700 00F6                131              BEQ         D8AnXn          *source number byte size --- (d8,An,Xn)
+000000CC                           132      
+000000CC                           133   
+000000CC                           134  *----------------------------------------------------------- 
+000000CC                           135  *-Source Helper Functions
+000000CC                           136  *-Adds Source Register numbers to (A4) string
+000000CC                           137  *-----------------------------------------------------------
+000000CC  18FC 0044                138  SregMode    MOVE.B      #'D',(A4)+
+000000D0  4EB9 000001D6            139              JSR         T1_GrabSreg
+000000D6  4EB9 000001EE            140              JSR         PrintD5Num   
+000000DC  4E75                     141              RTS  
+000000DE                           142          
+000000DE  18FC 0041                143  SaddMode    MOVE.B      #'A',(A4)+
+000000E2  4EB9 000001D6            144              JSR         T1_GrabSreg
+000000E8  4EB9 000001EE            145              JSR         PrintD5Num
+000000EE  4E75                     146              RTS
+000000F0                           147      
+000000F0                           148      
+000000F0                           149      
+000000F0  18FC 0028                150  SaddInMode  MOVE.B      #'(',(A4)+
+000000F4  18FC 0041                151              MOVE.B      #'A',(A4)+
+000000F8  4EB9 000001D6            152              JSR         T1_GrabSreg
+000000FE  4EB9 000001EE            153              JSR         PrintD5Num
+00000104  18FC 0029                154              MOVE.B      #')',(A4)+
+00000108  4E75                     155              RTS
+0000010A                           156      
+0000010A  18FC 002D                157  SaddINpre   MOVE.B      #'-',(A4)+
+0000010E  18FC 0028                158              MOVE.B      #'(',(A4)+
+00000112  18FC 0041                159              MOVE.B      #'A',(A4)+
+00000116  4EB9 000001D6            160              JSR         T1_GrabSreg
+0000011C  4EB9 000001EE            161              JSR         PrintD5Num
+00000122  18FC 0029                162              MOVE.B      #')',(A4)+
+00000126  4E75                     163              RTS
+00000128                           164      
+00000128  18FC 0028                165  SaddINpost  MOVE.B      #'(',(A4)+
+0000012C  18FC 0041                166              MOVE.B      #'A',(A4)+
+00000130  4EB9 000001D6            167              JSR         T1_GrabSreg
+00000136  4EB9 000001EE            168              JSR         PrintD5Num
+0000013C  18FC 0029                169              MOVE.B      #')',(A4)+
+00000140  18FC 002B                170              MOVE.B      #'+',(A4)+
+00000144  4E75                     171              RTS
+00000146                           172      
+00000146                           173  S16An
+00000146                           174  S8AnXn
+00000146                           175  
+00000146                           176  
+00000146                           177  *----------------------------------------------------------- 
+00000146                           178  *-Destination Helper Functions
+00000146                           179  *-Adds Destination Register numbers to (A4) string
+00000146                           180  *-----------------------------------------------------------
+00000146  18FC 0044                181  DregMode    MOVE.B      #'D',(A4)+
+0000014A  4EB9 000001E0            182              JSR         T1_GrabDreg
+00000150  4EB9 000001EE            183              JSR         PrintD5Num   
+00000156  4E75                     184              RTS
+00000158                           185           
+00000158  18FC 0041                186  DaddMode    MOVE.B      #'A',(A4)+
+0000015C  4EB9 000001E0            187              JSR         T1_GrabDreg
+00000162  4EB9 000001EE            188              JSR         PrintD5Num
+00000168  4E75                     189              RTS
+0000016A                           190      
+0000016A                           191      
+0000016A                           192      
+0000016A  18FC 0028                193  DaddInMode  MOVE.B      #'(',(A4)+
+0000016E  18FC 0041                194              MOVE.B      #'A',(A4)+
+00000172  4EB9 000001E0            195              JSR         T1_GrabDreg
+00000178  4EB9 000001EE            196              JSR         PrintD5Num
+0000017E  18FC 0029                197              MOVE.B      #')',(A4)+
+00000182  4E75                     198              RTS
+00000184                           199      
+00000184  18FC 002D                200  DaddINpre   MOVE.B      #'-',(A4)+
+00000188  18FC 0028                201              MOVE.B      #'(',(A4)+
+0000018C  18FC 0041                202              MOVE.B      #'A',(A4)+
+00000190  4EB9 000001E0            203              JSR         T1_GrabDreg
+00000196  4EB9 000001EE            204              JSR         PrintD5Num
+0000019C  18FC 0029                205              MOVE.B      #')',(A4)+
+000001A0  4E75                     206              RTS
+000001A2                           207      
+000001A2  18FC 0028                208  DaddINpost  MOVE.B      #'(',(A4)+
+000001A6  18FC 0041                209              MOVE.B      #'A',(A4)+
+000001AA  4EB9 000001E0            210              JSR         T1_GrabDreg
+000001B0  4EB9 000001EE            211              JSR         PrintD5Num
+000001B6  18FC 0029                212              MOVE.B      #')',(A4)+
+000001BA  18FC 002B                213              MOVE.B      #'+',(A4)+
+000001BE  4E75                     214              RTS
+000001C0                           215      
+000001C0                           216  D16An
+000001C0                           217  D8AnXn
+000001C0                           218  *-----------------------------------------------------------
+000001C0                           219  *-OPTYPE_B HELPER FUNCTIONS
+000001C0                           220  *Helps determine the size of shifts or registers
+000001C0                           221  *-----------------------------------------------------------
+000001C0                           222  *Value stored in cont/reg is a number of bits to shift
+000001C0                           223  *Display as #number
+000001C0  3415                     224  B_SCOUNT    MOVE.W      (A5),D2
+000001C2  EC4A                     225              LSR.W       #6,D2
+000001C4  E64A                     226              LSR.W       #3,D2
+000001C6  C47C 0007                227              AND.W       #$0007,D2
+000001CA  3A02                     228              MOVE.W      D2,D5
+000001CC  18FC 0023                229              MOVE.B      #'#',(A4)+
+000001D0  4EB9 000001EE            230              JSR         PrintD5Num
+000001D6                           231     
+000001D6                           232  
+000001D6                           233  B_DATAREG   
+000001D6                           234  
+000001D6                           235  *----------------------------------------------------------- 
+000001D6                           236  *-Assorted(?) Helper Functions
+000001D6                           237  *-add Description here
+000001D6                           238  *-----------------------------------------------------------
+000001D6                           239      
+000001D6  3415                     240  T1_GrabSreg MOVE.W      (A5),D2         *recopy op code
+000001D8  C47C 0007                241              AND.W       #$0007,D2       *mask other bits
+000001DC  3A02                     242              MOVE.W      D2,D5           *copy D2 to D5
+000001DE  4E75                     243              RTS
+000001E0                           244      
+000001E0  3415                     245  T1_GrabDreg MOVE.W      (A5),D2         *type one grab register bits
+000001E2  EC4A                     246              LSR.W       #6,D2           *shift bits over
+000001E4  E64A                     247              LSR.W       #3,D2           
+000001E6  C47C 0007                248              AND.W       #$0007,D2       *mask so only relevent bits left
+000001EA  3A02                     249              MOVE.W      D2,D5           *move to d5 for printing
+000001EC  4E75                     250              RTS
+000001EE                           251      
+000001EE  BA3C 0000                252  PrintD5Num  CMP.B       #0,D5           *print the numeber in d5
+000001F2  6700 0042                253              BEQ         PRINT0
+000001F6  BA3C 0001                254              CMP.B       #1,D5
+000001FA  6700 0040                255              BEQ         PRINT1
+000001FE  BA3C 0002                256              CMP.B       #2,D5
+00000202  6700 003E                257              BEQ         PRINT2
+00000206  BA3C 0003                258              CMP.B       #3,D5
+0000020A  6700 003C                259              BEQ         PRINT3
+0000020E  BA3C 0004                260              CMP.B       #4,D5
+00000212  6700 003A                261              BEQ         PRINT4
+00000216  BA3C 0005                262              CMP.B       #5,D5
+0000021A  6700 0038                263              BEQ         PRINT5
+0000021E  BA3C 0006                264              CMP.B       #6,D5
+00000222  6700 0036                265              BEQ         PRINT6
+00000226  BA3C 0007                266              CMP.B       #7,D5
+0000022A  6700 0034                267              BEQ         PRINT7
+0000022E  BA3C 0008                268              CMP.B       #8,D5
+00000232  6700 0032                269              BEQ         PRINT8  
+00000236                           270      
+00000236                           271      
+00000236  18FC 0030                272  PRINT0      MOVE.B      #'0',(A4)+
+0000023A  4E75                     273              RTS
+0000023C                           274      
+0000023C  18FC 0031                275  PRINT1      MOVE.B      #'1',(A4)+
+00000240  4E75                     276              RTS
+00000242                           277      
+00000242  18FC 0032                278  PRINT2      MOVE.B      #'2',(A4)+
+00000246  4E75                     279              RTS
+00000248                           280      
+00000248  18FC 0033                281  PRINT3      MOVE.B      #'3',(A4)+
+0000024C  4E75                     282              RTS
+0000024E                           283      
+0000024E  18FC 0034                284  PRINT4      MOVE.B      #'4',(A4)+
+00000252  4E75                     285              RTS
+00000254                           286      
+00000254  18FC 0035                287  PRINT5      MOVE.B      #'5',(A4)+
+00000258  4E75                     288              RTS
+0000025A                           289  
+0000025A  18FC 0036                290  PRINT6      MOVE.B      #'6',(A4)+
+0000025E  4E75                     291              RTS
+00000260                           292      
+00000260  18FC 0037                293  PRINT7      MOVE.B      #'7',(A4)+
+00000264  4E75                     294              RTS  
+00000266                           295         
+00000266  18FC 0038                296  PRINT8      MOVE.B      #'8',(A4)+
+0000026A  4E75                     297              RTS
+0000026C                           298      
+0000026C                           299  
+0000026C                           300  
+0000026C                           301  
+Line 302 WARNING: END directive missing, starting address not set
 
-10 errors detected
+1 error detected
 1 warning generated
 
 
 SYMBOL TABLE INFORMATION
 Symbol-name         Value
 -------------------------
-D16AN               186
-D8ANXN              186
-DADDINMODE          130
-DADDINPOST          168
-DADDINPRE           14A
-DADDMODE            11E
+B_DATAREG           1D6
+B_SCOUNT            1C0
+D16AN               1C0
+D8ANXN              1C0
+DADDINMODE          16A
+DADDINPOST          1A2
+DADDINPRE           184
+DADDMODE            158
 DECODE_A            0
 DECODE_B            22
-DECODE_C            22
-DECODE_D            22
-DECODE_E            22
-DECODE_F            22
-DREGMODE            10C
-ERROR               21C
-GET_DSTMODE         5A
-GET_SRCMODE         22
-PRINT0              1E6
-PRINT1              1EC
-PRINT2              1F2
-PRINT3              1F8
-PRINT4              1FE
-PRINT5              204
-PRINT6              20A
-PRINT7              210
-PRINT8              216
-PRINTD5NUM          19E
-S16AN               10C
-S8ANXN              10C
-SADDINMODE          B6
-SADDINPOST          EE
-SADDINPRE           D0
-SADDMODE            A4
-SREGMODE            92
-S_0                 21C
-S_1                 21D
-S_2                 21E
-S_3                 21F
-S_4                 220
-S_5                 221
-S_6                 222
-S_7                 223
-S_8                 224
-S_9                 225
-S_A                 226
-S_B                 227
-S_C                 228
-S_D                 229
-S_E                 22A
-S_F                 22B
-T1_GRABDREG         190
-T1_GRABSREG         186
+DECODE_C            5C
+DECODE_D            5C
+DECODE_E            5C
+DECODE_F            5C
+DREGMODE            146
+GET_DSTMODE         94
+GET_SRCMODE         5C
+PRINT0              236
+PRINT1              23C
+PRINT2              242
+PRINT3              248
+PRINT4              24E
+PRINT5              254
+PRINT6              25A
+PRINT7              260
+PRINT8              266
+PRINTD5NUM          1EE
+S16AN               146
+S8ANXN              146
+SADDINMODE          F0
+SADDINPOST          128
+SADDINPRE           10A
+SADDMODE            DE
+SREGMODE            CC
+T1_GRABDREG         1E0
+T1_GRABSREG         1D6
