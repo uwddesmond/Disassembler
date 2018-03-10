@@ -64,7 +64,7 @@ B_ADDMODE
            MOVE.W       (A5),D2
            LSR.W        #3,D2
            AND.W        #$0007,D2
-           JSR          GETDSTMODE
+           JSR          GET_DSTMODE
            MOVE.W       (A5),D2
            AND.W        #$0007,D2
            MOVE.W       D2,D5
@@ -109,7 +109,7 @@ B_DATAREG   MOVE.B      #'D',(A4)+
   
 DECODE_C    MOVE.W      (A5),D2
             *ENTER PRINT DATA CODE HERE
-            JSR.W       C_SRC
+            JSR         C_SRC
             
 
 
@@ -339,6 +339,7 @@ PRINT7      MOVE.B      #'7',(A4)+
 PRINT8      MOVE.B      #'8',(A4)+
             RTS
     
+
 
 
 

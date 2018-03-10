@@ -12,6 +12,7 @@
 BUILD_STR   JSR         PREPARE_OP          ;Define a location in memory to write an OPCODE string to
             JSR         GET_ADDR            ;Accumulate the OPCODE's address into the A4 string [0xADDR]
             JSR         JT_START            ;Send OPCODE to jump table for decoding [OPCODE $OPERAND]
+            MOVE.B      #0,(A4)+            ;End the string with a 0 delimiter
             
             RTS                             ;Return back to main disassembler loop
 
@@ -49,6 +50,7 @@ APPND_NUM   ADDI.B      #$30,D1             ;Add $30 to make it a ascii numeric 
             MOVE.B      D1,(A4)+            ;Append this character to string
             RTS
        
+
 
 
 *~Font name~Courier New~
