@@ -82,11 +82,11 @@ BIN_0       MOVE.W      (A5),D0             *reload opcode
             BEQ         ORI                 *if ORI go to the subroutine
             
             CMPI.W      #8,D0               *Check if the bit is an 8
-            BEQ         BCLR                *if BCLR immediate go to subroutine
+            BEQ         BCLR_IM             *if BCLR immediate go to subroutine
             
             AND.W       #$01,D0             *isolate the last bit
             CMPI.W      #1,D0               *Check if the bit is a 1
-            BEQ         BCLR                *if BCLR register go to subroutine
+            BEQ         BCLR_REG            *if BCLR register go to subroutine
             
             BRA         DATA           
 
@@ -178,7 +178,7 @@ BIN_8       MOVE.W      (A5),D0
             LSR.W       #6,D0
             AND.W       #$07,D0   
             CMPI.W      #7,D0
-            BEQ         DIVS
+            BEQ         DIVS_W
             
             BRA         OR  
             
@@ -212,9 +212,9 @@ BIN_11      MOVE.W      (A5),D0             *reload opcode into D0
             
 *--------------------------------------------------------------            
 *-BIN 12 Possible OPCODES:
-*-MULS
+*-MULS (word)
 *--------------------------------------------------------------     
-BIN_12      BRA         MULS                *MULS is the only option for this bin so branch to SUB
+BIN_12      BRA         MULS_W              *MULS is the only option for this bin so branch to SUB
 
 *--------------------------------------------------------------            
 *-BIN 13 Possible OPCODES:
@@ -237,15 +237,28 @@ BIN_13      MOVE.W      (A5),D0             *reload opcode into D0
 *--------------------------------------------------------------      
 BIN_14      MOVE.W      (A5),D0             *Reload the opcode
             LSR.W       #3,D0               *shift bits down
+            AND.W       #$03,D0             *mask bits
+            CMPI.W      #1,D0               *determin which kind of shift it is
+            BEQ         LOGIC_REG           *bra to logic shift register mode
+            
+            CMPI.W      #0,D0
+            BEQ         ARITH_REG           *bra to arthimetic shift register mode
+            
+            CMPI.W      #3,D0
+            BEQ         ROTATE_REG          *bra to rotate register mode  
+
+            MOVE.W      (A5),D0             *Reload the opcode
+            LSR.W       #4,D0               *shift bits down
+            LSR.W       #5,D0               *shift bits a total of 9
             AND.W       #$07,D0             *mask bits
-            CMP.W       #1,D0               *determin which kind of shift it is
-            BEQ         LOGICSHIFT          *bra to logic shift
+            CMPI.W      #1,D0               *determin which kind of shift it is
+            BEQ         LOGIC_MEM           *bra to logic shift memory mode
             
-            CMP.W       #0,D0
-            BEQ         ARITH_SHIFT         *bra to arthimetic shift
+            CMPI.W      #0,D0
+            BEQ         ARITH_MEM           *bra to arthimetic shift memory mode
             
-            CMP.W       #3,D0
-            BEQ         ROTATE              *bra to rotate      
+            CMPI.W      #3,D0
+            BEQ         ROTATE_MEM          *bra to rotate MEM mode    
             
             BRA         DATA                *if not a shift must be DATA 
                                                                 
@@ -281,12 +294,24 @@ CMPI        MOVE.B      #'C',(A4)+          *Load OPCODE string into (A4)
    
             RTS                             *Return to OutputBuilder file
             
-BCLR        MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
+BCLR_IM     MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'C',(A4)+
             MOVE.B      #'L',(A4)+
             MOVE.B      #'R',(A4)+
             
+            JSR         APPND_BYTE          *must be a byte if it is a BCLR on immediate data
+            
             RTS                             *Return to OutputBuilder file
+            
+BCLR_REG    MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
+            MOVE.B      #'C',(A4)+
+            MOVE.B      #'L',(A4)+
+            MOVE.B      #'R',(A4)+
+            
+            JSR         APPND_LONG          *must be a long if it is a BCLR on a register
+            
+            RTS                             *Return to OutputBuilder file
+
 
 *-BIN_MOVE (Bins 1, 2, and 3)---------------------------------- 
 MOVE        MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
@@ -413,10 +438,12 @@ BRA_SUB     MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
             RTS                             *Return to OutputBuilder file
             
 *-BIN 8--------------------------------------------------------
-DIVS        MOVE.B      #'D',(A4)+          *Load OPCODE string into (A4)
+DIVS_W      MOVE.B      #'D',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'I',(A4)+
             MOVE.B      #'V',(A4)+   
             MOVE.B      #'S',(A4)+
+            
+            JSR         APPND_WORD
         
             RTS                             *Return to OutputBuilder file
             
@@ -453,10 +480,12 @@ CMP         MOVE.B      #'C',(A4)+          *Load OPCODE string into (A4)
             RTS                             *Return to OutputBuilder file
 
 *-BIN 12---------------------------------------------------------
-MULS        MOVE.B      #'M',(A4)+          *Load OPCODE string into (A4)
+MULS_W      MOVE.B      #'M',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'U',(A4)+
             MOVE.B      #'L',(A4)+   
             MOVE.B      #'S',(A4)+
+            
+            JSR         APPND_WORD
             
             RTS                             *Return to OutputBuilder file
             
@@ -478,7 +507,7 @@ ADDA        MOVE.B      #'A',(A4)+          *Load OPCODE string into (A4)
             RTS                             *Return to OutputBuilder file
      
 *-BIN 14-------------------------------------------------------                                                                  
-LOGICSHIFT  MOVE.B      #'L',(A4)+          *Load OPCODE string into (A4)
+LOGIC_REG   MOVE.B      #'L',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'S',(A4)+
                    
             JSR         RIGHTORLEFT         *Append (L/R)
@@ -486,7 +515,7 @@ LOGICSHIFT  MOVE.B      #'L',(A4)+          *Load OPCODE string into (A4)
             
             RTS                             *Return to OutputBuilder file           
 
-ARITH_SHIFT MOVE.B      #'A',(A4)+          *Load OPCODE string into (A4)
+ARITH_REG   MOVE.B      #'A',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'S',(A4)+
             
             JSR         RIGHTORLEFT         *Append (L/R)
@@ -494,11 +523,35 @@ ARITH_SHIFT MOVE.B      #'A',(A4)+          *Load OPCODE string into (A4)
 
             RTS         
                 
-ROTATE      MOVE.B      #'R',(A4)+          *Load OPCODE string into (A4)
+ROTATE_REG  MOVE.B      #'R',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'O',(A4)+
           
             JSR         RIGHTORLEFT         *Append (L/R)
             JSR         GET_SIZE_67         *Append Size
+            
+            RTS
+            
+LOGIC_MEM   MOVE.B      #'L',(A4)+          *Load OPCODE string into (A4)
+            MOVE.B      #'S',(A4)+
+                   
+            JSR         RIGHTORLEFT         *Append (L/R)
+            JSR         APPND_WORD          *only supports word sized operations on memory
+            
+            RTS                             *Return to OutputBuilder file           
+
+ARITH_MEM   MOVE.B      #'A',(A4)+          *Load OPCODE string into (A4)
+            MOVE.B      #'S',(A4)+
+            
+            JSR         RIGHTORLEFT         *Append (L/R)
+            JSR         APPND_WORD          *only supports word sized operations on memory
+
+            RTS         
+                
+ROTATE_MEM  MOVE.B      #'R',(A4)+          *Load OPCODE string into (A4)
+            MOVE.B      #'O',(A4)+
+          
+            JSR         RIGHTORLEFT         *Append (L/R)
+            JSR         APPND_WORD          *only supports word sized operations on memory
             
             RTS
               
@@ -645,22 +698,27 @@ ADDA_SIZE   MOVE.W      (A5),D0             *reload OPCODE into (A5)
             CMPI.W      #7,D0
             BEQ         APPND_LONG          *is a long operation
             BRA         DATA                *is not one of the supported sizes
+                   
 
-APPND_BYTE  MOVE.W      #'B',(A4)+          *load size into (A4)
+APPND_BYTE  MOVE.W      #'.',(A4)+
+            MOVE.W      #'B',(A4)+          *load size into (A4)
             ADDI.W      #2,D7               *add OPCODE length to D7
             RTS
 
-APPND_WORD  MOVE.W      #'W',(A4)+          *load size into (A4)
+APPND_WORD  MOVE.W      #'.',(A4)+
+            MOVE.W      #'W',(A4)+          *load size into (A4)
             ADDI.W      #4,D7               *add OPCODE length to D7
             RTS
 
-APPND_LONG  MOVE.W      #'L',(A4)+          *load size into (A4)
+APPND_LONG  MOVE.W      #'.',(A4)+
+            MOVE.W      #'L',(A4)+          *load size into (A4)
             ADDI.W      #8,D7               *add OPCODE length to D7
             RTS                
             
 *-FILES--------------------------------------------------------
             INCLUDE     'TeamVisualBasic_OP_Decoder.X68'    ;Helper file for jump table
             
+
 
 
 
