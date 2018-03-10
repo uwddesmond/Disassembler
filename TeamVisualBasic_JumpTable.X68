@@ -429,17 +429,64 @@ DATA        MOVE.B      #'D',(A4)+          *Write DATA into string
             MOVE.B      #'A',(A4)+          
             MOVE.B      #'T',(A4)+          
             MOVE.B      #'A',(A4)+         
-            MOVE.B      #' ',(A4)+          *Write a space into string
+            MOVE.B      #09,(A4)+           *Write a tab into string
             
+            MOVE.B      #WORD,D7            *Increment the size counter D7 by a WORD 
+            JSR         WRITE_DATA          *Write D7 worth of OPCODE data that couldn't be decoded
             MOVE.B      #0,(A4)+            *End the string with a 0 delimiter 
-            
-            MOVE.W      (A5),(A4)+          *Write the word's worth of OPCODE data that couldn't be decoded
-            
+                                  
             RTS                             *Return program flow back to Dissasembler file
 
+
+WRITE_DATA  MOVE.L      D7,D3               *D3 is counter var. Same size as the length specified in D7
+WRITE_LOOP  CMPI.B      #0,D3               *is D3 == 0?
+            BEQ         WRITE_DONE          *then we are done writing the string 
+            
+            SUBI        #BYTE,D3            *Decrement counter var by 1 byte
+            
+            
+
+            MOVE.B      (A5),D2             *Move 1 byte of OPCODE/OPERAND data into D2                   
+            LSR.W       #4,D2               *Isolate left 4 bits of first byte in D1             
+            JSR         WRITE_DIGIT         *Save the left 4 bits in the byte as an ascii char
+        
+            MOVE.B      (A5),D2             *Move 1 byte of OPCODE/OPERAND data into D2   
+            ANDI.B      #$0F,D2             *Isolate right 4 of the first byte in D2                                     
+            JSR         WRITE_DIGIT         *Save the right 4 bits in the byte as an ascii char
+            
+            ADDA        #1,A5               *Increment A5
+            
+            BRA         WRITE_LOOP          *Go to start of loop, and write the next bytes worth of digits          
+        
+            
+WRITE_DIGIT CMP.B       #$09,D2             *Is D2 alphabet or number?
+            BGT         W_ALPHA             *If D2 > #$09, it's alphabet
+            BRA         W_NUM               *Else its numeric    
+          
+            
+W_ALPHA     JSR         CNVRT_ALPHA         *Convert the half byte to ascii, and write to string
+            RTS                             *Go back to write_loop
+
+W_NUM       JSR         CNVRT_ALPHA         *Convert the half byte to ascii, and write to string
+            RTS                             *Go back to write_loop
+            
+            
+CNVRT_ALPHA ADDI.B      #$37,D2             *Convert to ASCII
+            MOVE.B      D2,(A4)+            *Write to string
+            RTS
+
+
+CNVRT_NUM   ADDI.B      #$30,D2              *Convert to ASCII
+            MOVE.B      D2,(A4)+            *Write to string
+            RTS           
+            
+WRITE_DONE  SUB.W       D7,A5               *Bring A5 pointer back to where it was before writing the DATA
+            RTS                             *Finished writing       
+     
 *-Size Subroutines---------------------------------------------
-* This helper is applicable for: 
-* NEG, ORI, CMPI, LSL/LSR, ASL/ASR, ROL/ROR, EOR, CMP, SUBQ
+*-This helper is applicable for: 
+*-NEG, ORI, CMPI, LSL/LSR, ASL/ASR, ROL/ROR, EOR, CMP, SUBQ
+
 GET_SIZE_67 MOVE.W      (A5),D0             *reload OPCODE into (A5)
             LSR.W       #6,D0               *shift bits right 6
             AND.W       #$03,D0             *Isolate last 2 bits
@@ -550,6 +597,7 @@ S_DATA      DC.B        'DATA',0
 S_BYTE      DC.B        '.B',0
 S_WORD      DC.B        '.W',0
 S_LONG      DC.B        '.L',0
+
 
 
 

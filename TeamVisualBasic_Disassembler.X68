@@ -7,7 +7,7 @@
 *               Main Driver File
 *-----------------------------------------------------------
     
-START       ORG         $1000               ;Start @ address $1000             
+START       ORG         $1000               ;Start @ address $1000
             JSR         DISP_INTRO          ;Display Intro Message
             JSR         INPUT_ADDR          ;Take start and ending address as user input
             JSR         MAIN_LOOP           ;Meat of the program: Check for validity, OPCODE match, and print to screen
@@ -36,7 +36,7 @@ DISP_WAIT   LEA         M_WAIT,A1           ;Load wait message
             
 *-Main Loop-------------------------------------------------
 MAIN_LOOP   JSR         DISP_WAIT           ;Display Press Enter to Continue msg
-            MOVE.B      #20,D4              ;D4 loop var - print 20 lines per page
+            MOVE.B      #26,D4              ;D4 loop var - print 26 lines per page
             
 NEXT_OP     JSR         BUILD_STR           ;Build and accumulate the 0xADDR OPCODE $OPERAND string into memory @ OP_ADDR                            
             JSR         PRINT_OP            ;Print the built string to console 
@@ -80,17 +80,18 @@ PROMPT_NEW  LEA         M_NPROMPT,A1        ;Ask user if they would like to run 
             MOVE.B      #14,D0              ;Trap Task 14 displays null terminated string
             TRAP        #15                     
             
+            CLR.L       D1                  ;Clear D1
             MOVE.B      #5,D0               ;Read user input into D1
             TRAP        #15
             
             CMP.B       #'y',D1             ;Is input y
-            JSR         DISP_WAIT           ;Clear Screen
-            BEQ         START               ;if so restart program
+            BEQ         P_RESTART           ;if so restart program
             
             CMP.B       #'Y',D1             ;Is input Y capital
-            JSR         DISP_WAIT           ;Clear Screen
-            BEQ         START               ;if so restart program
-    
+            BEQ         P_RESTART           ;if so restart program
+            
+      
+
             CMP.B       #'n',D1             ;Is input n
             BEQ         END                 ;if so restart program
             
@@ -103,7 +104,8 @@ PROMPT_NEW  LEA         M_NPROMPT,A1        ;Ask user if they would like to run 
             
             BRA         PROMPT_NEW          ;Re prompt            
 
-
+P_RESTART   JSR         DISP_WAIT
+            BRA         START 
 *-END-------------------------------------------------------
 END         MOVE.B      #9,D0               ;End program
             TRAP        #15                      
@@ -135,7 +137,7 @@ M_IN_RULES  DC.B        'Please limit address input to numeric (0-9) and/or alph
 M_INPUT_S   DC.B        'Please Input the Starting Address (test code is ORG @ 7F00): ',CR,LF,0
 M_INPUT_E   DC.B        'Please Input the Ending Address: ',CR,LF,0
 
-M_WAIT      DC.B        'Press Enter to Continue!',CR,LF,0
+M_WAIT      DC.B        CR,LF,'Press Enter to Continue!',CR,LF,0
 
 M_INV_INPUT DC.B        'Input address is invalid! Please re-enter: ',CR,LF,CR,LF,0
 
@@ -145,7 +147,7 @@ M_ERR_ADDR3 DC.B        'ERR: ODD START address',CR,LF,0
 M_ERR_ADDR4 DC.B        'ERR: ODD END address',CR,LF,0
 
 M_NPROMPT   DC.B        'Would you like to run program again @ another address? (y/n)',CR,LF,0
-M_ERR_GEN   DC.B        'Invalid input!',CR,LF,0  
+M_ERR_GEN   DC.B        CR,LF,'Invalid input!',CR,LF,0  
 M_DONE      DC.B        'Done!',CR,LF,0  
 
 M_NEWLINE   DC.B        '',CR,LF,0
@@ -158,6 +160,8 @@ M_NEWLINE   DC.B        '',CR,LF,0
             INCLUDE     'TeamVisualBasic_JumpTable.X68'                     ;Include Jump Table file
             
             END         START               ;last line of source
+
+
 
 
 
