@@ -22,7 +22,8 @@
 *-OPCODEs: MOVE,MOVEA,
 *-xxxx Dest Reg(3) Dest Mode(3) Src Mode(3) Src Reg(3)  
 
-DECODE_A    MOVE.W      #2,D6               *Initilize opcode length to 2
+DECODE_A    MOVE.B      #'9',(A4)+          *tab after op code
+            MOVE.W      #2,D6               *Initilize opcode length to 2
             MOVE.W      (A5),D2             *Copy OPCODE into D2
             LSR.W       #3,D2               *Shift right 3 - isolate Src Mode
             AND.W       #$0007,D2           *Mask out other bits
@@ -40,7 +41,8 @@ DECODE_A    MOVE.W      #2,D6               *Initilize opcode length to 2
 *-OPCODEs: LSL/LSR,ASL/ASR,ROL/ROR
 *-xxxx Register(3) OP Mode(3) EA Mode(3) EA Reg(3)  
                
-DECODE_B    MOVE.W      #2,D6               *Initilize opcode length to 2
+DECODE_B    MOVE.B      #'9',(A4)+          *tab after op code
+            MOVE.W      #2,D6               *Initilize opcode length to 2
             MOVE.W      (A5),D2
             LSR.W       #6,D2
             AND.W       $0003,D2
@@ -109,7 +111,8 @@ B_DATAREG   MOVE.B      #'D',(A4)+
 *-xxxxxxxx Size2, Ea mode(3) Ea Reg(3)
 *STILL NEED TO PRINT DATA THAT FOLLOWS FIRST       
   
-DECODE_C    MOVE.W      #2,D6               *Initilize opcode length to 2
+DECODE_C    MOVE.B      #'9',(A4)+          *tab after op code
+            MOVE.W      #2,D6               *Initilize opcode length to 2
             MOVE.W      (A5),D2
             *ENTER PRINT DATA CODE HERE
             JSR         C_SRC
@@ -135,7 +138,8 @@ C_SRC       MOVE.W      (A5),D2
 *-OPCODEs: 
 *-xxxx Register(3) x Size(2) EA Mode(3) EA Reg(3)       
    
-DECODE_D    MOVE.W      #2,D6               *Initilize opcode length to 2   
+DECODE_D    MOVE.B      #'9',(A4)+          *tab after op code
+            MOVE.W      #2,D6               *Initilize opcode length to 2   
             MOVE.B      #'#',D6
             MOVE.B      #'$',D6     
             MOVE.W      #2,D2               *move counter to 2 since only 2 HEX values used
@@ -147,7 +151,8 @@ DECODE_D    MOVE.W      #2,D6               *Initilize opcode length to 2
 *-OPCODEs: 
 *-xxxx Condition(4) 8 Bit Displacement       
   
-DECODE_E    MOVE.W      #2,D6               *Initilize opcode length to 2
+DECODE_E    MOVE.B      #'9',(A4)+          *tab after op code
+            MOVE.W      #2,D6               *Initilize opcode length to 2
             MOVE.W      (A5),D2
             LSL.W       #3,D2               *GRAB SOURCE MODE BITS
             AND.W       #$0007,D2           *Mask out other bits
@@ -322,7 +327,25 @@ S_DATA_MODE JSR         T1_GrabDreg
             BEQ         LONG_DATA
             CMP.W       #0,D5  
             BEQ         WORD_DATA
-
+            CMP.W       #4,D5
+            BEQ         IMMEDIATE_D
+            
+*---------------IMMEDIATE_DATA-------------------------            
+*Reached when an opcode has immediate data afterwards
+*The length of this immedite data depends on the opcode length
+*That value is stored in the d7 register by the jump table            
+IMMEDIATE_D MOVE.B      #'#',(A4)+              *add the # to data string to immediate data
+            
+            CMP.W       #6,D7
+            BEQ         WORD_DATA               *means the immediate data is a word value
+            
+            CMP.W       #10,D7       
+            BEQ         LONG_DATA               *means the immediate data is a long value
+            
+            CMP.W       #4,D7
+            BEQ         BYTE_DATA             *means the immediate data is a long value
+            
+             
 *----------------------------------------------------------- 
 *-Destination Helper Functions
 *-Adds Destination Register numbers to (A4) string
@@ -382,9 +405,11 @@ D_DATA_MODE JSR         T1_GrabDreg
 *-add Description here
 *-----------------------------------------------------------
 LONG_DATA   MOVE.B      #'$',(A4)+       *prepare the string for a long hex value
-            MOVE.L      A5,A3    
-            ADD.L       D6,A3           *Add opcode data length
+            MOVE.L      A5,A3
+    
+            ADD.L       D6,A3           *Add opcode data length this increments the address past the op code and existing data
             MOVE.L      (A3),D0
+            
             MOVE.W      #8,D2           *move 8 to counter since this si long data 8 hex values are required
             JSR         GD_LOOP
             ADD.W       #4,D6           *since it is long data increment the address by 4 bits *d6 is opcode length counter
@@ -392,14 +417,30 @@ LONG_DATA   MOVE.B      #'$',(A4)+       *prepare the string for a long hex valu
 
 WORD_DATA   MOVE.B      #'$',(A4)+       *prepare the string for a long hex value
             MOVE.L      A5,A3    
-            ADD.L       D6,A3           *Add opcode data length
+            
+            ADD.L       D6,A3           *Add opcode data length to incement past opcode and data
             MOVE.L      (A3),D0         *Add correct data into d0 register for printing
+            
             MOVE.W      #4,D2           *move 8 to counter since this si long data 8 hex values are required
             LSL.L       #8,D0           *shift data over 8 bits for rotate in print to hex function
             JSR         GD_LOOP
             ADD.W       #2,D6           *since it is long data increment the address by 4 bits *d6 is opcode length counter
             RTS
 
+BYTE_DATA   MOVE.B      #'$',(A4)+       *prepare the string for a long hex value
+            MOVE.L      A5,A3    
+            
+            ADD.L       D6,A3           *Add opcode data length to incement past opcode and data
+            MOVE.L      (A3),D0         *Add correct data into d0 register for printing
+            
+            MOVE.W      #4,D2           *move 8 to counter since this si long data 8 hex values are required
+            LSL.L       #8,D0           *shift data over 8 bits for rotate in print to hex function
+            LSL.L       #4,D0           *shift data over 4 bits so beginning of byte is in the highest order
+            JSR         GD_LOOP
+            ADD.W       #2,D6           *since it is long data increment the address by 4 bits *d6 is opcode length counter
+            RTS
+            
+            
 T1_GrabSreg MOVE.W      (A5),D2         *recopy op code
             AND.W       #$0007,D2       *mask other bits
             MOVE.W      D2,D5           *copy D2 to D5
@@ -430,7 +471,13 @@ PrintD5Num  CMP.B       #0,D5           *print the numeber in d5
             BEQ         PRINT7
             CMP.B       #8,D5
             BEQ         PRINT8  
-    
+
+*Used to print data to a hex value from bits
+*----Requires a preload---------------------------------------------------------------
+*D0 =  must be loaded with bits to be printed, starts from highest order bit
+*D2 = how many bits it will convert to hex starting with the highest order bit in d0
+*Therefore bits wanting to be printed should be shifter or rotated to the highest order in d0
+*------------------------------------------------------------------------------------------    
 GD_LOOP     JSR         HEX_2_ASCII
             SUBI        #1,D2
             CMP.B       #0,D2
@@ -467,6 +514,7 @@ PRINT7      MOVE.B      #'7',(A4)+
 PRINT8      MOVE.B      #'8',(A4)+
             RTS
     
+
 
 
 *~Font name~Courier New~
