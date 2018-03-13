@@ -10,7 +10,9 @@
 START       ORG         $00007F00            ; first instruction of program
 
 *--------------------------Test the MOVE Op Code-----------------
-label1      MOVE.W      #$1234,D5
+label1      MOVE.B      #$12,D5
+            MOVE.W      #$1234,D5
+            
             ;MOVE.L      $00012346,$00345678
             ;MOVE.L      A2,$12345678
             ;MOVE.L      $12345678,A2
@@ -39,6 +41,8 @@ label1      MOVE.W      #$1234,D5
     
     
     
+
+
 
 
 
