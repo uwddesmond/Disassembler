@@ -9,39 +9,32 @@
     
 START       ORG         $00007F00            ; first instruction of program
 
-            NOP                         
-            NOP
-            NOP
-            NOP
-            NOP                         
-            NOP
-            NOP
-            NOP
-            NOP                         
-            NOP
-            NOP
-            NOP
-            NOP                         
-            NOP
-            NOP
-            NOP
-            NOP                         
-            NOP
-            NOP
-            NOP
-            NOP                         
-            NOP
-            NOP
-            NOP
+*--------------------------Test the MOVE Op Code-----------------
+label1      MOVE.L      $87654321,$12345678
+            MOVE.L      A2,$12345678
+            MOVE.L      $12345678,A2
+            MOVE.W      (A2),D2
+            MOVE.W      -(A2),D2
+            MOVE.W      (A2)+,D2
+            MOVE.W      D1,D1
+            MOVE.B      D2,D2
+            MOVE.B      D3,D3
+            MOVE.W      D4,D4
+            MOVE.B      $78,D5
+            MOVE.W      D6,D6
+            MOVE.W      D7,D7
+*---------------------------Test the MOVEA op Code-------------------
+            MOVEA.L     A2,A4
+            MOVEA.L     #$12345678,A6
 
 
-label1      NOP
 
             SIMHALT                     ; halt simulator
             END         START                ; last line of source
     
     
     
+
 
 
 

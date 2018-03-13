@@ -1,6 +1,6 @@
 00007F00 Starting Address
 Assembler used: EASy68K Editor/Assembler v5.15.04
-Created On: 3/8/2018 11:02:27 PM
+Created On: 3/12/2018 5:36:39 PM
 
 00000000                             1  *-----------------------------------------------------------
 00000000                             2  * Title      :  Team Visual Basic's Dissasembler: Testing File
@@ -13,43 +13,37 @@ Created On: 3/8/2018 11:02:27 PM
 00000000                             9      
 00007F00                            10  START       ORG         $00007F00            ; first instruction of program
 00007F00                            11  
-00007F00  4E71                      12              NOP                         
-00007F02  4E71                      13              NOP
-00007F04  4E71                      14              NOP
-00007F06  4E71                      15              NOP
-00007F08  4E71                      16              NOP                         
-00007F0A  4E71                      17              NOP
-00007F0C  4E71                      18              NOP
-00007F0E  4E71                      19              NOP
-00007F10  4E71                      20              NOP                         
-00007F12  4E71                      21              NOP
-00007F14  4E71                      22              NOP
-00007F16  4E71                      23              NOP
-00007F18  4E71                      24              NOP                         
-00007F1A  4E71                      25              NOP
-00007F1C  4E71                      26              NOP
-00007F1E  4E71                      27              NOP
-00007F20  4E71                      28              NOP                         
-00007F22  4E71                      29              NOP
-00007F24  4E71                      30              NOP
-00007F26  4E71                      31              NOP
-00007F28  4E71                      32              NOP                         
-00007F2A  4E71                      33              NOP
-00007F2C  4E71                      34              NOP
-00007F2E  4E71                      35              NOP
-00007F30                            36  
-00007F30                            37  
-00007F30  4E71                      38  label1      NOP
-00007F32                            39  
-00007F32  FFFF FFFF                 40              SIMHALT                     ; halt simulator
-00007F36                            41              END         START                ; last line of source
+00007F00                            12  *--------------------------Test the MOVE Op Code-----------------
+00007F00  23F9 87654321 12345678    13  label1      MOVE.L      $87654321,$12345678
+00007F0A  23CA 12345678             14              MOVE.L      A2,$12345678
+00007F10  2479 12345678             15              MOVE.L      $12345678,A2
+00007F16  3412                      16              MOVE.W      (A2),D2
+00007F18  3422                      17              MOVE.W      -(A2),D2
+00007F1A  341A                      18              MOVE.W      (A2)+,D2
+00007F1C  3201                      19              MOVE.W      D1,D1
+00007F1E  1402                      20              MOVE.B      D2,D2
+00007F20  1603                      21              MOVE.B      D3,D3
+00007F22  3804                      22              MOVE.W      D4,D4
+00007F24  1A38 0078                 23              MOVE.B      $78,D5
+00007F28  3C06                      24              MOVE.W      D6,D6
+00007F2A  3E07                      25              MOVE.W      D7,D7
+00007F2C                            26  *---------------------------Test the MOVEA op Code-------------------
+00007F2C  284A                      27              MOVEA.L     A2,A4
+00007F2E  2C7C 12345678             28              MOVEA.L     #$12345678,A6
+Line 29 ERROR: Invalid syntax
+00007F34                            29              MOVEA.L     +(A4),A6
+00007F34                            30  
+00007F34                            31  *----------------------------Test the 
+00007F34                            32  
+00007F34  FFFF FFFF                 33              SIMHALT                     ; halt simulator
+00007F38                            34              END         START                ; last line of source
 
-No errors detected
+1 error detected
 No warnings generated
 
 
 SYMBOL TABLE INFORMATION
 Symbol-name         Value
 -------------------------
-LABEL1              7F30
+LABEL1              7F00
 START               7F00
