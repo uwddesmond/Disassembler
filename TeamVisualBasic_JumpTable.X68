@@ -152,7 +152,7 @@ BIN_5       MOVE.W      (A5),D0             *reload opcode into D0
             CMPI.W      #0,D0               *check if the bit is a 0
             BEQ         ADDQ                *if ADDQ go to the SUB
             
-            BRA         DATA                *if neither EOR or CMP must be DATA
+            BRA         DATA                *if neither SUBQ or ADDQ must be DATA
 
 *--------------------------------------------------------------            
 *-BIN 6 Possible OPCODES:
@@ -201,7 +201,7 @@ BIN_8       MOVE.W      (A5),D0             *reload opcode into D0
             CMPI.W      #3,D0               *check if the bits == 3
             BEQ         DIVU_W              *if DIVU word go to the subroutine
             
-            BRA         OR  
+            BRA         OR                  *if neither DIVS or DIVU it must be OR
             
 *--------------------------------------------------------------            
 *-BIN 9 Possible OPCODES:
@@ -313,6 +313,7 @@ ORI         MOVE.B      #'O',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'I',(A4)+
             
             JSR         GET_SIZE_67
+            JSR         DECODE_C            *jump to decoder SUB C
          
             RTS                             *Return to OutputBuilder file
             
@@ -322,6 +323,7 @@ CMPI        MOVE.B      #'C',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'I',(A4)+
             
             JSR         GET_SIZE_67 
+            JSR         DECODE_C            *jump to decoder SUB C
    
             RTS                             *Return to OutputBuilder file
             
@@ -331,6 +333,7 @@ ADDI        MOVE.B      #'A',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'I',(A4)+
             
             JSR         GET_SIZE_67 
+            JSR         DECODE_C            *jump to decoder SUB C
    
             RTS                             *Return to OutputBuilder file
 
@@ -340,6 +343,7 @@ SUBI        MOVE.B      #'S',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'I',(A4)+
             
             JSR         GET_SIZE_67 
+            JSR         DECODE_C            *jump to decoder SUB C
    
             RTS                             *Return to OutputBuilder file
             
@@ -349,6 +353,7 @@ BCLR_IM     MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'R',(A4)+
             
             JSR         APPND_BYTE          *must be a byte if it is a BCLR on immediate data
+            JSR         DECODE_D            *jump to decoder SUB D
             
             RTS                             *Return to OutputBuilder file
             
@@ -358,6 +363,7 @@ BCLR_REG    MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'R',(A4)+
             
             JSR         APPND_LONG          *must be a long if it is a BCLR on a register
+            JSR         DECODE_D            *jump to decoder SUB D
             
             RTS                             *Return to OutputBuilder file
 
@@ -400,9 +406,10 @@ NOP         ADDI        #BYTE,D7            *NOP is 2 Bytes; Increment length va
             MOVE.B      #'O',(A4)+
             MOVE.B      #'P',(A4)+
             
+            *JSR         D_NOP
+            
             RTS                             *Return to OutputBuilder file
-            
-            
+                        
 RTS         MOVE.B      #'R',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'T',(A4)+
             MOVE.B      #'S',(A4)+ 
@@ -410,11 +417,15 @@ RTS         MOVE.B      #'R',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #WORD,D6            *Increment the size counter D6 by a WORD 
             MOVE.B      #WORD,D7            *Increment the size counter D7 by a WORD
             
+            *JSR         D_RTS
+            
             RTS                             *Return to OutputBuilder file
             
 LEA         MOVE.B      #'L',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'E',(A4)+
             MOVE.B      #'A',(A4)+   
+            
+            *JSR         D_LEA               *jump to LEA in the decoder
         
             RTS                             *Return to OutputBuilder file
             
@@ -425,6 +436,7 @@ MOVEM       MOVE.B      #'M',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'M',(A4)+
 
             JSR         MOVEM_SIZE          *Append size
+            *JSR         D_MOVEM             *jump to MOVEM in the decoder
             
             RTS                             *Return to OutputBuilder file
             
@@ -432,6 +444,7 @@ JSR         MOVE.B      #'J',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'S',(A4)+
             MOVE.B      #'R',(A4)+   
         
+            JSR         D_JSR               *jump to JSR in the decoder
 
             RTS                             *Return to OutputBuilder file
             
@@ -440,6 +453,7 @@ NEG         MOVE.B      #'N',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'G',(A4)+   
         
             JSR         GET_SIZE_67         *Append size
+            JSR         DECODER_C           *jump to decoder SUB C
             
             RTS                             *Return to OutputBuilder file
              
@@ -451,6 +465,7 @@ SUBQ        MOVE.B      #'S',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'Q',(A4)+ 
                                        
             JSR         GET_SIZE_67         *Append size
+            JSR         DECODER_C           *jump to decoder SUB C
             
             RTS                             *Return to OutputBuilder file
             
@@ -460,6 +475,7 @@ ADDQ        MOVE.B      #'A',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'Q',(A4)+ 
                                        
             JSR         GET_SIZE_67         *Append size
+            *JSR         D_ADDQ              
             
             RTS                             *Return to OutputBuilder file
             
@@ -467,37 +483,49 @@ ADDQ        MOVE.B      #'A',(A4)+          *Load OPCODE string into (A4)
 *-BIN 6--------------------------------------------------------
 BGE         MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'G',(A4)+
-            MOVE.B      #'E',(A4)+   
+            MOVE.B      #'E',(A4)+  
+
+            JSR         DECODER_E           *jump to decoder SUB E 
         
             RTS                             *Return to OutputBuilder file
             
 BCS         MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'C',(A4)+
-            MOVE.B      #'S',(A4)+   
+            MOVE.B      #'S',(A4)+  
+
+            JSR         DECODER_E           *jump to decoder SUB E  
         
             RTS                             *Return to OutputBuilder file
             
 BVC         MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'V',(A4)+
-            MOVE.B      #'C',(A4)+   
+            MOVE.B      #'C',(A4)+ 
+
+            JSR         DECODER_E           *jump to decoder SUB E   
         
             RTS                             *Return to OutputBuilder file
             
 BCC         MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'C',(A4)+
-            MOVE.B      #'C',(A4)+   
+            MOVE.B      #'C',(A4)+  
+
+            JSR         DECODER_E           *jump to decoder SUB E  
         
             RTS                             *Return to OutputBuilder file
             
 BLT         MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'L',(A4)+
             MOVE.B      #'T',(A4)+   
+            
+            JSR         DECODER_E           *jump to decoder SUB E 
         
             RTS                             *Return to OutputBuilder file
 
 BRA_SUB     MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'R',(A4)+
-            MOVE.B      #'A',(A4)+   
+            MOVE.B      #'A',(A4)+  
+
+            JSR         DECODER_E           *jump to decoder SUB E  
         
             RTS                             *Return to OutputBuilder file
 
@@ -507,6 +535,8 @@ MOVEQ       MOVE.B      #'M',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'V',(A4)+   
             MOVE.B      #'E',(A4)+
             MOVE.B      #'Q',(A4)+
+            
+            JSR         D_MOVEQ             *jump to MOVEQ in the decoder 
                         
             RTS                             *Return to OutputBuilder file
             
@@ -517,6 +547,7 @@ DIVS_W      MOVE.B      #'D',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'S',(A4)+
             
             JSR         APPND_WORD
+            JSR         DECODER_F           *jump to decoder SUB F 
         
             RTS                             *Return to OutputBuilder file
             
@@ -526,6 +557,7 @@ DIVU_W      MOVE.B      #'D',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'U',(A4)+
             
             JSR         APPND_WORD
+            JSR         DECODER_F           *jump to decoder SUB F
         
             RTS                             *Return to OutputBuilder file
             
@@ -533,6 +565,7 @@ OR          MOVE.B      #'O',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'R',(A4)+
            
             JSR         SIZE_678            *Append size
+            JSR         DECODER_F           *jump to decoder SUB F
             
             RTS                             *Return to OutputBuilder file
             
@@ -542,6 +575,7 @@ SUB         MOVE.B      #'S',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'B',(A4)+   
 
             JSR         SIZE_678            *Append size
+            JSR         DECODER_F           *jump to decoder SUB F
             
             RTS                             *Return to OutputBuilder file
             
@@ -551,6 +585,7 @@ EOR         MOVE.B      #'E',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'R',(A4)+   
 
             JSR         GET_SIZE_67         *Append size
+            JSR         DECODER_D           *jump to decoder SUB D
             
             RTS                             *Return to OutputBuilder file
 
@@ -559,6 +594,8 @@ CMP         MOVE.B      #'C',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'P',(A4)+   
 
             JSR         GET_SIZE_67         *Append size
+            JSR         DECODER_D           *jump to decoder SUB D
+            
             RTS                             *Return to OutputBuilder file
 
 *-BIN 12---------------------------------------------------------
@@ -568,6 +605,7 @@ MULS_W      MOVE.B      #'M',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'S',(A4)+
             
             JSR         APPND_WORD
+            JSR         DECODER_F           *jump to decoder SUB F
             
             RTS                             *Return to OutputBuilder file
             
@@ -576,6 +614,8 @@ AND         MOVE.B      #'A',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'D',(A4)+   
             
             JSR         SIZE_678            *Append size
+            JSR         DECODER_F           *jump to decoder SUB F
+            
             RTS                             *Return to OutputBuilder file
             
 *-BIN 13---------------------------------------------------------
@@ -584,6 +624,8 @@ ADD         MOVE.B      #'A',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'D',(A4)+   
             
             JSR         SIZE_678            *Append size
+            JSR         DECODER_F           *jump to decoder SUB F
+            
             RTS                             *Return to OutputBuilder file
             
 
@@ -592,6 +634,8 @@ ADDA        MOVE.B      #'A',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'D',(A4)+
             MOVE.B      #'D',(A4)+
             MOVE.B      #'A',(A4)+   
+            
+            JSR         DECODER_F           *jump to decoder SUB F
                 
             RTS                             *Return to OutputBuilder file
      
@@ -601,6 +645,7 @@ LOGIC_REG   MOVE.B      #'L',(A4)+          *Load OPCODE string into (A4)
                    
             JSR         RIGHTORLEFT         *Append (L/R)
             JSR         GET_SIZE_67         *Append Size
+            JSR         DECODER_B           *jump to decoder SUB B
             
             RTS                             *Return to OutputBuilder file           
 
@@ -609,6 +654,7 @@ ARITH_REG   MOVE.B      #'A',(A4)+          *Load OPCODE string into (A4)
             
             JSR         RIGHTORLEFT         *Append (L/R)
             JSR         GET_SIZE_67         *Append Size
+            JSR         DECODER_B           *jump to decoder SUB B
 
             RTS         
                 
@@ -617,6 +663,7 @@ ROTATE_REG  MOVE.B      #'R',(A4)+          *Load OPCODE string into (A4)
           
             JSR         RIGHTORLEFT         *Append (L/R)
             JSR         GET_SIZE_67         *Append Size
+            JSR         DECODER_B           *jump to decoder SUB B
             
             RTS
             
@@ -625,6 +672,7 @@ LOGIC_MEM   MOVE.B      #'L',(A4)+          *Load OPCODE string into (A4)
                    
             JSR         RIGHTORLEFT         *Append (L/R)
             JSR         APPND_WORD          *only supports word sized operations on memory
+            JSR         DECODER_B           *jump to decoder SUB B
             
             RTS                             *Return to OutputBuilder file           
 
@@ -633,6 +681,7 @@ ARITH_MEM   MOVE.B      #'A',(A4)+          *Load OPCODE string into (A4)
             
             JSR         RIGHTORLEFT         *Append (L/R)
             JSR         APPND_WORD          *only supports word sized operations on memory
+            JSR         DECODER_B           *jump to decoder SUB B
 
             RTS         
                 
@@ -641,6 +690,7 @@ ROTATE_MEM  MOVE.B      #'R',(A4)+          *Load OPCODE string into (A4)
           
             JSR         RIGHTORLEFT         *Append (L/R)
             JSR         APPND_WORD          *only supports word sized operations on memory
+            JSR         DECODER_B           *jump to decoder SUB B
             
             RTS
               
