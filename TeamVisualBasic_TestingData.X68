@@ -23,6 +23,10 @@ label1      MOVE.L      $87654321,$12345678
             MOVE.B      $78,D5
             MOVE.W      D6,D6
             MOVE.W      D7,D7
+*---------------------------testing the <#data> type--------------
+            MOVE.L      #$12345678,D2
+            MOVE.W      #$1234,D5
+            MOVE.B      #$12,D7
 *---------------------------Test the MOVEA op Code-------------------
             MOVEA.L     A2,A4
             MOVEA.L     #$12345678,A6
