@@ -1,0 +1,6 @@
+# Ignore
+*.L68
+*.S68
+
+# Allow
+!TeamVisualBasic_TestingData.S68
