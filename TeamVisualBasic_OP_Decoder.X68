@@ -336,13 +336,13 @@ S_DATA_MODE JSR         T1_GrabDreg
 *That value is stored in the d7 register by the jump table            
 IMMEDIATE_D MOVE.B      #'#',(A4)+              *add the # to data string to immediate data
             
-            CMP.W       #6,D7
+            CMP.W       #8,D7
             BEQ         WORD_DATA               *means the immediate data is a word value
             
-            CMP.W       #10,D7       
+            CMP.W       #12,D7       
             BEQ         LONG_DATA               *means the immediate data is a long value
             
-            CMP.W       #4,D7
+            CMP.W       #8,D7
             BEQ         BYTE_DATA             *means the immediate data is a long value
             
              
@@ -515,6 +515,7 @@ PRINT7      MOVE.B      #'7',(A4)+
 PRINT8      MOVE.B      #'8',(A4)+
             RTS
     
+
 
 
 

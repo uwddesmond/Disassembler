@@ -1,6 +1,6 @@
 00001000 Starting Address
 Assembler used: EASy68K Editor/Assembler v5.15.04
-Created On: 3/12/2018 9:09:18 PM
+Created On: 3/12/2018 9:47:40 PM
 
 00000000                             1  *-----------------------------------------------------------
 00000000                             2  * Title      :  Team Visual Basic's Disassembler
@@ -1066,8 +1066,7 @@ Created On: 3/12/2018 9:09:18 PM
 00001D0C  4EB9 0000205E           1062              JSR         PrintD5Num
 00001D12  4E75                    1063              RTS
 00001D14                          1064     
-Line 1065 ERROR: Undefined symbol
-00001D14  18FC 008E               1065  B_DATAREG   MOVE.B      #D,(A4)+
+00001D14  18FC 0044               1065  B_DATAREG   MOVE.B      #'D',(A4)+
 00001D18  3415                    1066              MOVE.W      (A5),D2
 00001D1A  EC4A                    1067              LSR.W       #6,D2
 00001D1C  E64A                    1068              LSR.W       #3,D2
@@ -1433,9 +1432,9 @@ Line 1065 ERROR: Undefined symbol
 000020EA                          1428  
 000020EA                          1429  
 000020EA                          1430  
-000020EA                          1431  -------------------- end include --------------------
-000020EA                          1432              
-000020EA                          1433  
+000020EA                          1431  
+000020EA                          1432  -------------------- end include --------------------
+000020EA                          1433              
 000020EA                          1434  
 000020EA                          1435  
 000020EA                          1436  
@@ -1453,11 +1452,12 @@ Line 1065 ERROR: Undefined symbol
 000020EA                          1448  
 000020EA                          1449  
 000020EA                          1450  
-000020EA                          1451  -------------------- end include --------------------
-000020EA                          1452              
-000020EA                          1453              END         START               ;last line of source
+000020EA                          1451  
+000020EA                          1452  -------------------- end include --------------------
+000020EA                          1453              
+000020EA                          1454              END         START               ;last line of source
 
-1 error detected
+No errors detected
 No warnings generated
 
 
