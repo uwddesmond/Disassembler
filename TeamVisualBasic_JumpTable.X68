@@ -12,7 +12,7 @@
 *-Start determining OPCODE based off the first four bits,
 *-then Branch off into 16 bin possibilities
 *-----------------------------------------------------------      
-JT_START    MOVE.L      #WORD,D7            *All OPCODEs takes up a WORD of space, save this into length counter D7
+JT_START    MOVE.L      #2,D7               *All OPCODEs takes up a 2 bytes of space, save this into length counter D7
             CLR.L       D6                  *Clear the D6 address increment counter
             MOVE.W      (A5),D0             *Move OPCODE into D0 to bit shift
             
@@ -858,6 +858,7 @@ APPND_LONG  MOVE.B      #'.',(A4)+
 *-FILES--------------------------------------------------------
             INCLUDE     'TeamVisualBasic_OP_Decoder.X68'    ;Helper file for jump table
             
+
 
 
 

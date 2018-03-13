@@ -323,13 +323,11 @@ SaddINpost  MOVE.B      #'(',(A4)+
     
 S16An
 S8AnXn
-S_DATA_MODE JSR         T1_GrabDreg
+S_DATA_MODE JSR         T1_GrabSreg         *<- Changed this from GrabDReg to GrabSReg 
             CMPI.W      #1,D5
             BEQ         LONG_DATA
-            CMPI.W      #2,D5
-            BEQ         LONG_DATA
             CMP.W       #0,D5  
-            BEQ         WORD_DATA
+            BEQ         D_SIZE
             CMP.W       #4,D5
             BEQ         IMMEDIATE_D
             
@@ -339,13 +337,13 @@ S_DATA_MODE JSR         T1_GrabDreg
 *That value is stored in the d7 register by the jump table            
 IMMEDIATE_D MOVE.B      #'#',(A4)+              *add the # to data string to immediate data
             
-            CMP.W       #8,D7
+            CMP.W       #6,D7
             BEQ         WORD_DATA               *means the immediate data is a word value
             
-            CMP.W       #12,D7       
+            CMP.W       #10,D7       
             BEQ         LONG_DATA               *means the immediate data is a long value
             
-            CMP.W       #6,D7
+            CMP.W       #4,D7
             BEQ         BYTE_DATA             *means the immediate data is a long value
             
 *-A7 to SP special case-------------------------------------
@@ -410,11 +408,13 @@ D_DATA_MODE JSR         T1_GrabDreg
             CMPI.W      #1,D5
             BEQ         LONG_DATA
             CMPI.W      #0,D5
+            BEQ         D_SIZE          *Determine if we gotta branch to WORD_DATA or BYTE_DATA off of D7
+
+
+D_SIZE      CMP.B       #6,D7
             BEQ         WORD_DATA
-            CMPI.W      #7,D5
-            *BEQ         DATA_SIZE
-            
-*D_SIZE      
+            CMP.B       #4,D7
+            BEQ         BYTE_DATA
 
 
 *----------------------------------------------------------- 
@@ -441,7 +441,7 @@ WORD_DATA   MOVE.B      #'$',(A4)+       *prepare the string for a long hex valu
             MOVE.W      #4,D2           *move 4 to counter since this it word data 4 hex values are required
             
             JSR         GD_LOOP
-            ADD.W       #2,D6           *since it is long data increment the address by 4 bits *d6 is opcode length counter
+            ADD.W       #2,D6           *since it is word data increment the address by 4 bits *d6 is opcode length counter
             RTS
 
 BYTE_DATA   MOVE.B      #'$',(A4)+       *prepare the string for a long hex value
@@ -453,7 +453,7 @@ BYTE_DATA   MOVE.B      #'$',(A4)+       *prepare the string for a long hex valu
             MOVE.W      #2,D2           *move 2 to counter since this is byte data 2 hex values are required
             LSL.L       #8,D0           *shift data over 4 bits so beginning of byte is in the highest order
             JSR         GD_LOOP
-            ADD.W       #2,D6           *since it is long data increment the address by 4 bits *d6 is opcode length counter
+            ADD.W       #2,D6           *since it is byte data increment the address by 4 bits *d6 is opcode length counter
             RTS
             
             
@@ -531,6 +531,7 @@ PRINT7      MOVE.B      #'7',(A4)+
 PRINT8      MOVE.B      #'8',(A4)+
             RTS
     
+
 
 
 

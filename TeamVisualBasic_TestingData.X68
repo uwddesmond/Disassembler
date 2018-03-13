@@ -10,7 +10,11 @@
 START       ORG         $00007F00            ; first instruction of program
 
 *--------------------------Test the MOVE Op Code-----------------
-label1      MOVE.B      #$12,D5             *destroyed
+label1      MOVE.B      $12,D6
+            MOVE.W      $1234,D5
+            MOVE.L      $12345678,D7
+
+            MOVE.B      #$12,D5             *destroyed
             MOVE.W      #$1234,D5           *conqoured
             MOVE.L      #$12345678,D5       *decoded
             MOVE.W      D4,D5               *vaporized
@@ -64,6 +68,7 @@ label1      MOVE.B      #$12,D5             *destroyed
     
     
     
+
 
 
 
