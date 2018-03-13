@@ -342,7 +342,7 @@ IMMEDIATE_D MOVE.B      #'#',(A4)+              *add the # to data string to imm
             CMP.W       #12,D7       
             BEQ         LONG_DATA               *means the immediate data is a long value
             
-            CMP.W       #8,D7
+            CMP.W       #6,D7
             BEQ         BYTE_DATA             *means the immediate data is a long value
             
              
@@ -434,8 +434,7 @@ BYTE_DATA   MOVE.B      #'$',(A4)+       *prepare the string for a long hex valu
             MOVE.L      (A3),D0         *Add correct data into d0 register for printing
             
             MOVE.W      #2,D2           *move 2 to counter since this is byte data 2 hex values are required
-            LSL.L       #8,D0           *shift data over 8 bits for rotate in print to hex function
-            LSL.L       #4,D0           *shift data over 4 bits so beginning of byte is in the highest order
+            LSL.L       #2,D0           *shift data over 4 bits so beginning of byte is in the highest order
             JSR         GD_LOOP
             ADD.W       #2,D6           *since it is long data increment the address by 4 bits *d6 is opcode length counter
             RTS
@@ -515,6 +514,8 @@ PRINT7      MOVE.B      #'7',(A4)+
 PRINT8      MOVE.B      #'8',(A4)+
             RTS
     
+
+
 
 
 
