@@ -567,10 +567,10 @@ RIGHTORLEFT MOVE.W      (A0),D0             *reload op
             CMP.W       #1,D0               *check if right
             BEQ         RIGHT  
                                               
-LEFT        MOVE.W      #'L',(A4)+          *Load directional string 'L' into (A4)
+LEFT        MOVE.B      #'L',(A4)+          *Load directional string 'L' into (A4)
             RTS                      
                      
-RIGHT       MOVE.W      #'R',(A4)+          *Load directional string 'R' into (A4)
+RIGHT       MOVE.B      #'R',(A4)+          *Load directional string 'R' into (A4)
             RTS
                                   
 *-DATA---------------------------------------------------------
@@ -705,19 +705,19 @@ ADDA_SIZE   MOVE.W      (A5),D0             *reload OPCODE into (A5)
             BRA         DATA                *is not one of the supported sizes
                    
 
-APPND_BYTE  MOVE.W      #'.',(A4)+
-            MOVE.W      #'B',(A4)+          *load size into (A4)
-            ADDI.W      #2,D7               *add OPCODE length to D7
+APPND_BYTE  MOVE.B      #'.',(A4)+
+            MOVE.B      #'B',(A4)+          *load size into (A4)
+            ADDI.B      #2,D7               *add OPCODE length to D7
             RTS
 
-APPND_WORD  MOVE.W      #'.',(A4)+
-            MOVE.W      #'W',(A4)+          *load size into (A4)
-            ADDI.W      #4,D7               *add OPCODE length to D7
+APPND_WORD  MOVE.B      #'.',(A4)+
+            MOVE.B      #'W',(A4)+          *load size into (A4)
+            ADDI.B      #4,D7               *add OPCODE length to D7
             RTS
 
-APPND_LONG  MOVE.W      #'.',(A4)+
-            MOVE.W      #'L',(A4)+          *load size into (A4)
-            ADDI.W      #8,D7               *add OPCODE length to D7
+APPND_LONG  MOVE.B      #'.',(A4)+
+            MOVE.B      #'L',(A4)+          *load size into (A4)
+            ADDI.B      #8,D7               *add OPCODE length to D7
             RTS                
             
 *-FILES--------------------------------------------------------
