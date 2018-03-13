@@ -1,6 +1,6 @@
 00007F00 Starting Address
 Assembler used: EASy68K Editor/Assembler v5.15.04
-Created On: 3/13/2018 1:03:07 AM
+Created On: 3/12/2018 10:10:38 PM
 
 00000000                             1  *-----------------------------------------------------------
 00000000                             2  * Title      :  Team Visual Basic's Dissasembler: Testing File
@@ -14,31 +14,34 @@ Created On: 3/13/2018 1:03:07 AM
 00007F00                            10  START       ORG         $00007F00            ; first instruction of program
 00007F00                            11  
 00007F00                            12  *--------------------------Test the MOVE Op Code-----------------
-00007F00                            13  label1      ;MOVE.L      $00012346,$00345678
-00007F00                            14              ;MOVE.L      A2,$12345678
-00007F00                            15              ;MOVE.L      $12345678,A2
-00007F00                            16              ;MOVE.W      (A2),D2
-00007F00                            17              ;MOVE.W      -(A2),D2
-00007F00                            18              ;MOVE.W      (A2)+,D2
-00007F00                            19              ;MOVE.W      D1,D1
-00007F00                            20              ;MOVE.B      D2,D2
-00007F00                            21              ;MOVE.B      D3,D3
-00007F00                            22              ;MOVE.W      D4,D4
-00007F00                            23              ;MOVE.B      $78,D5
-00007F00                            24              ;MOVE.W      D6,D6
-00007F00                            25              ;MOVE.W      D7,D7
-00007F00                            26  *---------------------------testing the <#data> type--------------
-00007F00                            27              ;MOVE.L      #$12345678,D2
-00007F00  3A3C 1234                 28              MOVE.W      #$1234,D5
-00007F04                            29              ;MOVE.B      #$12,D7
-00007F04                            30  *---------------------------Test the MOVEA op Code-------------------
-00007F04                            31              ;MOVEA.L     A2,A4
-00007F04                            32              ;MOVEA.L     #$12345678,A6
-00007F04                            33  
-00007F04                            34  
-00007F04                            35  
-00007F04  FFFF FFFF                 36              SIMHALT                     ; halt simulator
-00007F08                            37              END         START                ; last line of source
+00007F00  1A3C 0012                 13  label1      MOVE.B      #$12,D5
+00007F04  3A3C 1234                 14              MOVE.W      #$1234,D5
+00007F08                            15              
+00007F08                            16              ;MOVE.L      $00012346,$00345678
+00007F08                            17              ;MOVE.L      A2,$12345678
+00007F08                            18              ;MOVE.L      $12345678,A2
+00007F08                            19              ;MOVE.W      (A2),D2
+00007F08                            20              ;MOVE.W      -(A2),D2
+00007F08                            21              ;MOVE.W      (A2)+,D2
+00007F08                            22              ;MOVE.W      D1,D1
+00007F08                            23              ;MOVE.B      D2,D2
+00007F08                            24              ;MOVE.B      D3,D3
+00007F08                            25              ;MOVE.W      D4,D4
+00007F08                            26              ;MOVE.B      $78,D5
+00007F08                            27              ;MOVE.W      D6,D6
+00007F08                            28              ;MOVE.W      D7,D7
+00007F08                            29  *---------------------------testing the <#data> type--------------
+00007F08                            30              ;MOVE.L      #$12345678,D2
+00007F08  3A3C 1234                 31               MOVE.W      #$1234,D5
+00007F0C                            32              ;MOVE.B      #$12,D7
+00007F0C                            33  *---------------------------Test the MOVEA op Code-------------------
+00007F0C                            34              ;MOVEA.L     A2,A4
+00007F0C                            35              ;MOVEA.L     #$12345678,A6
+00007F0C                            36  
+00007F0C                            37  
+00007F0C                            38  
+00007F0C  FFFF FFFF                 39              SIMHALT                     ; halt simulator
+00007F10                            40              END         START                ; last line of source
 
 No errors detected
 No warnings generated
