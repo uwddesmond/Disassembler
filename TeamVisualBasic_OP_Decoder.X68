@@ -105,7 +105,7 @@ B_DATAREG   MOVE.B      #'D',(A4)+
 
 
 *-OPCODE Decode Type C--------------------------------------
-*-OPCODEs:ADDI,SUBI 
+*-OPCODEs: ADDI, SUBI, NEG, ORI, CMPI, ADDI 
 *-xxxxxxxx Size2, Ea mode(3) Ea Reg(3)
 *STILL NEED TO PRINT DATA THAT FOLLOWS FIRST       
   
@@ -176,6 +176,13 @@ DECODE_F    MOVE.W      #2,D6               *Initilize opcode length to 2
             LSR.W       #6,D2               *Shift right 6 - isolate Dest Mode
             AND.W       #$0007,D2           *Mask out other bits
             JSR         GET_DSTMODE         *Append DST string to (A4)
+
+*-OPCODE Decode Type G---------------------------------------
+*-OPCODEs: NEG, ORI, CMPI, ADDI
+*-xxxxxxxx Size(2) EAMode(3) EAReg(3)
+
+*DECODE_G   MOVE.W       #2,D6               *Initialize OPCODE length to 2
+           *Check for the size of the OPCODE
             
 *-----------------------------------------------------------
 *-OPTYPE_F HELPER FUNCTIONS
@@ -452,6 +459,7 @@ PRINT7      MOVE.B      #'7',(A4)+
 PRINT8      MOVE.B      #'8',(A4)+
             RTS
     
+
 
 *~Font name~Courier New~
 *~Font size~10~
