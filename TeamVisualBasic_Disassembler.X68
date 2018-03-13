@@ -51,7 +51,7 @@ NEXT_OP     JSR         BUILD_STR           ;Build and accumulate the 0xADDR OPC
 
             
 *-Loop Condition Logic--------------------------------------
-LOOP_COND   ADD.L       D7,A5            ;Increment current address (A5) by the length of the last instruction + operand data (D7)
+LOOP_COND   ADD.L       D6,A5            ;Increment current address (A5) by the length of the last instruction + operand data (D6)
             CMPA.W      A5,A6            ;If current address (A5) is now equal to or greater than end address (A6), end
             BLT         DSMBL_DONE           ;<---------- check conditional
             
@@ -160,6 +160,7 @@ M_NEWLINE   DC.B        '',CR,LF,0
             INCLUDE     'TeamVisualBasic_JumpTable.X68'                     ;Include Jump Table file
             
             END         START               ;last line of source
+
 
 
 

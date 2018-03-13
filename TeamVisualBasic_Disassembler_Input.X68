@@ -162,7 +162,6 @@ C_ERR_BASE1 MOVE.B      #11,D0              ;Clear screen
             
             CLR.L       D2
             CLR.L       D5
-            CLR.L       D6
                               
 
             MOVE.L      #$FFFFFFFF,(START_ADDR)        
@@ -178,6 +177,7 @@ C_ERR_BASE2 LEA         M_INV_INPUT,A1      ;Load error message
             
             BRA         START 
            
+
 
 
 *~Font name~Courier New~
