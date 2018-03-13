@@ -22,7 +22,8 @@
 *-OPCODEs: MOVE,MOVEA,
 *-xxxx Dest Reg(3) Dest Mode(3) Src Mode(3) Src Reg(3)  
 
-DECODE_A    MOVE.W      (A5),D2             *Copy OPCODE into D2
+DECODE_A    MOVE.W      #2,D6               *Initilize opcode length to 2
+            MOVE.W      (A5),D2             *Copy OPCODE into D2
             LSR.W       #3,D2               *Shift right 3 - isolate Src Mode
             AND.W       #$0007,D2           *Mask out other bits
             JSR         GET_SRCMODE         *Append SRC string to (A4)          
@@ -39,7 +40,8 @@ DECODE_A    MOVE.W      (A5),D2             *Copy OPCODE into D2
 *-OPCODEs: LSL/LSR,ASL/ASR,ROL/ROR
 *-xxxx Register(3) OP Mode(3) EA Mode(3) EA Reg(3)  
                
-DECODE_B    MOVE.W      (A5),D2
+DECODE_B    MOVE.W      #2,D6               *Initilize opcode length to 2
+            MOVE.W      (A5),D2
             LSR.W       #6,D2
             AND.W       $0003,D2
             CMP.W       #3,D2
@@ -107,7 +109,8 @@ B_DATAREG   MOVE.B      #'D',(A4)+
 *-xxxxxxxx Size2, Ea mode(3) Ea Reg(3)
 *STILL NEED TO PRINT DATA THAT FOLLOWS FIRST       
   
-DECODE_C    MOVE.W      (A5),D2
+DECODE_C    MOVE.W      #2,D6               *Initilize opcode length to 2
+            MOVE.W      (A5),D2
             *ENTER PRINT DATA CODE HERE
             JSR         C_SRC
             
@@ -132,24 +135,94 @@ C_SRC       MOVE.W      (A5),D2
 *-OPCODEs: 
 *-xxxx Register(3) x Size(2) EA Mode(3) EA Reg(3)       
    
-DECODE_D
-
+DECODE_D    MOVE.W      #2,D6               *Initilize opcode length to 2   
+            MOVE.B      #'#',D6
+            MOVE.B      #'$',D6     
+            MOVE.W      #2,D2               *move counter to 2 since only 2 HEX values used
+            LSL.W       #8,D2               *set up data for printers
+            JSR         GD_LOOP             *print hex the 2 bits
+            RTS
 
 *-OPCODE Decode Type E--------------------------------------
 *-OPCODEs: 
 *-xxxx Condition(4) 8 Bit Displacement       
   
-DECODE_E
+DECODE_E    MOVE.W      #2,D6               *Initilize opcode length to 2
+            MOVE.W      (A5),D2
+            LSL.W       #3,D2               *GRAB SOURCE MODE BITS
+            AND.W       #$0007,D2           *Mask out other bits
+            JSR         GET_SRCMODE         *Append SRC string to (A4)          
+            MOVE.B      #',',(A4)+          *Addd comma for out put
+            MOVE.W      (A5),D2
+            LSL.W       #6,D2               *logical shift left to get data bits to d2
+            LSL.W       #3,D2
+            AND.W       $0007,D2            *mask out other bits
+            MOVE.B      #'D',(A4)+          *Push D into register
+            MOVE.W      D2,D5
+            JSR         PrintD5Num          *print register number
+                  
 
 
 *-OPCODE Decode Type F--------------------------------------
 *-OPCODEs: 
-*-xxxx Data(3) 1 Size(2) EA Mode(3) EA Reg(3)       
+*-xxxx Reg(3) OPMode(3) EAMode(3) EAReg(3)       
   
-DECODE_F
+DECODE_F    MOVE.W      #2,D6               *Initilize opcode length to 2
+            MOVE.W      (A5),D2             *Copy opcode into d2
+            LSL.W       #6,D2               *Shift to grab op mode
+            AND.W       #$0007,D2           *Mask other bits
+            JSR         F_OPMODE
+            MOVE.W      (A5),D2             *Recopy OPCODE into D2  
+            LSR.W       #6,D2               *Shift right 6 - isolate Dest Mode
+            AND.W       #$0007,D2           *Mask out other bits
+            JSR         GET_DSTMODE         *Append DST string to (A4)
+            
+*-----------------------------------------------------------
+*-OPTYPE_F HELPER FUNCTIONS
+*Helps determine the OPTYPE
+*-----------------------------------------------------------
+F_OPMODE
+
+*-OPS WITHOUT TYPE------------------------------------------
+*-OPCODES: MOVEQ
+
+D_MOVEQ     MOVE.W      #2,D6               *Initilize opcode length to 2
+            MOVE.W      (A5),D0             *grab op code from a5
+            MOVE.B      #'#',(A4)+          *preload source string for literal
+            MOVE.B      #'$',(A4)+          *preload source string for hex
+            MOVE.W      #2,D2               *move 8 to counter since this si long data 8 hex values are required
+            LSL.W       #8,D2               *shift over 8 so bits in high order for print
+            JSR         GD_LOOP
+            JSR         B_DATAREG           *grabs and prints data reg 
+            RTS
+
+D_ADDQ      MOVE.W      #2,D6               *Initilize opcode length to 2
+            MOVE.W      (A5),D0             *grab op code from a5
+            MOVE.B      #'#',(A4)+          *preload source string for literal
+            MOVE.B      #'$',(A4)+          *preload source string for hex
+            MOVE.W      #1,D2               *move counter to 1 since only 1 bit is used
+            LSL.W       #2,D2               *set up data for printer
+            ADD.W       #$C000,D2           *mask out first bits
+            JSR         GD_LOOP             *print hex the 2 bits
+            MOVE.W      (A5),D2             *reload op code from a5
+            LSL.W       #3,D2               *shift so source mode is in LSBs  
+            AND.W       #$0007,D2           *mask out other bits
+            JSR         GET_SRCMODE         *print source mode
+            RTS
+            
+D_JSR       MOVE.W      #2,D6               *Initilize opcode length to 2
+            MOVE.W      (A5),D2             *reload op code from a5
+            LSL.W       #3,D2               *shift so source mode is in LSBs  
+            AND.W       #$0007,D2           *mask out other bits
+            JSR         GET_SRCMODE         *print source mode
+            RTS
 
 
-   
+            
+            
+          
+            
+             
 
 *-SRC_MODE--------------------------------------------------
 *-Determines SRC Mode from bits 5,4,3, and branch to appropriate subroutine
@@ -169,6 +242,8 @@ GET_SRCMODE CMP.W       #0,D2
             BEQ         S16An           *source number of word size --- (d16,An)
             CMP.W       #6,D2
             BEQ         S8AnXn          *source number byte size --- (d8,An,Xn)
+            CMP.W       #7,D2
+            BEQ         S_DATA_MODE     *immediate data
     
 *-DST_MODE--------------------------------------------------
 *-Determines DST Mode from bits 8,7,6, and branch to appropriate subroutine
@@ -188,6 +263,8 @@ GET_DSTMODE CMP.W       #0,D2
             BEQ         D16An           *source number of word size --- (d16,An)
             CMP.W       #6,D2
             BEQ         D8AnXn          *source number byte size --- (d8,An,Xn)
+            CMP.W       #7,D2           
+            BEQ         D_DATA_MODE     *Source is immediate data following the opcode
     
  
 *----------------------------------------------------------- 
@@ -231,7 +308,13 @@ SaddINpost  MOVE.B      #'(',(A4)+
     
 S16An
 S8AnXn
-
+S_DATA_MODE JSR         T1_GrabDreg
+            CMPI.W      #1,D5
+            BEQ         LONG_DATA
+            CMPI.W      #2,D5
+            BEQ         LONG_DATA
+            CMP.W       #0,D5  
+            BEQ         WORD_DATA
 
 *----------------------------------------------------------- 
 *-Destination Helper Functions
@@ -273,13 +356,43 @@ DaddINpost  MOVE.B      #'(',(A4)+
             RTS
     
 D16An
+            
 D8AnXn
+
+D_DATA_MODE JSR         T1_GrabDreg
+            CMPI.W      #1,D5
+            BEQ         LONG_DATA
+            CMPI.W      #0,D5
+            BEQ         WORD_DATA
+            CMPI.W      #7,D5
+            *BEQ         DATA_SIZE
+            
+*D_SIZE      
+
 
 *----------------------------------------------------------- 
 *-Assorted(?) Helper Functions
 *-add Description here
 *-----------------------------------------------------------
-    
+LONG_DATA   MOVE.B      #'$',(A4)+       *prepare the string for a long hex value
+            MOVE.L      A5,A3    
+            ADD.L       D6,A3           *Add opcode data length
+            MOVE.L      (A3),D0
+            MOVE.W      #8,D2           *move 8 to counter since this si long data 8 hex values are required
+            JSR         GD_LOOP
+            ADD.W       #4,D6           *since it is long data increment the address by 4 bits *d6 is opcode length counter
+            RTS
+
+WORD_DATA   MOVE.B      #'$',(A4)+       *prepare the string for a long hex value
+            MOVE.L      A5,A3    
+            ADD.L       D6,A3           *Add opcode data length
+            MOVE.L      (A3),D0         *Add correct data into d0 register for printing
+            MOVE.W      #4,D2           *move 8 to counter since this si long data 8 hex values are required
+            LSL.L       #8,D0           *shift data over 8 bits for rotate in print to hex function
+            JSR         GD_LOOP
+            ADD.W       #2,D6           *since it is long data increment the address by 4 bits *d6 is opcode length counter
+            RTS
+
 T1_GrabSreg MOVE.W      (A5),D2         *recopy op code
             AND.W       #$0007,D2       *mask other bits
             MOVE.W      D2,D5           *copy D2 to D5
@@ -339,10 +452,6 @@ PRINT7      MOVE.B      #'7',(A4)+
 PRINT8      MOVE.B      #'8',(A4)+
             RTS
     
-
-
-
-
 
 *~Font name~Courier New~
 *~Font size~10~
