@@ -315,13 +315,14 @@ BCLR_REG    MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
 
 
 *-BIN_MOVE (Bins 1, 2, and 3)---------------------------------- 
-MOVE        MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
-            MOVE.B      #'C',(A4)+
-            MOVE.B      #'L',(A4)+
-            MOVE.B      #'R',(A4)+
+MOVE        MOVE.B      #'M',(A4)+          *Load OPCODE string into (A4)
+            MOVE.B      #'O',(A4)+
+            MOVE.B      #'V',(A4)+
+            MOVE.B      #'E',(A4)+
             
             JSR         MOVE_SIZE           *Append size
-
+            JSR         DECODE_A            *Append Decode information
+            
             RTS                             *Return to OutputBuilder file
            
             
@@ -341,7 +342,8 @@ MOVEA       MOVE.B      #'M',(A4)+          *Load OPCODE string into (A4)
             BEQ         DATA                *Operation not supported for MOVEA
             
             JSR         MOVE_SIZE           *Append size
-            
+            JSR         DECODE_A            *Append Decode information
+
             RTS                             *Return to OutputBuilder file
 
 *-BIN 4--------------------------------------------------------
@@ -723,6 +725,8 @@ APPND_LONG  MOVE.B      #'.',(A4)+
 *-FILES--------------------------------------------------------
             INCLUDE     'TeamVisualBasic_OP_Decoder.X68'    ;Helper file for jump table
             
+
+
 
 
 
