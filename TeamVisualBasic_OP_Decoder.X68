@@ -424,6 +424,14 @@ PrintD5Num  CMP.B       #0,D5           *print the numeber in d5
             CMP.B       #8,D5
             BEQ         PRINT8  
     
+GD_LOOP     JSR         HEX_2_ASCII
+            SUBI        #1,D2
+            CMP.B       #0,D2
+            BGT         GD_LOOP
+            RTS
+
+
+
     
 PRINT0      MOVE.B      #'0',(A4)+
             RTS
@@ -452,6 +460,7 @@ PRINT7      MOVE.B      #'7',(A4)+
 PRINT8      MOVE.B      #'8',(A4)+
             RTS
     
+
 
 *~Font name~Courier New~
 *~Font size~10~
