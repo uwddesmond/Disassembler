@@ -1,6 +1,7 @@
 # Ignore
 *.L68
 *.S68
+TeamVisualBasic_Dissassembler.X68
 
 # Allow
 !TeamVisualBasic_TestingData.S68
