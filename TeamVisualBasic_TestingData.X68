@@ -10,9 +10,22 @@
 START       ORG         $00007F00            ; first instruction of program
 
 *--------------------------Test the MOVE Op Code-----------------
-label1      MOVE.B      #$12,D5
-            MOVE.W      #$1234,D5
+label1      MOVE.B      #$12,D5             *destroyed
+            MOVE.W      #$1234,D5           *conqoured
+            MOVE.L      #$12345678,D5       *decoded
+            MOVE.W      D4,D5               *vaporized
+            MOVE.L      D7,D5               *liqudated
+            MOVEA.L     $1000AAAA,A2        *extinguished
+            MOVEA.L     A5,A5               *merc'd
+            MOVE.L      (A5)+,D2            *headshot
+            MOVE.L      -(A5),D2            *crushed
             
+*--------------------------MOVE has been defeated-----------------
+            LSL.W       #$4,D3              *demolished
+            LSL.B       #$2,D3              *obliterated
+            LSL.L       #$6,D3              *slapped
+            LSL.W       D4,D3
+            LSR.W       D5,D6          
             ;MOVE.L      $00012346,$00345678
             ;MOVE.L      A2,$12345678
             ;MOVE.L      $12345678,A2
@@ -28,7 +41,7 @@ label1      MOVE.B      #$12,D5
             ;MOVE.W      D7,D7
 *---------------------------testing the <#data> type--------------
             ;MOVE.L      #$12345678,D2
-             MOVE.W      #$1234,D5
+            ;MOVE.W      #$1234,D5
             ;MOVE.B      #$12,D7
 *---------------------------Test the MOVEA op Code-------------------
             ;MOVEA.L     A2,A4
@@ -41,6 +54,14 @@ label1      MOVE.B      #$12,D5
     
     
     
+
+
+
+
+
+
+
+
 
 
 

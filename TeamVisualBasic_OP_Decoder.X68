@@ -42,28 +42,24 @@ DECODE_A    MOVE.B      #9,(A4)+          *tab after op code
 *-xxxx Register(3) OP Mode(3) EA Mode(3) EA Reg(3)  
                
 DECODE_B    MOVE.B      #9,(A4)+          *tab after op code
-            MOVE.W      #2,D6               *Initilize opcode length to 2
-            MOVE.W      (A5),D2
-            LSR.W       #6,D2
-            AND.W       $0003,D2
+            MOVE.W      #2,D6             *Initilize opcode length to 2
+            MOVE.W      (A5),D2           *reload op code
+            LSR.W       #6,D2              
+            AND.W       #$0003,D2
             CMP.W       #3,D2
             BEQ         B_ADDMODE
-            MOVE.W      (A5),D2             
-            LSR.W       #5,D2
-            AND.W       #$0003,D2
-            CMP.W       #1,D2
+            MOVE.W      (A5),D5             
+            LSR.W       #5,D5              *logical shift left to get i/r
+            AND.W       #$0001,D5           
+            CMP.W       #0,D5
             BEQ         B_SCOUNT
-            CMP.W       #2,D2
-            BEQ         B_DATAREG
-            MOVE.B      #'D',(A4)+
-            MOVE.W      (A5),D2
-            AND.W       #$0007,D2
-            MOVE.W      D2,D5
-            JSR         PrintD5Num
+            CMP.W       #1,D5
+            BEQ         B_DATAREG           
             RTS
 
 *-------------------------------------------------------
-*Shift on address is occuring           
+*Shift on address is occuring    
+*print address by using EA Mode and EA Reg bits at end of op       
 B_ADDMODE
            MOVE.W       (A5),D2
            LSR.W        #3,D2
@@ -91,10 +87,11 @@ B_SCOUNT    MOVE.W      (A5),D2
             MOVE.W      D2,D5
             MOVE.B      #'#',(A4)+
             JSR         PrintD5Num
+            JSR         B_SRC_DMODE
             RTS
    
 *------------------------------------------------------------
-*Display proper register number
+*Display proper register number found at the 12 - 9 bits
 B_DATAREG   MOVE.B      #'D',(A4)+
             MOVE.W      (A5),D2
             LSR.W       #6,D2
@@ -103,9 +100,15 @@ B_DATAREG   MOVE.B      #'D',(A4)+
             MOVE.W      D2,D5
             JSR         PrintD5Num
             RTS
-       
-
-
+*---------------------------------------------------------
+*display the register number 
+B_SRC_DMODE MOVE.W      (A5),D2             *reload op
+            MOVE.B      #',',(A4)+          *add comma to printer
+            MOVE.B      #'D',(A4)+          *D for data register
+            AND.W       #0007,D2            *mask out other bits
+            MOVE.W      D2,D5               *move register number to d5
+            JSR         Printd5Num          *print register numebr
+            RTS
 *-OPCODE Decode Type C--------------------------------------
 *-OPCODEs: ADDI, SUBI, NEG, ORI, CMPI, ADDI 
 *-xxxxxxxx Size2, Ea mode(3) Ea Reg(3)
@@ -434,7 +437,7 @@ BYTE_DATA   MOVE.B      #'$',(A4)+       *prepare the string for a long hex valu
             MOVE.L      (A3),D0         *Add correct data into d0 register for printing
             
             MOVE.W      #2,D2           *move 2 to counter since this is byte data 2 hex values are required
-            LSL.L       #2,D0           *shift data over 4 bits so beginning of byte is in the highest order
+            LSL.L       #8,D0           *shift data over 4 bits so beginning of byte is in the highest order
             JSR         GD_LOOP
             ADD.W       #2,D6           *since it is long data increment the address by 4 bits *d6 is opcode length counter
             RTS
@@ -514,6 +517,11 @@ PRINT7      MOVE.B      #'7',(A4)+
 PRINT8      MOVE.B      #'8',(A4)+
             RTS
     
+
+
+
+
+
 
 
 

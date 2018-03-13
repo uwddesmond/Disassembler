@@ -519,6 +519,7 @@ LOGIC_REG   MOVE.B      #'L',(A4)+          *Load OPCODE string into (A4)
             JSR         RIGHTORLEFT         *Append (L/R)
             JSR         GET_SIZE_67         *Append Size
             
+            JSR         DECODE_B
             RTS                             *Return to OutputBuilder file           
 
 ARITH_REG   MOVE.B      #'A',(A4)+          *Load OPCODE string into (A4)
@@ -725,6 +726,7 @@ APPND_LONG  MOVE.B      #'.',(A4)+
 *-FILES--------------------------------------------------------
             INCLUDE     'TeamVisualBasic_OP_Decoder.X68'    ;Helper file for jump table
             
+
 
 
 
