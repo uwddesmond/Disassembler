@@ -357,6 +357,9 @@ RTS         MOVE.B      #'R',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'T',(A4)+
             MOVE.B      #'S',(A4)+ 
 
+            MOVE.B      #WORD,D6            *Increment the size counter D6 by a WORD 
+            MOVE.B      #WORD,D7            *Increment the size counter D7 by a WORD
+            
             RTS                             *Return to OutputBuilder file
             
 LEA         MOVE.B      #'L',(A4)+          *Load OPCODE string into (A4)
@@ -577,6 +580,7 @@ DATA        MOVE.B      #'D',(A4)+          *Write DATA into string
             MOVE.B      #'A',(A4)+         
             MOVE.B      #09,(A4)+           *Write a tab into string
             
+            MOVE.B      #WORD,D6            *Increment the size counter D6 by a WORD 
             MOVE.B      #WORD,D7            *Increment the size counter D7 by a WORD 
             JSR         WRITE_DATA          *Write D7 worth of OPCODE data that couldn't be decoded
                                   
@@ -719,6 +723,7 @@ APPND_LONG  MOVE.W      #'.',(A4)+
 *-FILES--------------------------------------------------------
             INCLUDE     'TeamVisualBasic_OP_Decoder.X68'    ;Helper file for jump table
             
+
 
 
 
