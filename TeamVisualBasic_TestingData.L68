@@ -1,6 +1,6 @@
 00007F00 Starting Address
 Assembler used: EASy68K Editor/Assembler v5.15.04
-Created On: 3/12/2018 11:28:26 PM
+Created On: 3/13/2018 2:59:41 PM
 
 00000000                             1  *-----------------------------------------------------------
 00000000                             2  * Title      :  Team Visual Basic's Dissasembler: Testing File
@@ -14,47 +14,47 @@ Created On: 3/12/2018 11:28:26 PM
 00007F00                            10  START       ORG         $00007F00            ; first instruction of program
 00007F00                            11  
 00007F00                            12  *--------------------------Test the MOVE Op Code-----------------
-00007F00  1A3C 0012                 13  label1      MOVE.B      #$12,D5             *destroyed
-00007F04  3A3C 1234                 14              MOVE.W      #$1234,D5           *conqoured
-00007F08  2A3C 12345678             15              MOVE.L      #$12345678,D5       *decoded
-00007F0E  3A04                      16              MOVE.W      D4,D5               *vaporized
-00007F10  2A07                      17              MOVE.L      D7,D5               *liqudated
-00007F12  2479 1000AAAA             18              MOVEA.L     $1000AAAA,A2        *extinguished
-00007F18  2A4D                      19              MOVEA.L     A5,A5               *merc'd
-00007F1A  241D                      20              MOVE.L      (A5)+,D2            *headshot
-00007F1C  2425                      21              MOVE.L      -(A5),D2            *crushed
-00007F1E                            22              
-00007F1E                            23  *--------------------------MOVE has been defeated-----------------
-00007F1E  E94B                      24              LSL.W       #$4,D3              *demolished
-00007F20  E50B                      25              LSL.B       #$2,D3              *obliterated
-00007F22  ED8B                      26              LSL.L       #$6,D3              *slapped
-00007F24  E96B                      27              LSL.W       D4,D3
-00007F26  EA6E                      28              LSR.W       D5,D6          
-00007F28                            29              ;MOVE.L      $00012346,$00345678
-00007F28                            30              ;MOVE.L      A2,$12345678
-00007F28                            31              ;MOVE.L      $12345678,A2
-00007F28                            32              ;MOVE.W      (A2),D2
-00007F28                            33              ;MOVE.W      -(A2),D2
-00007F28                            34              ;MOVE.W      (A2)+,D2
-00007F28                            35              ;MOVE.W      D1,D1
-00007F28                            36              ;MOVE.B      D2,D2
-00007F28                            37              ;MOVE.B      D3,D3
-00007F28                            38              ;MOVE.W      D4,D4
-00007F28                            39              ;MOVE.B      $78,D5
-00007F28                            40              ;MOVE.W      D6,D6
-00007F28                            41              ;MOVE.W      D7,D7
-00007F28                            42  *---------------------------testing the <#data> type--------------
-00007F28                            43              ;MOVE.L      #$12345678,D2
-00007F28                            44              ;MOVE.W      #$1234,D5
-00007F28                            45              ;MOVE.B      #$12,D7
-00007F28                            46  *---------------------------Test the MOVEA op Code-------------------
-00007F28                            47              ;MOVEA.L     A2,A4
-00007F28                            48              ;MOVEA.L     #$12345678,A6
-00007F28                            49  
-00007F28                            50  
-00007F28                            51  
-00007F28  FFFF FFFF                 52              SIMHALT                     ; halt simulator
-00007F2C                            53              END         START                ; last line of source
+00007F00                            13  label1      ;MOVE.B      #$12,D5             *destroyed
+00007F00                            14              ;MOVE.W      #$1234,D5           *conqoured
+00007F00                            15              ;MOVE.L      #$12345678,D5       *decoded
+00007F00                            16              ;MOVE.W      D4,D5               *vaporized
+00007F00                            17              ;MOVE.L      D7,D5               *liqudated
+00007F00                            18              ;MOVEA.L     $1000AAAA,A2        *extinguished
+00007F00                            19              ;MOVEA.L     A5,A5               *merc'd
+00007F00  241D                      20              MOVE.L      (A5)+,D2            *headshot
+00007F02  2425                      21              MOVE.L      -(A5),D2            *crushed
+00007F04                            22              
+00007F04                            23  *--------------------------MOVE has been defeated-----------------
+00007F04  E94B                      24              LSL.W       #$4,D3              *demolished
+00007F06  E50B                      25              LSL.B       #$2,D3              *obliterated
+00007F08  ED8B                      26              LSL.L       #$6,D3              *slapped
+00007F0A  E96B                      27              LSL.W       D4,D3
+00007F0C  EA6E                      28              LSR.W       D5,D6          
+00007F0E                            29              ;MOVE.L      $00012346,$00345678
+00007F0E                            30              ;MOVE.L      A2,$12345678
+00007F0E                            31              ;MOVE.L      $12345678,A2
+00007F0E                            32              ;MOVE.W      (A2),D2
+00007F0E                            33              ;MOVE.W      -(A2),D2
+00007F0E                            34              ;MOVE.W      (A2)+,D2
+00007F0E                            35              ;MOVE.W      D1,D1
+00007F0E                            36              ;MOVE.B      D2,D2
+00007F0E                            37              ;MOVE.B      D3,D3
+00007F0E                            38              ;MOVE.W      D4,D4
+00007F0E                            39              ;MOVE.B      $78,D5
+00007F0E                            40              ;MOVE.W      D6,D6
+00007F0E                            41              ;MOVE.W      D7,D7
+00007F0E                            42  *---------------------------testing the <#data> type--------------
+00007F0E                            43              ;MOVE.L      #$12345678,D2
+00007F0E                            44              ;MOVE.W      #$1234,D5
+00007F0E                            45              ;MOVE.B      #$12,D7
+00007F0E                            46  *---------------------------Test the MOVEA op Code-------------------
+00007F0E                            47              ;MOVEA.L     A2,A4
+00007F0E                            48              ;MOVEA.L     #$12345678,A6
+00007F0E                            49  
+00007F0E                            50  
+00007F0E                            51  
+00007F0E  FFFF FFFF                 52              SIMHALT                     ; halt simulator
+00007F12                            53              END         START                ; last line of source
 
 No errors detected
 No warnings generated

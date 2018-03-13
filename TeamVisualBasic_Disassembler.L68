@@ -1,6 +1,6 @@
 00001000 Starting Address
 Assembler used: EASy68K Editor/Assembler v5.15.04
-Created On: 3/13/2018 9:41:15 AM
+Created On: 3/13/2018 3:07:45 PM
 
 00000000                             1  *-----------------------------------------------------------
 00000000                             2  * Title      :  Team Visual Basic's Disassembler
@@ -1320,9 +1320,9 @@ Created On: 3/13/2018 9:41:15 AM
 00001FD8  B47C 0002               1316              CMP.W       #2,D2
 00001FDC  6700 008E               1317              BEQ         SaddINmode      *addres indirect mode ---(An)
 00001FE0  B47C 0003               1318              CMP.W       #3,D2
-00001FE4  6700 00A0               1319              BEQ         SaddINpre       *addess indirect pre dec ----(An)
+00001FE4  6700 00BE               1319              BEQ         SaddINpost      *addess indirect pre dec --- (An)+
 00001FE8  B47C 0004               1320              CMP.W       #4,D2
-00001FEC  6700 00B6               1321              BEQ         SaddINpost      *address indirect post inc --- (An)+
+00001FEC  6700 0098               1321              BEQ         SaddINpre       *address indirect post inc --- -(An)
 00001FF0  B47C 0005               1322              CMP.W       #5,D2
 00001FF4  6700 00CC               1323              BEQ         S16An           *source number of word size --- (d16,An)
 00001FF8  B47C 0006               1324              CMP.W       #6,D2
@@ -1338,9 +1338,9 @@ Created On: 3/13/2018 9:41:15 AM
 00002018  B47C 0002               1334              CMP.W       #2,D2
 0000201C  6700 010A               1335              BEQ         DaddINmode      *addres indirect mode ---(An)
 00002020  B47C 0003               1336              CMP.W       #3,D2
-00002024  6700 011C               1337              BEQ         DaddINpre       *addess indirect pre dec ----(An)
+00002024  6700 013A               1337              BEQ         DaddINpost      *addess indirect post inc --- (An)+
 00002028  B47C 0004               1338              CMP.W       #4,D2
-0000202C  6700 0132               1339              BEQ         DaddINpost      *address indirect post inc --- (An)+
+0000202C  6700 0114               1339              BEQ         DaddINpre       *address indirect post inc --- -(An)
 00002030  B47C 0005               1340              CMP.W       #5,D2
 00002034  6700 0148               1341              BEQ         D16An           *source number of word size --- (d16,An)
 00002038  B47C 0006               1342              CMP.W       #6,D2
@@ -1573,9 +1573,9 @@ Created On: 3/13/2018 9:41:15 AM
 00002286                          1569  
 00002286                          1570  
 00002286                          1571  
-00002286                          1572  -------------------- end include --------------------
-00002286                          1573              
-00002286                          1574  
+00002286                          1572  
+00002286                          1573  -------------------- end include --------------------
+00002286                          1574              
 00002286                          1575  
 00002286                          1576  
 00002286                          1577  
@@ -1595,9 +1595,10 @@ Created On: 3/13/2018 9:41:15 AM
 00002286                          1591  
 00002286                          1592  
 00002286                          1593  
-00002286                          1594  -------------------- end include --------------------
-00002286                          1595              
-00002286                          1596              END         START               ;last line of source
+00002286                          1594  
+00002286                          1595  -------------------- end include --------------------
+00002286                          1596              
+00002286                          1597              END         START               ;last line of source
 
 No errors detected
 No warnings generated

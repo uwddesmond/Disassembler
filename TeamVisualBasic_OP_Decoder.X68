@@ -250,9 +250,9 @@ GET_SRCMODE CMP.W       #0,D2
             CMP.W       #2,D2
             BEQ         SaddINmode      *addres indirect mode ---(An)
             CMP.W       #3,D2
-            BEQ         SaddINpre       *addess indirect pre dec ----(An)
+            BEQ         SaddINpost      *addess indirect pre dec --- (An)+
             CMP.W       #4,D2
-            BEQ         SaddINpost      *address indirect post inc --- (An)+
+            BEQ         SaddINpre       *address indirect post inc --- -(An)
             CMP.W       #5,D2
             BEQ         S16An           *source number of word size --- (d16,An)
             CMP.W       #6,D2
@@ -271,9 +271,9 @@ GET_DSTMODE CMP.W       #0,D2
             CMP.W       #2,D2
             BEQ         DaddINmode      *addres indirect mode ---(An)
             CMP.W       #3,D2
-            BEQ         DaddINpre       *addess indirect pre dec ----(An)
+            BEQ         DaddINpost      *addess indirect post inc --- (An)+
             CMP.W       #4,D2
-            BEQ         DaddINpost      *address indirect post inc --- (An)+
+            BEQ         DaddINpre       *address indirect post inc --- -(An)
             CMP.W       #5,D2
             BEQ         D16An           *source number of word size --- (d16,An)
             CMP.W       #6,D2
@@ -517,6 +517,7 @@ PRINT7      MOVE.B      #'7',(A4)+
 PRINT8      MOVE.B      #'8',(A4)+
             RTS
     
+
 
 
 
