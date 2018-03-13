@@ -300,23 +300,23 @@ SaddMode    MOVE.B      #'A',(A4)+
     
 SaddInMode  MOVE.B      #'(',(A4)+
             MOVE.B      #'A',(A4)+
-            JSR         T1_GrabSreg
-            JSR         PrintD5Num
+            JSR         T1_GrabSreg         *put reg num into D5
+            JSR         A7toSP              *if reg num is 7, replace w/ SP 
             MOVE.B      #')',(A4)+
             RTS
     
 SaddINpre   MOVE.B      #'-',(A4)+
             MOVE.B      #'(',(A4)+
             MOVE.B      #'A',(A4)+
-            JSR         T1_GrabSreg
-            JSR         PrintD5Num
+            JSR         T1_GrabSreg         *put reg num into D5
+            JSR         A7toSP              *if reg num is 7, replace w/ SP 
             MOVE.B      #')',(A4)+
             RTS
     
 SaddINpost  MOVE.B      #'(',(A4)+
             MOVE.B      #'A',(A4)+
-            JSR         T1_GrabSreg
-            JSR         PrintD5Num
+            JSR         T1_GrabSreg         *put reg num into D5
+            JSR         A7toSP              *if reg num is 7, replace w/ SP 
             MOVE.B      #')',(A4)+
             MOVE.B      #'+',(A4)+
             RTS
@@ -348,6 +348,20 @@ IMMEDIATE_D MOVE.B      #'#',(A4)+              *add the # to data string to imm
             CMP.W       #6,D7
             BEQ         BYTE_DATA             *means the immediate data is a long value
             
+*-A7 to SP special case-------------------------------------
+A7toSP      CMP.B       #7,D5           *If Address register (num stored in D5) is A7
+            BEQ         A7toSP_repl     *then branch to subroutine that replaces A7 string with SP   
+            BRA         A7toSP_nA7      *else, branch normally and print A0-A6
+
+A7toSP_nA7  JSR         PrintD5Num
+            RTS
+
+A7toSP_repl SUBA        #1,A4           *move the A4 string back by a digit
+            MOVE.B      #'S',(A4)+      *replace string with SP
+            MOVE.B      #'P',(A4)+      
+            RTS
+            
+
              
 *----------------------------------------------------------- 
 *-Destination Helper Functions
@@ -367,23 +381,23 @@ DaddMode    MOVE.B      #'A',(A4)+
     
 DaddInMode  MOVE.B      #'(',(A4)+
             MOVE.B      #'A',(A4)+
-            JSR         T1_GrabDreg
-            JSR         PrintD5Num
+            JSR         T1_GrabDreg         *put reg num into D5
+            JSR         A7toSP              *if reg num is 7, replace w/ SP           
             MOVE.B      #')',(A4)+
             RTS
     
 DaddINpre   MOVE.B      #'-',(A4)+
             MOVE.B      #'(',(A4)+
             MOVE.B      #'A',(A4)+
-            JSR         T1_GrabDreg
-            JSR         PrintD5Num
+            JSR         T1_GrabDreg         *put reg num into D5
+            JSR         A7toSP              *if reg num is 7, replace w/ SP 
             MOVE.B      #')',(A4)+
             RTS
     
 DaddINpost  MOVE.B      #'(',(A4)+
             MOVE.B      #'A',(A4)+
-            JSR         T1_GrabDreg
-            JSR         PrintD5Num
+            JSR         T1_GrabDreg         *put reg num into D5
+            JSR         A7toSP              *if reg num is 7, replace w/ SP 
             MOVE.B      #')',(A4)+
             MOVE.B      #'+',(A4)+
             RTS
@@ -470,7 +484,7 @@ PrintD5Num  CMP.B       #0,D5           *print the numeber in d5
             CMP.B       #6,D5
             BEQ         PRINT6
             CMP.B       #7,D5
-            BEQ         PRINT7
+            BEQ         PRINT7          
             CMP.B       #8,D5
             BEQ         PRINT8  
 
@@ -517,6 +531,11 @@ PRINT7      MOVE.B      #'7',(A4)+
 PRINT8      MOVE.B      #'8',(A4)+
             RTS
     
+
+
+
+
+
 
 
 

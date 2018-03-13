@@ -10,15 +10,25 @@
 START       ORG         $00007F00            ; first instruction of program
 
 *--------------------------Test the MOVE Op Code-----------------
-label1      ;MOVE.B      #$12,D5             *destroyed
-            ;MOVE.W      #$1234,D5           *conqoured
-            ;MOVE.L      #$12345678,D5       *decoded
-            ;MOVE.W      D4,D5               *vaporized
-            ;MOVE.L      D7,D5               *liqudated
-            ;MOVEA.L     $1000AAAA,A2        *extinguished
-            ;MOVEA.L     A5,A5               *merc'd
+label1      MOVE.B      #$12,D5             *destroyed
+            MOVE.W      #$1234,D5           *conqoured
+            MOVE.L      #$12345678,D5       *decoded
+            MOVE.W      D4,D5               *vaporized
+            MOVE.L      D7,D5               *liqudated
+            MOVEA.L     $1000AAAA,A2        *extinguished
+            MOVEA.L     A5,A5               *merc'd
             MOVE.L      (A5)+,D2            *headshot
             MOVE.L      -(A5),D2            *crushed
+            MOVE.W      D5,A5
+            MOVE.W      D6,(A5)
+            MOVE.L      D2,(A5)+
+            MOVE.W      D2,-(A5)
+            MOVE.W      D2,-(SP)
+            MOVE.W      (SP),D5
+            MOVE.W      -(SP),D5
+            MOVE.W      (SP)+,D5
+            MOVE.W      D5,(SP)
+            MOVE.W      D5,(SP)+
             
 *--------------------------MOVE has been defeated-----------------
             LSL.W       #$4,D3              *demolished
@@ -54,6 +64,7 @@ label1      ;MOVE.B      #$12,D5             *destroyed
     
     
     
+
 
 
 
