@@ -22,7 +22,7 @@
 *-OPCODEs: MOVE,MOVEA,
 *-xxxx Dest Reg(3) Dest Mode(3) Src Mode(3) Src Reg(3)  
 
-DECODE_A    MOVE.B      #'9',(A4)+          *tab after op code
+DECODE_A    MOVE.B      #9,(A4)+          *tab after op code
             MOVE.W      #2,D6               *Initilize opcode length to 2
             MOVE.W      (A5),D2             *Copy OPCODE into D2
             LSR.W       #3,D2               *Shift right 3 - isolate Src Mode
@@ -41,7 +41,7 @@ DECODE_A    MOVE.B      #'9',(A4)+          *tab after op code
 *-OPCODEs: LSL/LSR,ASL/ASR,ROL/ROR
 *-xxxx Register(3) OP Mode(3) EA Mode(3) EA Reg(3)  
                
-DECODE_B    MOVE.B      #'9',(A4)+          *tab after op code
+DECODE_B    MOVE.B      #9,(A4)+          *tab after op code
             MOVE.W      #2,D6               *Initilize opcode length to 2
             MOVE.W      (A5),D2
             LSR.W       #6,D2
@@ -95,7 +95,7 @@ B_SCOUNT    MOVE.W      (A5),D2
    
 *------------------------------------------------------------
 *Display proper register number
-B_DATAREG   MOVE.B      #'D',(A4)+
+B_DATAREG   MOVE.B      #D,(A4)+
             MOVE.W      (A5),D2
             LSR.W       #6,D2
             LSR.W       #3,D2
@@ -111,7 +111,7 @@ B_DATAREG   MOVE.B      #'D',(A4)+
 *-xxxxxxxx Size2, Ea mode(3) Ea Reg(3)
 *STILL NEED TO PRINT DATA THAT FOLLOWS FIRST       
   
-DECODE_C    MOVE.B      #'9',(A4)+          *tab after op code
+DECODE_C    MOVE.B      #9,(A4)+          *tab after op code
             MOVE.W      #2,D6               *Initilize opcode length to 2
             MOVE.W      (A5),D2
             *ENTER PRINT DATA CODE HERE
@@ -138,7 +138,7 @@ C_SRC       MOVE.W      (A5),D2
 *-OPCODEs: 
 *-xxxx Register(3) x Size(2) EA Mode(3) EA Reg(3)       
    
-DECODE_D    MOVE.B      #'9',(A4)+          *tab after op code
+DECODE_D    MOVE.B      #9,(A4)+          *tab after op code
             MOVE.W      #2,D6               *Initilize opcode length to 2   
             MOVE.B      #'#',D6
             MOVE.B      #'$',D6     
@@ -477,6 +477,7 @@ PrintD5Num  CMP.B       #0,D5           *print the numeber in d5
 *D0 =  must be loaded with bits to be printed, starts from highest order bit
 *D2 = how many bits it will convert to hex starting with the highest order bit in d0
 *Therefore bits wanting to be printed should be shifter or rotated to the highest order in d0
+*HEX_2_ASCII exists in the Print builder file
 *------------------------------------------------------------------------------------------    
 GD_LOOP     JSR         HEX_2_ASCII
             SUBI        #1,D2
