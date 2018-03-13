@@ -10,7 +10,8 @@
 START       ORG         $00007F00            ; first instruction of program
 
 *--------------------------Test the MOVE Op Code-----------------
-label1      ;MOVE.L      $00012346,$00345678
+label1      MOVE.W      #$1234,D5
+            ;MOVE.L      $00012346,$00345678
             ;MOVE.L      A2,$12345678
             ;MOVE.L      $12345678,A2
             ;MOVE.W      (A2),D2
@@ -25,7 +26,7 @@ label1      ;MOVE.L      $00012346,$00345678
             ;MOVE.W      D7,D7
 *---------------------------testing the <#data> type--------------
             ;MOVE.L      #$12345678,D2
-            MOVE.W      #$1234,D5
+             MOVE.W      #$1234,D5
             ;MOVE.B      #$12,D7
 *---------------------------Test the MOVEA op Code-------------------
             ;MOVEA.L     A2,A4
@@ -38,6 +39,7 @@ label1      ;MOVE.L      $00012346,$00345678
     
     
     
+
 
 
 

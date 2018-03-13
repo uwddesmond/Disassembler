@@ -1,6 +1,6 @@
 00001000 Starting Address
 Assembler used: EASy68K Editor/Assembler v5.15.04
-Created On: 3/12/2018 8:41:25 PM
+Created On: 3/12/2018 9:09:18 PM
 
 00000000                             1  *-----------------------------------------------------------
 00000000                             2  * Title      :  Team Visual Basic's Disassembler
@@ -1007,7 +1007,7 @@ Created On: 3/12/2018 8:41:25 PM
 00001C70                          1003  
 00001C70                          1004  
 00001C70                          1005  
-00001C70  18FC 0039               1006  DECODE_A    MOVE.B      #'9',(A4)+          *tab after op code
+00001C70  18FC 0009               1006  DECODE_A    MOVE.B      #9,(A4)+          *tab after op code
 00001C74  3C3C 0002               1007              MOVE.W      #2,D6               *Initilize opcode length to 2
 00001C78  3415                    1008              MOVE.W      (A5),D2             *Copy OPCODE into D2
 00001C7A  E64A                    1009              LSR.W       #3,D2               *Shift right 3 - isolate Src Mode
@@ -1023,7 +1023,7 @@ Created On: 3/12/2018 8:41:25 PM
 00001C98  4E75                    1019              RTS                             *Return back to jump table
 00001C9A                          1020  
 00001C9A                          1021                 
-00001C9A  18FC 0039               1022  DECODE_B    MOVE.B      #'9',(A4)+          *tab after op code
+00001C9A  18FC 0009               1022  DECODE_B    MOVE.B      #9,(A4)+          *tab after op code
 00001C9E  3C3C 0002               1023              MOVE.W      #2,D6               *Initilize opcode length to 2
 00001CA2  3415                    1024              MOVE.W      (A5),D2
 00001CA4  EC4A                    1025              LSR.W       #6,D2
@@ -1066,7 +1066,8 @@ Created On: 3/12/2018 8:41:25 PM
 00001D0C  4EB9 0000205E           1062              JSR         PrintD5Num
 00001D12  4E75                    1063              RTS
 00001D14                          1064     
-00001D14  18FC 0044               1065  B_DATAREG   MOVE.B      #'D',(A4)+
+Line 1065 ERROR: Undefined symbol
+00001D14  18FC 008E               1065  B_DATAREG   MOVE.B      #D,(A4)+
 00001D18  3415                    1066              MOVE.W      (A5),D2
 00001D1A  EC4A                    1067              LSR.W       #6,D2
 00001D1C  E64A                    1068              LSR.W       #3,D2
@@ -1078,7 +1079,7 @@ Created On: 3/12/2018 8:41:25 PM
 00001D2C                          1074  
 00001D2C                          1075  
 00001D2C                          1076    
-00001D2C  18FC 0039               1077  DECODE_C    MOVE.B      #'9',(A4)+          *tab after op code
+00001D2C  18FC 0009               1077  DECODE_C    MOVE.B      #9,(A4)+          *tab after op code
 00001D30  3C3C 0002               1078              MOVE.W      #2,D6               *Initilize opcode length to 2
 00001D34  3415                    1079              MOVE.W      (A5),D2
 00001D36                          1080              *ENTER PRINT DATA CODE HERE
@@ -1098,7 +1099,7 @@ Created On: 3/12/2018 8:41:25 PM
 00001D58                          1094  
 00001D58                          1095  
 00001D58                          1096     
-00001D58  18FC 0039               1097  DECODE_D    MOVE.B      #'9',(A4)+          *tab after op code
+00001D58  18FC 0009               1097  DECODE_D    MOVE.B      #9,(A4)+          *tab after op code
 00001D5C  3C3C 0002               1098              MOVE.W      #2,D6               *Initilize opcode length to 2   
 00001D60  1C3C 0023               1099              MOVE.B      #'#',D6
 00001D64  1C3C 0024               1100              MOVE.B      #'$',D6     
@@ -1456,7 +1457,7 @@ Created On: 3/12/2018 8:41:25 PM
 000020EA                          1452              
 000020EA                          1453              END         START               ;last line of source
 
-No errors detected
+1 error detected
 No warnings generated
 
 

@@ -95,7 +95,7 @@ B_SCOUNT    MOVE.W      (A5),D2
    
 *------------------------------------------------------------
 *Display proper register number
-B_DATAREG   MOVE.B      #D,(A4)+
+B_DATAREG   MOVE.B      #'D',(A4)+
             MOVE.W      (A5),D2
             LSR.W       #6,D2
             LSR.W       #3,D2
@@ -515,6 +515,7 @@ PRINT7      MOVE.B      #'7',(A4)+
 PRINT8      MOVE.B      #'8',(A4)+
             RTS
     
+
 
 
 
