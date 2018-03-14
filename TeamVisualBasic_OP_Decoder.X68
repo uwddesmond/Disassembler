@@ -73,7 +73,7 @@ DECODE_C    MOVE.B      #9,(A4)+            *tab after op code
             RTS
             
 *-OPCODE Decode Type D--------------------------------------
-*-OPCODEs: 
+*-OPCODEs: MOVEQ, EOR, CMP, BCLR (immediate and register)
 *-xxxx Register(3) x Size(2) EA Mode(3) EA Reg(3)       
    
 DECODE_D    MOVE.B      #9,(A4)+          *tab after op code
@@ -560,6 +560,7 @@ PRINT7      MOVE.B      #'7',(A4)+
 PRINT8      MOVE.B      #'8',(A4)+
             RTS
     
+
 
 
 
