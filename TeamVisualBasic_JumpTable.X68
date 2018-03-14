@@ -692,13 +692,14 @@ ROTATE_MEM  MOVE.B      #'R',(A4)+          *Load OPCODE string into (A4)
             
             RTS
               
-RIGHTORLEFT MOVE.W      (A0),D0             *reload op
-            LSL.W       #8,D0               *shift until dr bit is reached
-            CMP.W       #0,D0               *check if left
-            BEQ         LEFT
+RIGHTORLEFT MOVE.W      (A5),D0             *reload op
+            LSR.L       #8,D0               *shift until dr bit is reached
+            AND.L       #$00000001,D0       *isolate dr bit
+            CMP.B       #0,D0               *check if left
+            BEQ         RIGHT
             
-            CMP.W       #1,D0               *check if right
-            BEQ         RIGHT  
+            CMP.B       #1,D0               *check if right
+            BEQ         LEFT  
                                               
 LEFT        MOVE.B      #'L',(A4)+          *Load directional string 'L' into (A4)
             RTS                      
@@ -856,6 +857,7 @@ APPND_LONG  MOVE.B      #'.',(A4)+
 *-FILES--------------------------------------------------------
             INCLUDE     'TeamVisualBasic_OP_Decoder.X68'    ;Helper file for jump table
             
+
 
 
 

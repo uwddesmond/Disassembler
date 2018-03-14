@@ -22,7 +22,7 @@
 *-OPCODEs: MOVE,MOVEA,
 *-xxxx Dest Reg(3) Dest Mode(3) Src Mode(3) Src Reg(3)  
 
-DECODE_A    MOVE.B      #9,(A4)+          *tab after op code
+DECODE_A    MOVE.B      #9,(A4)+            *tab after op code
             MOVE.W      #2,D6               *Initilize opcode length to 2
             MOVE.W      (A5),D2             *Copy OPCODE into D2
             LSR.W       #3,D2               *Shift right 3 - isolate Src Mode
@@ -41,74 +41,24 @@ DECODE_A    MOVE.B      #9,(A4)+          *tab after op code
 *-OPCODEs: LSL/LSR,ASL/ASR,ROL/ROR
 *-xxxx Register(3) OP Mode(3) EA Mode(3) EA Reg(3)  
                
-DECODE_B    MOVE.B      #9,(A4)+          *tab after op code
-            MOVE.W      #2,D6             *Initilize opcode length to 2
-            MOVE.W      (A5),D2           *reload op code
+DECODE_B    MOVE.B      #9,(A4)+            *tab after op code
+            MOVE.W      #2,D6               *Initilize opcode length to 2
+            MOVE.W      (A5),D2             *reload op code
+            
             LSR.W       #6,D2              
             AND.W       #$0003,D2
             CMP.W       #3,D2
-            BEQ         B_ADDMODE
-            MOVE.W      (A5),D5             
-            LSR.W       #5,D5              *logical shift left to get i/r
+            BEQ         B_ADDMODE           *this shift is an address variant
+            
+            MOVE.W      (A5),D5             *otherwise this shift is a register variant  
+            LSR.W       #5,D5               *logical shift left to get i/r
             AND.W       #$0001,D5           
-            CMP.W       #0,D5
-            BEQ         B_SCOUNT
-            CMP.W       #1,D5
+            CMP.W       #0,D5               *if i/r bit is 0, bits are COUNT
+            BEQ         B_SCOUNT            
+            CMP.W       #1,D5               *if i/r bit is 1, bits are REGISTER
             BEQ         B_DATAREG           
             RTS
 
-*-------------------------------------------------------
-*Shift on address is occuring    
-*print address by using EA Mode and EA Reg bits at end of op       
-B_ADDMODE
-           MOVE.W       (A5),D2
-           LSR.W        #3,D2
-           AND.W        #$0007,D2
-           JSR          GET_DSTMODE
-           MOVE.W       (A5),D2
-           AND.W        #$0007,D2
-           MOVE.W       D2,D5
-           JSR          PrintD5Num
-           RTS
-            
-            
-*-----------------------------------------------------------
-*-OPTYPE_B HELPER FUNCTIONS
-*Helps determine the size of shifts or registers
-*-----------------------------------------------------------
-
-*-----------------------------------------------------------
-*Value stored in cont/reg is a number of bits to shift
-*Display as #number
-B_SCOUNT    MOVE.W      (A5),D2
-            LSR.W       #6,D2
-            LSR.W       #3,D2
-            AND.W       #$0007,D2
-            MOVE.W      D2,D5
-            MOVE.B      #'#',(A4)+
-            JSR         PrintD5Num
-            JSR         B_SRC_DMODE
-            RTS
-   
-*------------------------------------------------------------
-*Display proper register number found at the 12 - 9 bits
-B_DATAREG   MOVE.B      #'D',(A4)+
-            MOVE.W      (A5),D2
-            LSR.W       #6,D2
-            LSR.W       #3,D2
-            AND.W       #$0007,D2
-            MOVE.W      D2,D5
-            JSR         PrintD5Num
-            RTS
-*---------------------------------------------------------
-*display the register number 
-B_SRC_DMODE MOVE.W      (A5),D2             *reload op
-            MOVE.B      #',',(A4)+          *add comma to printer
-            MOVE.B      #'D',(A4)+          *D for data register
-            AND.W       #0007,D2            *mask out other bits
-            MOVE.W      D2,D5               *move register number to d5
-            JSR         Printd5Num          *print register numebr
-            RTS
 *-OPCODE Decode Type C--------------------------------------
 *-OPCODEs: ADDI, SUBI, NEG, ORI, CMPI, ADDI 
 *-xxxxxxxx Size2, Ea mode(3) Ea Reg(3)
@@ -120,23 +70,6 @@ DECODE_C    MOVE.B      #9,(A4)+          *tab after op code
             *ENTER PRINT DATA CODE HERE
             JSR         C_SRC
             
-
-
-*-----------------------------------------------------------
-*-OPTYPE_c HELPER FUNCTIONS
-*Helps print second argument
-*-----------------------------------------------------------
-
-C_SRC       MOVE.W      (A5),D2
-            LSR.W       #3,D2
-            AND.W       #$0007,D2
-            JSR         GET_DSTMODE
-            MOVE.W      (A5),D2
-            AND.W       #$0007,D2
-            JSR         GET_SRCMODE
-            RTS
-
-
 *-OPCODE Decode Type D--------------------------------------
 *-OPCODEs: 
 *-xxxx Register(3) x Size(2) EA Mode(3) EA Reg(3)       
@@ -193,10 +126,73 @@ DECODE_F    MOVE.W      #2,D6               *Initilize opcode length to 2
            *Check for the size of the OPCODE
             
 *-----------------------------------------------------------
-*-OPTYPE_F HELPER FUNCTIONS
-*Helps determine the OPTYPE
+*-OPTYPE_B HELPER FUNCTIONS
+*Helps determine the size of shifts or registers
 *-----------------------------------------------------------
-F_OPMODE
+*-------------------------------------------------------
+*Shift on address is occuring    
+*print address by using EA Mode and EA Reg bits at end of op       
+B_ADDMODE
+           MOVE.W       (A5),D2
+           LSR.W        #3,D2
+           AND.W        #$0007,D2
+           JSR          GET_DSTMODE
+           MOVE.W       (A5),D2
+           AND.W        #$0007,D2
+           MOVE.W       D2,D5
+           JSR          PrintD5Num
+           RTS
+           
+*-----------------------------------------------------------
+*Value stored in cont/reg is a number of bits to shift
+*Display as #number
+B_SCOUNT    MOVE.W      (A5),D2
+            LSR.L       #6,D2
+            LSR.L       #3,D2
+            AND.W       #$0007,D2
+            MOVE.W      D2,D5
+            MOVE.B      #'#',(A4)+
+            JSR         PrintD5Num
+            JSR         B_SRC_DMODE
+            RTS
+   
+*------------------------------------------------------------
+*Display proper register number found at the 12 - 9 bits
+B_DATAREG   MOVE.B      #'D',(A4)+
+            MOVE.W      (A5),D2
+            LSR.W       #6,D2
+            LSR.W       #3,D2
+            AND.W       #$0007,D2
+            MOVE.W      D2,D5
+            JSR         PrintD5Num
+            JSR         B_SRC_DMODE
+            RTS
+*---------------------------------------------------------
+*display the register number 
+B_SRC_DMODE MOVE.W      (A5),D2             *reload op
+            MOVE.B      #',',(A4)+          *add comma to printer
+            MOVE.B      #'D',(A4)+          *D for data register
+            AND.W       #0007,D2            *mask out other bits
+            MOVE.W      D2,D5               *move register number to d5
+            JSR         Printd5Num          *print register numebr
+            RTS
+            
+
+
+*-----------------------------------------------------------
+*-OPTYPE_c HELPER FUNCTIONS
+*Helps print second argument
+*-----------------------------------------------------------
+C_SRC       MOVE.W      (A5),D2
+            LSR.W       #3,D2
+            AND.W       #$0007,D2
+            JSR         GET_DSTMODE
+            MOVE.W      (A5),D2
+            AND.W       #$0007,D2
+            JSR         GET_SRCMODE
+            RTS
+
+           
 
 *-OPS WITHOUT TYPE------------------------------------------
 *-OPCODES: MOVEQ
@@ -232,8 +228,12 @@ D_JSR       MOVE.W      #2,D6               *Initilize opcode length to 2
             JSR         GET_SRCMODE         *print source mode
             RTS
 
-
-            
+*-----------------------------------------------------------
+*-OPTYPE_F HELPER FUNCTIONS
+*Helps determine the OPTYPE
+*-----------------------------------------------------------
+F_OPMODE
+           
             
           
             
@@ -531,6 +531,7 @@ PRINT7      MOVE.B      #'7',(A4)+
 PRINT8      MOVE.B      #'8',(A4)+
             RTS
     
+
 
 
 
