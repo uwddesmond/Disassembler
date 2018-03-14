@@ -16,6 +16,21 @@ START       ORG         $00007F00            ; first instruction of program
             ADDI.W      #$1234,D7
             ADDI.L      #$12345678,D0
             
+            SUBI.B      #$12,D0
+            SUBI.W      #$1234,D7
+            SUBI.L      #$12345678,D0
+            
+            ORI.B       #$12,D0
+            ORI.W       #$1234,D7
+            ORI.L       #$12345678,D0
+            
+            CMPI.B      #$12,D0
+            CMPI.W      #$1234,D7
+            CMPI.L      #$12345678,D0
+            
+            
+            ;NEG?
+            
 
 
 *-Shift test-----------------------------------------------------

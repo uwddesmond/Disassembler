@@ -60,7 +60,7 @@ DECODE_B    MOVE.B      #9,(A4)+            *tab after op code
             RTS
 
 *-OPCODE Decode Type C--------------------------------------
-*-OPCODEs: ADDI, SUBI, NEG, ORI, CMPI, ADDI 
+*-OPCODEs: ADDI, SUBI, NEG, ORI, CMPI, 
 *-xxxxxxxx Size2, Ea mode(3) Ea Reg(3)
 *STILL NEED TO PRINT DATA THAT FOLLOWS FIRST       
   
@@ -69,9 +69,7 @@ DECODE_C    MOVE.B      #9,(A4)+            *tab after op code
             
             JSR         PRINT_DATA          *Append immediate data to string
             JSR         B_SRC_DMODE         *Append ,D(reg num) to string
-            ;MOVE.W      (A5),D2
-            *ENTER PRINT DATA CODE HERE
-            ;JSR         C_SRC
+
             RTS
             
 *-OPCODE Decode Type D--------------------------------------
@@ -193,9 +191,9 @@ B_SRC_DMODE MOVE.W      (A5),D2             *reload op
 *Helps print second argument
 *-----------------------------------------------------------
 *DECODE TYPE SPECIFIC FUNCTION
-C_SRC       MOVE.W      (A5),D2             *Reload op
-            LSR.W       #3,D2
-            AND.W       #$0007,D2           *Isolate EA MODE
+C_SRC       ;MOVE.W      (A5),D2             *Reload op
+            ;LSR.W       #3,D2
+            ;AND.W       #$0007,D2           *Isolate EA MODE
             
             ;JSR         GET_EAMODE          *Append to string appropriate EA mode data
             

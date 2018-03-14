@@ -13,12 +13,6 @@
 *-then Branch off into 16 bin possibilities
 *-----------------------------------------------------------      
 JT_START    MOVE.L      #2,D7               *All OPCODEs takes up a 2 bytes of space, save this into length counter D7
-            CLR.L       D0                  *Clear D0
-            CLR.L       D1                  *Clear D1
-            CLR.L       D2                  *Clear D2
-            CLR.L       D3                  *Clear D3
-            CLR.L       D4                  *Clear D4
-            CLR.L       D5                  *Clear D5
             CLR.L       D6                  *Clear the D6 address increment counter
             MOVE.W      (A5),D0             *Move OPCODE into D0 to bit shift
             
@@ -721,7 +715,6 @@ DATA        MOVE.B      #'D',(A4)+          *Write DATA into string
             MOVE.B      #09,(A4)+           *Write a tab into string
             
             ADD.B       #2,D6               *Increment the size counter D6 by a word 
-            ADD.B       #2,D7               *Increment the size counter D7 by a word 
             JSR         WRITE_DATA          *Write D7 worth of OPCODE data that couldn't be decoded
                                   
             RTS                             *Return program flow back to Dissasembler file
@@ -740,11 +733,11 @@ P_OPERAND   SUBI.B      #2,D7               *Subtract 2 from D7 size counter to 
             
 *-Print/Data Helper Methods------------------------------------
 *-Don't access these methods directly, use P_OPERAND instead
-WRITE_DATA  MOVE.L      D7,D3               *D3 is counter var. Same size as the length specified in D7
+WRITE_DATA  MOVE.L      D6,D3               *D3 is counter var. Same size as the length specified in D6
 WRITE_LOOP  CMPI.B      #0,D3               *is D3 == 0?
             BEQ         WRITE_DONE          *then we are done writing the string 
             
-            SUBI        #BYTE,D3            *Decrement counter var by 1 byte                       
+            SUBI        #1,D3               *Decrement counter var by 1                       
 
             MOVE.B      (A5),D2             *Move 1 byte of OPCODE/OPERAND data into D2                   
             LSR.W       #4,D2               *Isolate left 4 bits of first byte in D1             

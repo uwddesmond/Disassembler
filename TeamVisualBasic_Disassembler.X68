@@ -105,6 +105,14 @@ PROMPT_NEW  LEA         M_NPROMPT,A1        ;Ask user if they would like to run 
             BRA         PROMPT_NEW          ;Re prompt            
 
 P_RESTART   JSR         DISP_WAIT
+            CLR.L       D0
+            CLR.L       D1
+            CLR.L       D2
+            CLR.L       D3
+            CLR.L       D4
+            CLR.L       D5
+            CLR.L       D6
+            CLR.L       D7
             BRA         START 
 *-END-------------------------------------------------------
 END         MOVE.B      #9,D0               ;End program
