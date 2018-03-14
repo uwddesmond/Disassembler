@@ -36,7 +36,7 @@ DISP_WAIT   LEA         M_WAIT,A1           ;Load wait message
             
 *-Main Loop-------------------------------------------------
 MAIN_LOOP   JSR         DISP_WAIT           ;Display Press Enter to Continue msg
-            MOVE.B      #26,D4              ;D4 loop var - print 26 lines per page
+            MOVE.B      #24,D4              ;D4 loop var - print 26 lines per page
             
 NEXT_OP     JSR         BUILD_STR           ;Build and accumulate the 0xADDR OPCODE $OPERAND string into memory @ OP_ADDR                            
             JSR         PRINT_OP            ;Print the built string to console 
@@ -160,6 +160,7 @@ M_NEWLINE   DC.B        '',CR,LF,0
             INCLUDE     'TeamVisualBasic_JumpTable.X68'                     ;Include Jump Table file
             
             END         START               ;last line of source
+
 
 
 

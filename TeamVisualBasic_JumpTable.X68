@@ -107,8 +107,6 @@ BIN_MOVE    MOVE.W      (A5),D0             *reload opcode
             CMPI.W      #1,D0               *check if the bits are 001
             BEQ         MOVEA               *if MOVEA go to SUB
             
-            CMPI.W      #7,D0               *check if the bits are 111
-            BEQ         DATA                *if 111 must be DATA
             BRA         MOVE                *otherwise must be MOVE
             
 *--------------------------------------------------------------            
@@ -858,6 +856,7 @@ APPND_LONG  MOVE.B      #'.',(A4)+
 *-FILES--------------------------------------------------------
             INCLUDE     'TeamVisualBasic_OP_Decoder.X68'    ;Helper file for jump table
             
+
 
 
 

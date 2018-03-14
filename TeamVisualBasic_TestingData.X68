@@ -13,6 +13,9 @@ START       ORG         $00007F00            ; first instruction of program
 label1      MOVE.B      $12,D6
             MOVE.W      $1234,D5
             MOVE.L      $12345678,D7
+            MOVE.L      D2,$12345676
+            MOVE.W      D3,$1234
+            MOVE.B      D4,$12
 
             MOVE.B      #$12,D5             *destroyed
             MOVE.W      #$1234,D5           *conqoured
@@ -68,6 +71,7 @@ label1      MOVE.B      $12,D6
     
     
     
+
 
 
 
