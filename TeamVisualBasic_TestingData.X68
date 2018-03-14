@@ -9,6 +9,18 @@
     
 START       ORG         $00007F00            ; first instruction of program
 
+*-DECODE_E test-------------------------------------------------
+*-BCC (BCC, BLT, BGE, BCS, BVC), BRA
+
+            BRA     JUMP
+            
+JUMP        BCC     JUMP2
+JUMP2       BLT     JUMP3
+JUMP3       BGE     JUMP4
+JUMP4       BCS     JUMP5
+JUMP5       BVC     JUMP6
+JUMP6
+
 *-DECODE_C test--------------------------------------------------
 *-ADDI,SUBI,NEG,ORI,CMPI,ADDI
             ADDI.B      #$12,D0
@@ -559,6 +571,7 @@ label1      MOVE.B      $12,D6
     
     
     
+
 
 
 

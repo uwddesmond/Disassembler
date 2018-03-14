@@ -86,20 +86,27 @@ DECODE_D    MOVE.B      #9,(A4)+          *tab after op code
             RTS
 
 *-OPCODE Decode Type E--------------------------------------
-*-OPCODEs: 
+*-OPCODEs: BCC (BCC, BLT, BGE, BCS, BVC), BRA
 *-xxxx Condition(4) 8 Bit Displacement       
   
 DECODE_E    MOVE.B      #'9',(A4)+          *tab after op code
             MOVE.W      #2,D6               *Initilize opcode length to 2
             MOVE.W      (A5),D2
+            
+            *--What source mode bits is it grabbing and why? Condition is only for figuring out
+            *what type of branch it is (BCS, BLT, BGE, etc.). Only thing that matters in DECODE_E
+            *is the 8 bit displacement because that is where the branch is suppose to be connected to
+            
             LSL.W       #3,D2               *GRAB SOURCE MODE BITS
             AND.W       #$0007,D2           *Mask out other bits
-            JSR         GET_SRCMODE         *Append SRC string to (A4)          
+            JSR         GET_SRCMODE         *Append SRC string to (A4)  
+
+            *--Don't think there should ever be a comma in the ouput because should be a displacement        
             MOVE.B      #',',(A4)+          *Addd comma for out put
             MOVE.W      (A5),D2
             LSL.W       #6,D2               *logical shift left to get data bits to d2
             LSL.W       #3,D2
-            AND.W       $0007,D2            *mask out other bits
+            AND.W       #$0007,D2            *mask out other bits
             MOVE.B      #'D',(A4)+          *Push D into register
             MOVE.W      D2,D5
             JSR         PrintD5Num          *print register number
@@ -560,6 +567,7 @@ PRINT7      MOVE.B      #'7',(A4)+
 PRINT8      MOVE.B      #'8',(A4)+
             RTS
     
+
 
 
 
