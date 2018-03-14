@@ -9,44 +9,53 @@
     
 START       ORG         $00007F00            ; first instruction of program
 
+*-DECODE_C test--------------------------------------------------
+*-ADDI,SUBI,NEG,ORI,CMPI,ADDI
+            ADDI.B      #$12,D0
+            *ADDI.B      #$12,A0            *not allowed
+            ADDI.W      #$1234,D7
+            ADDI.L      #$12345678,D0
+            
+
+
 *-Shift test-----------------------------------------------------
-*            LSL.W       #$4,D3              *demolished
-*            LSL.B       #$2,D3              *obliterated
-*            LSL.L       #$6,D3              *slapped
-*            LSL.W       D4,D3
-*            LSR.W       D5,D6  
-*            
-*            
-*            LSL.B       #$01,D0
-*            LSL.B       #$02,D1
-*            LSL.B       #$03,D2
-*            LSL.B       #$04,D3
-*            LSL.B       #$05,D4
-*            LSL.B       #$06,D5
-*            LSL.B       #$07,D6
-*            LSL.B       D0,D7    
-*            LSL.B       D1,D7  
-*            LSL.B       D2,D7    
-*            LSL.B       D3,D7 
-*            LSL.B       D4,D7    
-*            LSL.B       D5,D7
-*            LSL.B       D6,D7    
-*            LSL.B       D7,D7   
-*
-*            LSL.W       #$01,D0
-*            LSL.W       #$02,D1
-*            LSL.W       #$03,D2
-*            LSL.W       #$04,D3
-*            LSL.W       #$05,D4
-*            LSL.W       #$06,D5
-*            LSL.W       #$07,D6
-*            LSL.W       D0,D7    
-*            LSL.W       D1,D7  
-*            LSL.W       D2,D7    
-*            LSL.W       D3,D7 
-*            LSL.W       D4,D7    
-*            LSL.W       D5,D7
-*            LSL.W       D6,D7    
+            LSL.W       #$4,D3              *demolished
+            LSL.B       #$2,D3              *obliterated
+            LSL.L       #$6,D3              *slapped
+            LSL.W       D4,D3
+            LSR.W       D5,D6  
+            
+            
+            LSL.B       #$01,D0
+            LSL.B       #$02,D1
+            LSL.B       #$03,D2
+            LSL.B       #$04,D3
+            LSL.B       #$05,D4
+            LSL.B       #$06,D5
+            LSL.B       #$07,D6
+            LSL.B       D0,D7    
+            LSL.B       D1,D7  
+            LSL.B       D2,D7    
+            LSL.B       D3,D7 
+            LSL.B       D4,D7    
+            LSL.B       D5,D7
+            LSL.B       D6,D7    
+            LSL.B       D7,D7   
+
+            LSL.W       #$01,D0
+            LSL.W       #$02,D1
+            LSL.W       #$03,D2
+            LSL.W       #$04,D3
+            LSL.W       #$05,D4
+            LSL.W       #$06,D5
+            LSL.W       #$07,D6
+            LSL.W       D0,D7    
+            LSL.W       D1,D7  
+            LSL.W       D2,D7    
+            LSL.W       D3,D7 
+            LSL.W       D4,D7    
+            LSL.W       D5,D7
+            LSL.W       D6,D7    
             LSL.W       D7,D7     
             
             ;LSL.W       $ABCD1234
@@ -535,6 +544,7 @@ label1      MOVE.B      $12,D6
     
     
     
+
 
 
 

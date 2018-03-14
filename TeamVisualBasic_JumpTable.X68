@@ -13,6 +13,12 @@
 *-then Branch off into 16 bin possibilities
 *-----------------------------------------------------------      
 JT_START    MOVE.L      #2,D7               *All OPCODEs takes up a 2 bytes of space, save this into length counter D7
+            CLR.L       D0                  *Clear D0
+            CLR.L       D1                  *Clear D1
+            CLR.L       D2                  *Clear D2
+            CLR.L       D3                  *Clear D3
+            CLR.L       D4                  *Clear D4
+            CLR.L       D5                  *Clear D5
             CLR.L       D6                  *Clear the D6 address increment counter
             MOVE.W      (A5),D0             *Move OPCODE into D0 to bit shift
             
@@ -714,8 +720,8 @@ DATA        MOVE.B      #'D',(A4)+          *Write DATA into string
             MOVE.B      #'A',(A4)+         
             MOVE.B      #09,(A4)+           *Write a tab into string
             
-            MOVE.B      #WORD,D6            *Increment the size counter D6 by a WORD 
-            MOVE.B      #WORD,D7            *Increment the size counter D7 by a WORD 
+            ADD.B       #2,D6               *Increment the size counter D6 by a word 
+            ADD.B       #2,D7               *Increment the size counter D7 by a word 
             JSR         WRITE_DATA          *Write D7 worth of OPCODE data that couldn't be decoded
                                   
             RTS                             *Return program flow back to Dissasembler file

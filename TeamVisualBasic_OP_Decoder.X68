@@ -64,11 +64,15 @@ DECODE_B    MOVE.B      #9,(A4)+            *tab after op code
 *-xxxxxxxx Size2, Ea mode(3) Ea Reg(3)
 *STILL NEED TO PRINT DATA THAT FOLLOWS FIRST       
   
-DECODE_C    MOVE.B      #9,(A4)+          *tab after op code
+DECODE_C    MOVE.B      #9,(A4)+            *tab after op code
             MOVE.W      #2,D6               *Initilize opcode length to 2
-            MOVE.W      (A5),D2
+            
+            JSR         PRINT_DATA          *Append immediate data to string
+            JSR         B_SRC_DMODE         *Append ,D(reg num) to string
+            ;MOVE.W      (A5),D2
             *ENTER PRINT DATA CODE HERE
-            JSR         C_SRC
+            ;JSR         C_SRC
+            RTS
             
 *-OPCODE Decode Type D--------------------------------------
 *-OPCODEs: 
@@ -131,7 +135,8 @@ DECODE_F    MOVE.W      #2,D6               *Initilize opcode length to 2
 *-----------------------------------------------------------
 *-------------------------------------------------------
 *Shift on address is occuring    
-*print address by using EA Mode and EA Reg bits at end of op       
+*print address by using EA Mode and EA Reg bits at end of op
+*DECODE TYPE SPECIFIC FUNCTION       
 B_ADDMODE
            MOVE.W       (A5),D2
            LSR.W        #3,D2
@@ -146,6 +151,7 @@ B_ADDMODE
 *-----------------------------------------------------------
 *Value stored in cont/reg is a number of bits to shift
 *Display as #number
+*DECODE TYPE SPECIFIC FUNCTION
 B_SCOUNT    MOVE.W      (A5),D2
             LSR.L       #6,D2
             LSR.L       #3,D2
@@ -158,6 +164,7 @@ B_SCOUNT    MOVE.W      (A5),D2
    
 *------------------------------------------------------------
 *Display proper register number found at the 12 - 9 bits
+*DECODE TYPE SPECIFIC FUNCTION
 B_DATAREG   MOVE.B      #'D',(A4)+
             MOVE.W      (A5),D2
             LSR.W       #6,D2
@@ -168,7 +175,9 @@ B_DATAREG   MOVE.B      #'D',(A4)+
             JSR         B_SRC_DMODE
             RTS
 *---------------------------------------------------------
-*display the register number 
+*display the register number that's in bits 2-1-0
+*DECODE TYPE SPECIFIC(?) FUNCTION
+
 B_SRC_DMODE MOVE.W      (A5),D2             *reload op
             MOVE.B      #',',(A4)+          *add comma to printer
             MOVE.B      #'D',(A4)+          *D for data register
@@ -183,15 +192,19 @@ B_SRC_DMODE MOVE.W      (A5),D2             *reload op
 *-OPTYPE_c HELPER FUNCTIONS
 *Helps print second argument
 *-----------------------------------------------------------
-C_SRC       MOVE.W      (A5),D2
+*DECODE TYPE SPECIFIC FUNCTION
+C_SRC       MOVE.W      (A5),D2             *Reload op
             LSR.W       #3,D2
-            AND.W       #$0007,D2
-            JSR         GET_DSTMODE
-            MOVE.W      (A5),D2
-            AND.W       #$0007,D2
-            JSR         GET_SRCMODE
+            AND.W       #$0007,D2           *Isolate EA MODE
+            
+            ;JSR         GET_EAMODE          *Append to string appropriate EA mode data
+            
+            ;MOVE.W      (A5),D2
+            ;AND.W       #$0007,D2
+            ;JSR         GET_SRCMODE
+            
             RTS
-
+                      
            
 
 *-OPS WITHOUT TYPE------------------------------------------
@@ -240,9 +253,8 @@ F_OPMODE
              
 
 *-SRC_MODE--------------------------------------------------
-*-Determines SRC Mode from bits 5,4,3, and branch to appropriate subroutine
 *-Assumption is that the SRC Mode bits are pre-isolated in D2
-
+*DECODE TYPE SPECIFIC FUNCTION
 GET_SRCMODE CMP.W       #0,D2
             BEQ         SregMode        *register mode: Dn
             CMP.W       #1,D2
@@ -261,9 +273,8 @@ GET_SRCMODE CMP.W       #0,D2
             BEQ         S_DATA_MODE     *immediate data
     
 *-DST_MODE--------------------------------------------------
-*-Determines DST Mode from bits 8,7,6, and branch to appropriate subroutine
 *-Assumption is that the DST Mode bits are pre-isolated in D2
-
+*DECODE TYPE SPECIFIC FUNCTION
 GET_DSTMODE CMP.W       #0,D2
             BEQ         DregMode        *register mode ---Dn
             CMP.W       #1,D2
@@ -281,6 +292,11 @@ GET_DSTMODE CMP.W       #0,D2
             CMP.W       #7,D2           
             BEQ         D_DATA_MODE     *Source is immediate data following the opcode
     
+*-EA_MODE----------------------------------------------------
+*-Assumption is that the EA Mode bits are pre-isolated in D2
+
+GET_EAMODE  
+
  
 *----------------------------------------------------------- 
 *-Source Helper Functions
@@ -321,44 +337,18 @@ SaddINpost  MOVE.B      #'(',(A4)+
             MOVE.B      #'+',(A4)+
             RTS
     
-S16An
-S8AnXn
-S_DATA_MODE JSR         T1_GrabSreg         *<- Changed this from GrabDReg to GrabSReg 
-            CMPI.W      #1,D5
+S16An       BRA         DATA
+S8AnXn      BRA         DATA
+
+S_DATA_MODE JSR         T1_GrabSreg         *get least sig 3 bits 
+            CMPI.W      #1,D5               
             BEQ         LONG_DATA
+            
             CMP.W       #0,D5  
             BEQ         D_SIZE
-            CMP.W       #4,D5
-            BEQ         IMMEDIATE_D
             
-*---------------IMMEDIATE_DATA-------------------------            
-*Reached when an opcode has immediate data afterwards
-*The length of this immedite data depends on the opcode length
-*That value is stored in the d7 register by the jump table            
-IMMEDIATE_D MOVE.B      #'#',(A4)+              *add the # to data string to immediate data
-            
-            CMP.W       #6,D7
-            BEQ         WORD_DATA               *means the immediate data is a word value
-            
-            CMP.W       #10,D7       
-            BEQ         LONG_DATA               *means the immediate data is a long value
-            
-            CMP.W       #4,D7
-            BEQ         BYTE_DATA             *means the immediate data is a long value
-            
-*-A7 to SP special case-------------------------------------
-A7toSP      CMP.B       #7,D5           *If Address register (num stored in D5) is A7
-            BEQ         A7toSP_repl     *then branch to subroutine that replaces A7 string with SP   
-            BRA         A7toSP_nA7      *else, branch normally and print A0-A6
-
-A7toSP_nA7  JSR         PrintD5Num
-            RTS
-
-A7toSP_repl SUBA        #1,A4           *move the A4 string back by a digit
-            MOVE.B      #'S',(A4)+      *replace string with SP
-            MOVE.B      #'P',(A4)+      
-            RTS
-            
+            CMP.W       #4,D5               *This branch is invalid in the case of DECODE_C. Probably okay tho
+            BEQ         IMMEDIATE_D           
 
              
 *----------------------------------------------------------- 
@@ -400,9 +390,9 @@ DaddINpost  MOVE.B      #'(',(A4)+
             MOVE.B      #'+',(A4)+
             RTS
     
-D16An
+D16An       BRA         DATA
             
-D8AnXn
+D8AnXn      BRA         DATA
 
 D_DATA_MODE JSR         T1_GrabDreg
             CMPI.W      #1,D5
@@ -421,28 +411,56 @@ D_SIZE      CMP.B       #6,D7
 *-Assorted(?) Helper Functions
 *-add Description here
 *-----------------------------------------------------------
-LONG_DATA   MOVE.B      #'$',(A4)+       *prepare the string for a long hex value
-            MOVE.L      A5,A3
-    
-            ADD.L       D6,A3           *Add opcode data length this increments the address past the op code and existing data
-            MOVE.L      (A3),D0
             
-            MOVE.W      #8,D2           *move 8 to counter since this si long data 8 hex values are required
-            JSR         GD_LOOP
-            ADD.W       #4,D6           *since it is long data increment the address by 4 bits *d6 is opcode length counter
+*---------------IMMEDIATE_DATA-------------------------            
+*Reached when an opcode has immediate data afterwards
+*The length of this immedite data depends on the opcode length
+*That value is stored in the d7 register by the jump table 
+*DECODE TYPE AGNOSTIC FUNCTION           
+IMMEDIATE_D MOVE.B      #'#',(A4)+              *add the # to data string to immediate data
+            BRA         PRINT_DATA
+
+
+*----------------------------------------------------------
+*DECODE TYPE SPECIFIC FUNCTION            
+T1_GrabSreg MOVE.W      (A5),D2         *recopy op code
+            AND.W       #$0007,D2       *mask other bits
+            MOVE.W      D2,D5           *copy D2 to D5
+            RTS
+*DECODE TYPE SPECIFIC FUNCTION    
+T1_GrabDreg MOVE.W      (A5),D2         *type one grab register bits
+            LSR.W       #6,D2           *shift bits over
+            LSR.W       #3,D2           
+            AND.W       #$0007,D2       *mask so only relevent bits left
+            MOVE.W      D2,D5           *move to d5 for printing
+            RTS            
+            
+*-A7 to SP special case-------------------------------------
+*DECODE TYPE AGNOSTIC FUNCTION
+A7toSP      CMP.B       #7,D5           *If Address register (num stored in D5) is A7
+            BEQ         A7toSP_repl     *then branch to subroutine that replaces A7 string with SP   
+            BRA         A7toSP_nA7      *else, branch normally and print A0-A6
+
+A7toSP_nA7  JSR         PrintD5Num
             RTS
 
-WORD_DATA   MOVE.B      #'$',(A4)+       *prepare the string for a long hex value
-            MOVE.L      A5,A3    
-            
-            ADD.L       D6,A3           *Add opcode data length to incement past opcode and data
-            MOVE.L      (A3),D0         *Add correct data into d0 register for printing
-            
-            MOVE.W      #4,D2           *move 4 to counter since this it word data 4 hex values are required
-            
-            JSR         GD_LOOP
-            ADD.W       #2,D6           *since it is word data increment the address by 4 bits *d6 is opcode length counter
+A7toSP_repl SUBA        #1,A4           *move the A4 string back by a digit
+            MOVE.B      #'S',(A4)+      *replace string with SP
+            MOVE.B      #'P',(A4)+      
             RTS
+
+*-Size helper------------------------------------------------
+*DECODE TYPE AGNOSTIC FUNCTION         
+PRINT_DATA  CMP.B       #4,D7
+            BEQ         BYTE_DATA      
+ 
+            CMP.B       #6,D7
+            BEQ         WORD_DATA    
+            
+            CMP.B       #10,D7
+            BEQ         LONG_DATA
+            
+            BRA         DATA            *Base case: catastrophic failure        
 
 BYTE_DATA   MOVE.B      #'$',(A4)+       *prepare the string for a long hex value
             MOVE.L      A5,A3    
@@ -456,19 +474,31 @@ BYTE_DATA   MOVE.B      #'$',(A4)+       *prepare the string for a long hex valu
             ADD.W       #2,D6           *since it is byte data increment the address by 4 bits *d6 is opcode length counter
             RTS
             
+WORD_DATA   MOVE.B      #'$',(A4)+       *prepare the string for a long hex value
+            MOVE.L      A5,A3    
             
-T1_GrabSreg MOVE.W      (A5),D2         *recopy op code
-            AND.W       #$0007,D2       *mask other bits
-            MOVE.W      D2,D5           *copy D2 to D5
-            RTS
+            ADD.L       D6,A3           *Add opcode data length to incement past opcode and data
+            MOVE.L      (A3),D0         *Add correct data into d0 register for printing
+            
+            MOVE.W      #4,D2           *move 4 to counter since this it word data 4 hex values are required
+            
+            JSR         GD_LOOP
+            ADD.W       #2,D6           *since it is word data increment the address by 4 bits *d6 is opcode length counter
+            RTS            
+            
+LONG_DATA   MOVE.B      #'$',(A4)+      *prepare the string for a long hex value
+            MOVE.L      A5,A3
     
-T1_GrabDreg MOVE.W      (A5),D2         *type one grab register bits
-            LSR.W       #6,D2           *shift bits over
-            LSR.W       #3,D2           
-            AND.W       #$0007,D2       *mask so only relevent bits left
-            MOVE.W      D2,D5           *move to d5 for printing
-            RTS
-    
+            ADD.L       D6,A3           *Add opcode data length this increments the address past the op code and existing data
+            MOVE.L      (A3),D0
+            
+            MOVE.W      #8,D2           *move 8 to counter since this si long data 8 hex values are required
+            JSR         GD_LOOP
+            ADD.W       #4,D6           *since it is long data increment the address by 4 bits *d6 is opcode length counter
+            RTS     
+ 
+*----------------------------------------------------------   
+*DECODE TYPE AGNOSTIC FUNCTION    
 PrintD5Num  CMP.B       #0,D5           *print the numeber in d5
             BEQ         PRINT0
             CMP.B       #1,D5
@@ -487,6 +517,7 @@ PrintD5Num  CMP.B       #0,D5           *print the numeber in d5
             BEQ         PRINT7          
             CMP.B       #8,D5
             BEQ         PRINT8  
+
 
 *Used to print data to a hex value from bits
 *----Requires a preload---------------------------------------------------------------
