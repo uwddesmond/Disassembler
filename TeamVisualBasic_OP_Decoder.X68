@@ -45,7 +45,7 @@ DECODE_B    MOVE.B      #9,(A4)+            *tab after op code
             MOVE.W      #2,D6               *Initilize opcode length to 2
             MOVE.W      (A5),D2             *reload op code
             
-            JSR         GRABx8_6            *grab bits at index 8 to 6 and put them in D2
+            JSR         GRABx7_6            *grab SIZE bits and put them in D2
             CMP.W       #3,D2
             BEQ         B_ADDMODE           *this shift is an address variant
             
@@ -472,6 +472,17 @@ GRABx8_6    MOVE.W      (A5),D2         *recopy op code
             LSR.W       #3,D2           *shift so 8 to 6 bits are the LSB
             AND.W       #$0007,D2       *mask other bits
             MOVE.W      D2,D5           *copy D2 to D5
+            RTS
+            
+*----------------------------------------------------------
+*Grab bits found at indes 7 to 6 and stores values into D5            
+GRABx7_6    MOVE.W      (A5),D2         *recopy op code
+            LSR.W       #3,D2           *shift so 8 to 6 bits are the LSB
+            LSR.W       #3,D2           *shift so 8 to 6 bits are the LSB
+            AND.W       #$0003,D2       *mask other bits
+            MOVE.W      D2,D5           *copy D2 to D5            
+            RTS
+            
 *----------------------------------------------------------------           
 *Grab bits found at index 11 throu 9 and stores values into D5   
 GRABx11_9   MOVE.W      (A5),D2         *type one grab register bits
@@ -608,6 +619,7 @@ PRINT7      MOVE.B      #'7',(A4)+
 PRINT8      MOVE.B      #'8',(A4)+
             RTS
     
+
 
 
 
