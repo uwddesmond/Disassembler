@@ -13,13 +13,14 @@ START       ORG         $00007F00            ; first instruction of program
 *-BCC (BCC, BLT, BGE, BCS, BVC), BRA
 
             BRA     JUMP
+            BRA     JUMP2
             
-JUMP        BCC     JUMP2
-JUMP2       BLT     JUMP3
-JUMP3       BGE     JUMP4
-JUMP4       BCS     JUMP5
-JUMP5       BVC     JUMP6
-JUMP6
+*JUMP        BCC     JUMP2
+*JUMP2       BLT     JUMP3
+*JUMP3       BGE     JUMP4
+*JUMP4       BCS     JUMP5
+*JUMP5       BVC     JUMP6
+*JUMP6
 
 *-DECODE_C test--------------------------------------------------
 *-ADDI,SUBI,NEG,ORI,CMPI,ADDI
@@ -564,13 +565,15 @@ label1      MOVE.B      $12,D6
             ;MOVEA.L     A2,A4
             ;MOVEA.L     #$12345678,A6
 
-
+JUMP
+JUMP2
 
             SIMHALT                     ; halt simulator
             END         START                ; last line of source
     
     
     
+
 
 
 

@@ -6,7 +6,7 @@
 *               Machine code to Motorola 68000 Assembly
 *               OP Decoder File
 *               Using different opcode type, deconstructs the op code 
-*               and prints the register or addr
+*               prints the register or addr
 *-----------------------------------------------------------
 
 *-----------------------------------------------------------
@@ -25,14 +25,14 @@
 DECODE_A    MOVE.B      #9,(A4)+            *tab after op code
             MOVE.W      #2,D6               *Initilize opcode length to 2
             MOVE.W      (A5),D2             *Copy OPCODE into D2
-            LSR.W       #3,D2               *Shift right 3 - isolate Src Mode
-            AND.W       #$0007,D2           *Mask out other bits
+            JSR         GRABx5_3            *Grab source mode
+            MOVE.W      D5,D2               *put source mode in D2
             JSR         GET_SRCMODE         *Append SRC string to (A4)          
             MOVE.B      #',',(A4)+
             
             MOVE.W      (A5),D2             *Recopy OPCODE into D2  
-            LSR.W       #6,D2               *Shift right 6 - isolate Dest Mode
-            AND.W       #$0007,D2           *Mask out other bits
+            JSR         GRABx8_6            *grab dest mode bits
+            MOVE.W      D5,D2               *Move dest mode into D2
             JSR         GET_DSTMODE         *Append DST string to (A4)
             
             RTS                             *Return back to jump table
@@ -45,8 +45,7 @@ DECODE_B    MOVE.B      #9,(A4)+            *tab after op code
             MOVE.W      #2,D6               *Initilize opcode length to 2
             MOVE.W      (A5),D2             *reload op code
             
-            LSR.W       #6,D2              
-            AND.W       #$0003,D2
+            JSR         GRABx8_6            *grab bits at index 8 to 6 and put them in D2
             CMP.W       #3,D2
             BEQ         B_ADDMODE           *this shift is an address variant
             
@@ -89,7 +88,8 @@ DECODE_D    MOVE.B      #9,(A4)+          *tab after op code
 *-OPCODEs: BCC (BCC, BLT, BGE, BCS, BVC), BRA
 *-xxxx Condition(4) 8 Bit Displacement       
   
-DECODE_E    MOVE.B      #'9',(A4)+          *tab after op code
+DECODE_E    MOVE.B      #9,(A4)+          *tab after op code
+            MOVE.B      #9,(A4)+          *2tabs since bra is short
             MOVE.W      #2,D6               *Initilize opcode length to 2
             MOVE.W      (A5),D2
             
@@ -97,22 +97,46 @@ DECODE_E    MOVE.B      #'9',(A4)+          *tab after op code
             *what type of branch it is (BCS, BLT, BGE, etc.). Only thing that matters in DECODE_E
             *is the 8 bit displacement because that is where the branch is suppose to be connected to
             
-            LSL.W       #3,D2               *GRAB SOURCE MODE BITS
-            AND.W       #$0007,D2           *Mask out other bits
-            JSR         GET_SRCMODE         *Append SRC string to (A4)  
-
-            *--Don't think there should ever be a comma in the ouput because should be a displacement        
-            MOVE.B      #',',(A4)+          *Addd comma for out put
-            MOVE.W      (A5),D2
-            LSL.W       #6,D2               *logical shift left to get data bits to d2
-            LSL.W       #3,D2
-            AND.W       #$0007,D2            *mask out other bits
-            MOVE.B      #'D',(A4)+          *Push D into register
-            MOVE.W      D2,D5
-            JSR         PrintD5Num          *print register number
+            LSR.W       #8,D2               *GRAB condition bits
+            AND.W       #$000F,D2           *Mask out other bits
+            CMP.W       #0,D2               *CHECK IF BRA
+            JSR         D_BRA               *Go to decode BRA sub routine
+            RTS
+            
                   
 
+D_BRA       MOVE.W      (A5),D2             *Load op and store in D2
+            AND.W       #$00FF,D2           *Get displacement bits by masking
+            CMP.W       #$00,D2
+            BGT         BRA_BYTE_
+            MOVE.W      (A5),D2             *Load op and store in D2
+            AND.W       #$00FF,D2           *Get displacement bits by masking
+            CMP.W       #$00,D2
+            BEQ         BRA_WORD            *branch word displacement sub
+            MOVE.W      (A5),D2             *Load op and store in D2
+            AND.W       #$00FF,D2           *Get displacement bits by masking
+            CMP.W       #$00FF,D2
+            BEQ         BRA_LONG            *branch long displacement
+            RTS
+            
 
+            
+BRA_WORD    JSR         WORD_DATA
+            RTS
+            
+BRA_LONG    JSR         LONG_DATA
+            RTS
+            
+BRA_BYTE_   CMP.W       #$FF,D2
+            BLT         BRA_BYTE
+            RTS
+
+BRA_BYTE    MOVE.W      (A5),D0
+            AND.W       #$00FF,D0
+            MOVE.W      #8,D2
+            JSR         GD_LOOP
+            RTS     
+*-----------displacement sub routines---------------------       
 *-OPCODE Decode Type F--------------------------------------
 *-OPCODEs: 
 *-xxxx Reg(3) OPMode(3) EAMode(3) EAReg(3)       
@@ -308,12 +332,12 @@ GET_EAMODE
 *-Adds Source Register numbers to (A4) string
 *-----------------------------------------------------------
 SregMode    MOVE.B      #'D',(A4)+
-            JSR         T1_GrabSreg
+            JSR         GRABx2_0
             JSR         PrintD5Num   
             RTS  
         
 SaddMode    MOVE.B      #'A',(A4)+
-            JSR         T1_GrabSreg
+            JSR         GRABx2_0
             JSR         PrintD5Num
             RTS
     
@@ -321,7 +345,7 @@ SaddMode    MOVE.B      #'A',(A4)+
     
 SaddInMode  MOVE.B      #'(',(A4)+
             MOVE.B      #'A',(A4)+
-            JSR         T1_GrabSreg         *put reg num into D5
+            JSR         GRABx2_0         *put reg num into D5
             JSR         A7toSP              *if reg num is 7, replace w/ SP 
             MOVE.B      #')',(A4)+
             RTS
@@ -329,23 +353,25 @@ SaddInMode  MOVE.B      #'(',(A4)+
 SaddINpre   MOVE.B      #'-',(A4)+
             MOVE.B      #'(',(A4)+
             MOVE.B      #'A',(A4)+
-            JSR         T1_GrabSreg         *put reg num into D5
+            JSR         GRABx2_0         *put reg num into D5
             JSR         A7toSP              *if reg num is 7, replace w/ SP 
             MOVE.B      #')',(A4)+
             RTS
     
 SaddINpost  MOVE.B      #'(',(A4)+
             MOVE.B      #'A',(A4)+
-            JSR         T1_GrabSreg         *put reg num into D5
+            JSR         GRABx2_0         *put reg num into D5
             JSR         A7toSP              *if reg num is 7, replace w/ SP 
             MOVE.B      #')',(A4)+
             MOVE.B      #'+',(A4)+
             RTS
     
-S16An       BRA         DATA
-S8AnXn      BRA         DATA
+S16An       RTS
+            *BRA         DATA
+S8AnXn      RTS
+            *BRA         DATA
 
-S_DATA_MODE JSR         T1_GrabSreg         *get least sig 3 bits 
+S_DATA_MODE JSR         GRABx2_0         *get least sig 3 bits 
             CMPI.W      #1,D5               
             BEQ         LONG_DATA
             
@@ -361,12 +387,12 @@ S_DATA_MODE JSR         T1_GrabSreg         *get least sig 3 bits
 *-Adds Destination Register numbers to (A4) string
 *-----------------------------------------------------------
 DregMode    MOVE.B      #'D',(A4)+
-            JSR         T1_GrabDreg
+            JSR         GRABx11_9
             JSR         PrintD5Num   
             RTS
          
 DaddMode    MOVE.B      #'A',(A4)+
-            JSR         T1_GrabDreg
+            JSR         GRABx11_9
             JSR         PrintD5Num
             RTS
     
@@ -374,7 +400,7 @@ DaddMode    MOVE.B      #'A',(A4)+
     
 DaddInMode  MOVE.B      #'(',(A4)+
             MOVE.B      #'A',(A4)+
-            JSR         T1_GrabDreg         *put reg num into D5
+            JSR         GRABx11_9         *put reg num into D5
             JSR         A7toSP              *if reg num is 7, replace w/ SP           
             MOVE.B      #')',(A4)+
             RTS
@@ -382,14 +408,14 @@ DaddInMode  MOVE.B      #'(',(A4)+
 DaddINpre   MOVE.B      #'-',(A4)+
             MOVE.B      #'(',(A4)+
             MOVE.B      #'A',(A4)+
-            JSR         T1_GrabDreg         *put reg num into D5
+            JSR         GRABx11_9         *put reg num into D5
             JSR         A7toSP              *if reg num is 7, replace w/ SP 
             MOVE.B      #')',(A4)+
             RTS
     
 DaddINpost  MOVE.B      #'(',(A4)+
             MOVE.B      #'A',(A4)+
-            JSR         T1_GrabDreg         *put reg num into D5
+            JSR         GRABx11_9         *put reg num into D5
             JSR         A7toSP              *if reg num is 7, replace w/ SP 
             MOVE.B      #')',(A4)+
             MOVE.B      #'+',(A4)+
@@ -399,7 +425,7 @@ D16An       BRA         DATA
             
 D8AnXn      BRA         DATA
 
-D_DATA_MODE JSR         T1_GrabDreg
+D_DATA_MODE JSR         GRABx11_9
             CMPI.W      #1,D5
             BEQ         LONG_DATA
             CMPI.W      #0,D5
@@ -427,13 +453,28 @@ IMMEDIATE_D MOVE.B      #'#',(A4)+              *add the # to data string to imm
 
 
 *----------------------------------------------------------
-*DECODE TYPE SPECIFIC FUNCTION            
-T1_GrabSreg MOVE.W      (A5),D2         *recopy op code
+*Grab bits found at indes 2 to 0 and stores values into D5            
+GRABx2_0    MOVE.W      (A5),D2         *recopy op code
             AND.W       #$0007,D2       *mask other bits
             MOVE.W      D2,D5           *copy D2 to D5
-            RTS
-*DECODE TYPE SPECIFIC FUNCTION    
-T1_GrabDreg MOVE.W      (A5),D2         *type one grab register bits
+            RTS 
+*----------------------------------------------------------
+*Grab bits found at indes 5 to 3 and stores values into D5            
+GRABx5_3    MOVE.W      (A5),D2         *recopy op code
+            LSR.W       #3,D2           *shift so 5 to 3 bits are the LSB
+            AND.W       #$0007,D2       *mask other bits
+            MOVE.W      D2,D5           *copy D2 to D5
+            RTS 
+*----------------------------------------------------------
+*Grab bits found at indes 8 to 6 and stores values into D5            
+GRABx8_6    MOVE.W      (A5),D2         *recopy op code
+            LSR.W       #3,D2           *shift so 8 to 6 bits are the LSB
+            LSR.W       #3,D2           *shift so 8 to 6 bits are the LSB
+            AND.W       #$0007,D2       *mask other bits
+            MOVE.W      D2,D5           *copy D2 to D5
+*----------------------------------------------------------------           
+*Grab bits found at index 11 throu 9 and stores values into D5   
+GRABx11_9   MOVE.W      (A5),D2         *type one grab register bits
             LSR.W       #6,D2           *shift bits over
             LSR.W       #3,D2           
             AND.W       #$0007,D2       *mask so only relevent bits left
@@ -567,6 +608,9 @@ PRINT7      MOVE.B      #'7',(A4)+
 PRINT8      MOVE.B      #'8',(A4)+
             RTS
     
+
+
+
 
 
 
