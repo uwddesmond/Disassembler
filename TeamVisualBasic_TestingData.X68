@@ -15,11 +15,11 @@ START       ORG         $00007F00            ; first instruction of program
             BRA     JUMP
             BRA     JUMP2
             
-*JUMP        BCC     JUMP2
-*JUMP2       BLT     JUMP3
-*JUMP3       BGE     JUMP4
-*JUMP4       BCS     JUMP5
-*JUMP5       BVC     JUMP6
+            BCC     JUMP2
+            BLT     DECODE_B
+            BGE     PRINT_OP
+            BCS     JUMP5
+            BVC     JUMP6
 *JUMP6
 
 *-DECODE_C test--------------------------------------------------
@@ -573,6 +573,7 @@ JUMP2
     
     
     
+
 
 
 
