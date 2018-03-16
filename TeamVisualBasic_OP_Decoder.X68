@@ -281,13 +281,29 @@ B_SRC_DMODE MOVE.W      (A5),D2             *reload op
 
 D_MOVEQ     MOVE.W      #2,D6               *Initilize opcode length to 2
             MOVE.W      (A5),D0             *grab op code from a5
+            MOVE.B      #09,(A4)+           *Insert tab character
+            
             MOVE.B      #'#',(A4)+          *preload source string for literal
             MOVE.B      #'$',(A4)+          *preload source string for hex
-            MOVE.W      #2,D2               *move 8 to counter since this si long data 8 hex values are required
-            LSL.W       #8,D2               *shift over 8 so bits in high order for print
-            JSR         GD_LOOP
-            JSR         B_DATAREG           *grabs and prints data reg 
+            
+            ;MOVE.W      #2,D2               *move 8 to counter since this si long data 8 hex values are required
+            ;LSL.W       #8,D2               *shift over 8 so bits in high order for print
+            ;JSR         GD_LOOP
+            
+            JSR         P_MOVEQ_B
+            MOVE.B      #',',(A4)+
+            MOVE.B      #'D',(A4)+
+            JSR         GRABx11_9
+            JSR         PrintD5Num
             RTS
+            
+P_MOVEQ_B   MOVE.W      (A5),D0
+            AND.W       #$00FF,D0
+            ROR.L       #8,D0
+            MOVE.W      #2,D2
+            JSR         GD_LOOP         
+            RTS  
+            
 
 D_ADDQ      MOVE.W      #2,D6               *Initilize opcode length to 2
             MOVE.W      (A5),D0             *grab op code from a5
@@ -691,6 +707,7 @@ PRINT7      MOVE.B      #'7',(A4)+
 PRINT8      MOVE.B      #'8',(A4)+
             RTS
     
+
 
 
 
