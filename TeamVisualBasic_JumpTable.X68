@@ -156,6 +156,7 @@ BIN_5       MOVE.W      (A5),D0             *reload opcode into D0
 *--------------------------------------------------------------            
 *-BIN 6 Possible OPCODES:
 *-Bcc(BCC, BCS, BGE, BLT, BVC), BRA
+*-Extra Bcc(BEQ, BGT, BLS, BNE, BHI, BVS, BPL, BMI, BLE) 
 *--------------------------------------------------------------    
 BIN_6       MOVE.W      (A5),D0             *reload fresh op code
             LSR.W       #4,D0               *shift right 4
@@ -165,20 +166,47 @@ BIN_6       MOVE.W      (A5),D0             *reload fresh op code
             CMPI.W      #0,D0               *check if the 4 bits == 0000
             BEQ         BRA_SUB             *branch to BRA SUB
             
+            CMPI.W      #2,D0
+            BEQ         BHI                 *branch to BHI SUB
+            
+            CMPI.W      #3,D0
+            BEQ         BLS                 *branch to BLS SUB
+            
             CMPI.W      #4,D0
-            BEQ         BCC                 *branch to BCC code 
-                                                                     
-            CMPI.W      #$D,D0
-            BEQ         BLT                 *branch to BLT SUB            
-                                                                 
+            BEQ         BCC                 *branch to BCC code
+
+            CMPI.W      #5,D0
+            BEQ         BCS                 *branch to BCS SUB
+
+            CMPI.W      #6,D0
+            BEQ         BNE                 *branch to BNE SUB 
+            
+            CMPI.W      #7,D0
+            BEQ         BEQ_SUB             *branch to BEQ SUB
+            
             CMPI.W      #8,D0
             BEQ         BVC                 *branch to BVC code
+
+            CMPI.W      #9,D0
+            BEQ         BVS                 *branch to BVS code
             
-            CMPI.W      #5,D0
-            BEQ         BCS                 *branch to BCS code
+            CMPI.W      #$A,D0
+            BEQ         BPL                 *branch to BPL code
+            
+            CMPI.W      #$B,D0
+            BEQ         BMI                 *branch to BMI code
             
             CMPI.W      #$C,D0
             BEQ         BGE                 *branch to BGE code
+                                                                     
+            CMPI.W      #$D,D0
+            BEQ         BLT                 *branch to BLT SUB            
+            
+            CMPI.W      #$E,D0
+            BEQ         BGT                 *branch to BGT code
+            
+            CMPI.W      #$F,D0
+            BEQ         BLE                 *branch to BLE code
 
 *--------------------------------------------------------------            
 *-BIN 7 Possible OPCODES:
@@ -480,11 +508,30 @@ ADDQ        MOVE.B      #'A',(A4)+          *Load OPCODE string into (A4)
             
            
 *-BIN 6--------------------------------------------------------
-BGE         MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
-            MOVE.B      #'G',(A4)+
-            MOVE.B      #'E',(A4)+  
+BHI         MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
+            MOVE.B      #'H',(A4)+
+            MOVE.B      #'I',(A4)+  
 
-            JSR         DECODE_E           *jump to decoder SUB E 
+            JSR         BRANCH_SIZE        *append the size of the branch
+            JSR         DECODE_E           *jump to decoder SUB E  
+        
+            RTS                             *Return to OutputBuilder file
+            
+BLS         MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
+            MOVE.B      #'L',(A4)+
+            MOVE.B      #'S',(A4)+  
+
+            JSR         BRANCH_SIZE        *append the size of the branch
+            JSR         DECODE_E           *jump to decoder SUB E  
+        
+            RTS                             *Return to OutputBuilder file
+            
+BCC         MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
+            MOVE.B      #'C',(A4)+
+            MOVE.B      #'C',(A4)+  
+
+            JSR         BRANCH_SIZE        *append the size of the branch
+            JSR         DECODE_E           *jump to decoder SUB E  
         
             RTS                             *Return to OutputBuilder file
             
@@ -492,6 +539,25 @@ BCS         MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'C',(A4)+
             MOVE.B      #'S',(A4)+  
 
+            JSR         BRANCH_SIZE        *append the size of the branch
+            JSR         DECODE_E           *jump to decoder SUB E  
+        
+            RTS                             *Return to OutputBuilder file
+            
+BNE         MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
+            MOVE.B      #'N',(A4)+
+            MOVE.B      #'E',(A4)+  
+
+            JSR         BRANCH_SIZE        *append the size of the branch
+            JSR         DECODE_E           *jump to decoder SUB E  
+        
+            RTS                             *Return to OutputBuilder file
+            
+BEQ_SUB     MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
+            MOVE.B      #'E',(A4)+
+            MOVE.B      #'Q',(A4)+  
+
+            JSR         BRANCH_SIZE        *append the size of the branch
             JSR         DECODE_E           *jump to decoder SUB E  
         
             RTS                             *Return to OutputBuilder file
@@ -500,15 +566,44 @@ BVC         MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'V',(A4)+
             MOVE.B      #'C',(A4)+ 
 
+            JSR         BRANCH_SIZE        *append the size of the branch
             JSR         DECODE_E           *jump to decoder SUB E   
         
             RTS                             *Return to OutputBuilder file
             
-BCC         MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
-            MOVE.B      #'C',(A4)+
-            MOVE.B      #'C',(A4)+  
+BVS         MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
+            MOVE.B      #'V',(A4)+
+            MOVE.B      #'S',(A4)+ 
 
-            JSR         DECODE_E           *jump to decoder SUB E  
+            JSR         BRANCH_SIZE        *append the size of the branch
+            JSR         DECODE_E           *jump to decoder SUB E   
+        
+            RTS                             *Return to OutputBuilder file
+            
+BPL         MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
+            MOVE.B      #'P',(A4)+
+            MOVE.B      #'L',(A4)+ 
+
+            JSR         BRANCH_SIZE        *append the size of the branch
+            JSR         DECODE_E           *jump to decoder SUB E   
+        
+            RTS                             *Return to OutputBuilder file
+            
+BMI         MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
+            MOVE.B      #'M',(A4)+
+            MOVE.B      #'I',(A4)+ 
+
+            JSR         BRANCH_SIZE        *append the size of the branch
+            JSR         DECODE_E           *jump to decoder SUB E   
+        
+            RTS                             *Return to OutputBuilder file
+            
+BGE         MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
+            MOVE.B      #'G',(A4)+
+            MOVE.B      #'E',(A4)+  
+
+            JSR         BRANCH_SIZE        *append the size of the branch
+            JSR         DECODE_E           *jump to decoder SUB E 
         
             RTS                             *Return to OutputBuilder file
             
@@ -516,6 +611,25 @@ BLT         MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'L',(A4)+
             MOVE.B      #'T',(A4)+   
             
+            JSR         BRANCH_SIZE        *append the size of the branch
+            JSR         DECODE_E           *jump to decoder SUB E 
+        
+            RTS                             *Return to OutputBuilder file
+            
+BGT         MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
+            MOVE.B      #'G',(A4)+
+            MOVE.B      #'T',(A4)+   
+            
+            JSR         BRANCH_SIZE        *append the size of the branch
+            JSR         DECODE_E           *jump to decoder SUB E 
+        
+            RTS                             *Return to OutputBuilder file
+            
+BLE         MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
+            MOVE.B      #'L',(A4)+
+            MOVE.B      #'E',(A4)+   
+            
+            JSR         BRANCH_SIZE        *append the size of the branch
             JSR         DECODE_E           *jump to decoder SUB E 
         
             RTS                             *Return to OutputBuilder file
@@ -523,7 +637,8 @@ BLT         MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
 BRA_SUB     MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'R',(A4)+
             MOVE.B      #'A',(A4)+  
-
+            
+            JSR         BRANCH_SIZE        *append the size of the branch
             JSR         DECODE_E           *jump to decoder SUB E  
         
             RTS                             *Return to OutputBuilder file
@@ -837,6 +952,14 @@ ADDA_SIZE   MOVE.W      (A5),D0             *reload OPCODE into (A5)
             CMPI.W      #7,D0
             BEQ         APPND_LONG          *is a long operation
             BRA         DATA                *is not one of the supported sizes
+            
+BRANCH_SIZE MOVE.W      (A5),D0             *reload OPCODE into (A5)
+            AND.W       #$08,D0             *isolate the last 8 bits
+            CMPI.W      #$00,D0             *checking if the last 8 bits are $00
+            BEQ         APPND_WORD          *is a word operation    
+            CMPI.W      #$FF,D0             *checking if the last 8 bits are $FF
+            BEQ         APPND_LONG          *is a long operation
+            BRA         APPND_BYTE          *otherwise is a byte
                    
 
 APPND_BYTE  MOVE.B      #'.',(A4)+
@@ -857,26 +980,6 @@ APPND_LONG  MOVE.B      #'.',(A4)+
 *-FILES--------------------------------------------------------
             INCLUDE     'TeamVisualBasic_OP_Decoder.X68'    ;Helper file for jump table
             
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

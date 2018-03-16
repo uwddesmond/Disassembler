@@ -112,7 +112,8 @@ D_BRA       MOVE.W      (A5),D2             *Load op and store in D2
             MOVE.W      (A5),D2             *Load op and store in D2
             AND.W       #$00FF,D2           *Get displacement bits by masking
             CMP.W       #$00,D2
-            BEQ         BRA_WORD            *branch word displacement sub
+            BEQ         
+            *branch word displacement sub
             MOVE.W      (A5),D2             *Load op and store in D2
             AND.W       #$00FF,D2           *Get displacement bits by masking
             CMP.W       #$00FF,D2
@@ -150,7 +151,64 @@ DECODE_F    MOVE.W      #2,D6               *Initilize opcode length to 2
             LSR.W       #6,D2               *Shift right 6 - isolate Dest Mode
             AND.W       #$0007,D2           *Mask out other bits
             JSR         GET_DSTMODE         *Append DST string to (A4)
+*-----------------------------------------------------------
+*-OPTYPE_F HELPER FUNCTIONS
+*Helps determine the OPTYPE
+*-----------------------------------------------------------
+F_OPMODE    CMP.W       #7,D2               *Check if opcode type falls into the opmode 11 ,divs,mul
+            BEQ         F_111_MODE          *Branch to handle 111 Modes
+            CMP.W       #7,D2
+            BGT         F_OPMODE2
+            RTS
+            
+F_OPMODE2   MOVE.W      (A5),D2             *Reload opcode into D2
+            LSR.W       #6,D2
+            LSR.W       #5,D2
+            AND.W       $0001,D2            *Shift to get opmode bits into the final 3 LSB
+            CMP.W       #1,D2
+            BEQ         F_DN_EA             *Branch to handle when op codes are Dn+<ea> -- Dn
+            CMP.W       #0,D2
+            BEQ         F_EA_DN             *Branch to handle when op code are Dn + <ea - <Ea>
+            RTS
+            
+F_DC_EA     MOVE.W      (A5),D2             *Reload opcode into D2
+            JSR         GRABX8_6            *GRAB BITS 8_5 plce into D5
+            AND         #$0003,D5
+            CMP.W       #0,D5
+            BEQ         BYTE_DATA
+            CMP.W       #1,D5
+            BEQ         WORD_DATA
+            CMP.W       #2,D5
+            BEQ         LONG_DATA
+            *---------------PRINT DESTINATION REG---------------
+            MOVE.B      'D',(A4)+           *Must be a data register for dest
+            MOVE.W      (A5),D2             *Re load op code
+            JSR         GRABx11_9           *grab register bits and store in d5
+            JSR         PrintD5Num
+            RTS
+            
+     
 
+
+F_DC_EA     MOVE.B      'D',(A4)+           *Must be a data register for dest
+            MOVE.W      (A5),D2             *Re load op code
+            JSR         GRABx11_9           *grab register bits and store in d5
+            JSR         PrintD5Num
+            RTS
+            
+            
+
+*------------------------------------------------------------
+*Handles when op mode bits are 111
+F_111_MODE  MOVE.W      (A5),D2
+            JSR         GRABx5_3
+            MOVE.W      D5,D2
+            JSR         GET_SRCMODE
+            RTS                                         
+           
+            
+          
+    
 *-OPCODE Decode Type G---------------------------------------
 *-OPCODEs: NEG, ORI, CMPI, ADDI
 *-xxxxxxxx Size(2) EAMode(3) EAReg(3)
@@ -175,7 +233,8 @@ B_ADDMODE
            AND.W        #$0007,D2
            MOVE.W       D2,D5
            JSR          PrintD5Num
-           RTS
+           RTS          GET_SRC_MODE
+           
            
 *-----------------------------------------------------------
 *Value stored in cont/reg is a number of bits to shift
@@ -251,6 +310,7 @@ D_JSR       MOVE.W      #2,D6               *Initilize opcode length to 2
             JSR         GET_SRCMODE         *print source mode
             RTS
 
+<<<<<<< HEAD
 D_NEG       MOVE.B      #9,(A4)+            *tab after op code
             MOVE.W      #2,D6               *Initilize opcode length to 2
             MOVE.W      (A5),D2             *reload op code from a5          
@@ -294,6 +354,9 @@ F_OPMODE
             
           
             
+=======
+        
+>>>>>>> 19687eb006b0a69b53b4c42be8accbdae997b1bf
              
 
 *-SRC_MODE--------------------------------------------------

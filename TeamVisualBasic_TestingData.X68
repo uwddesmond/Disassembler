@@ -12,15 +12,45 @@ START       ORG         $00007F00            ; first instruction of program
 *-DECODE_E test-------------------------------------------------
 *-BCC (BCC, BLT, BGE, BCS, BVC), BRA
 
-            ;BRA.L     JUMP
-            ;BRA     JUMP2
+            BRA.L     JUMP
+            BRA     JUMP2
+           
             
-            ;BCC     JUMP2
-            ;BLT     DECODE_B
-            ;BGE     PRINT_OP
-            ;BCS     JUMP5
-            ;BVC     JUMP6
-*JUMP6
+
+            MULS.W  #$AAAA,D4
+            MULS.W  D3,D5
+            BRA     JUMP
+            BRA     JUMP2
+
+            BRA.B     JUMP3
+            BRA.S     JUMP3
+
+            
+            BHI     JUMP3
+            BHI.B   JUMP3
+            BHI.B   JUMP4
+            BLS     JUMP4
+            BCC     JUMP2
+
+            BCS     JUMP2
+            BNE     JUMP2
+            BEQ     JUMP2
+            BVC     JUMP2
+            BVS     JUMP2
+            BPL     JUMP2
+            BMI     JUMP2
+            BGE     JUMP2   
+            BLT     JUMP2
+            BGT     JUMP2
+            BLE     JUMP3
+            
+JUMP3       BCC     JUMP2
+JUMP4
+            *BLT     DECODE_B
+            *BGE     PRINT_OP
+            *BCS     JUMP5
+            *BVC     JUMP6
+
 
 *-DECODE_C test--------------------------------------------------
 *-ADDI,SUBI,NEG,ORI,CMPI,ADDI
@@ -610,6 +640,10 @@ JUMP2
 
 
 
+<<<<<<< HEAD
+
+=======
+>>>>>>> 19687eb006b0a69b53b4c42be8accbdae997b1bf
 
 *~Font name~Courier New~
 *~Font size~10~
