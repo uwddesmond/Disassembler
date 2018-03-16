@@ -12,6 +12,10 @@ START       ORG         $00007F00            ; first instruction of program
 *-DECODE_E test-------------------------------------------------
 *-BCC (BCC, BLT, BGE, BCS, BVC), BRA
 
+            
+
+            MULS.W  #$AAAA,D4
+            MULS.W  D3,D5
             BRA     JUMP
             BRA     JUMP2
             
@@ -573,6 +577,7 @@ JUMP2
     
     
     
+
 
 
 
