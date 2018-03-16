@@ -122,6 +122,7 @@ BIN_4       MOVE.W      (A5),D0             *reload opcode
             
             LSR.W       #4,D0               *shift right 4 bits
             LSR.W       #4,D0               *shift right 4 bits
+            
             AND.W       #$0F,D0             *bitmask first 4 bits  
             CMPI.W      #$E,D0              *compare final masked bits
             BEQ         JSR                 *if it equals E it is JSR
@@ -479,7 +480,7 @@ NEG         MOVE.B      #'N',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'G',(A4)+   
         
             JSR         GET_SIZE_67         *Append size
-            JSR         DECODE_C           *jump to decoder SUB C
+            JSR         D_NEG               *jump to decoder SUB C
             
             RTS                             *Return to OutputBuilder file
              
@@ -979,27 +980,6 @@ APPND_LONG  MOVE.B      #'.',(A4)+
 *-FILES--------------------------------------------------------
             INCLUDE     'TeamVisualBasic_OP_Decoder.X68'    ;Helper file for jump table
             
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

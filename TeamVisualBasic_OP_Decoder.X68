@@ -332,7 +332,43 @@ D_JSR       MOVE.W      #2,D6               *Initilize opcode length to 2
             JSR         GET_SRCMODE         *print source mode
             RTS
 
-        
+D_NEG       MOVE.B      #9,(A4)+            *tab after op code
+            MOVE.W      #2,D6               *Initilize opcode length to 2
+            MOVE.W      (A5),D2             *reload op code from a5          
+            
+            LSR.L       #3,D2               *isolate EA mode
+            ANDI.L      #$00000007,D2       
+            
+            CMP.B       #0,D2               *if == 0, Dn
+            BEQ         DregMode            
+            
+            CMP.B       #2,D2               *if == 2, (An)
+            BEQ         DaddINMode
+            
+            CMP.B       #3,D2               *if == 3, (An)+
+            BEQ         DaddINpost
+            
+            CMP.B       #4,D2               *if == 4, -(An)
+            BEQ         DaddINpre 
+
+            CMP.B       #7,D2               *if == 7, -(An)
+            BEQ         NEG_PRINT
+            BRA         RTS_BACK
+            
+NEG_PRINT   MOVE.W      (A5),D2             *reload op code from a5
+            ANDI.L      #$00000007,D2       *isolate register bits
+            
+            CMP.B       #0,D2               *If == 0, its (xxx).W
+            BEQ         WORD_DATA
+            
+            CMP.B       #1,D2               *If == 1, its (xxx).W
+            BEQ         LONG_DATA
+                                                                                    
+                                           
+            RTS
+            
+          
+           
              
 
 *-SRC_MODE--------------------------------------------------
@@ -510,6 +546,7 @@ IMMEDIATE_D MOVE.B      #'#',(A4)+              *add the # to data string to imm
 *Grab bits found at indes 2 to 0 and stores values into D5            
 GRABx2_0    MOVE.W      (A5),D2         *recopy op code
             AND.W       #$0007,D2       *mask other bits
+            ANDI.W       #$0007,D2       *mask other bits
             MOVE.W      D2,D5           *copy D2 to D5
             RTS 
 *----------------------------------------------------------
@@ -563,6 +600,10 @@ A7toSP_repl SUBA        #1,A4           *move the A4 string back by a digit
 *-Size helper------------------------------------------------
 *DECODE TYPE AGNOSTIC FUNCTION         
 PRINT_DATA  CMP.B       #4,D7
+PRINT_DATA  CMP.B       #2,D7           *If there is no additional data, go back
+            BEQ         RTS_BACK
+
+            CMP.B       #4,D7
             BEQ         BYTE_DATA      
  
             CMP.B       #6,D7
@@ -608,6 +649,7 @@ LONG_DATA   MOVE.B      #'$',(A4)+      *prepare the string for a long hex value
             ADD.W       #4,D6           *since it is long data increment the address by 4 bits *d6 is opcode length counter
             RTS     
  
+RTS_BACK    RTS                         *GO BACK 
 *----------------------------------------------------------   
 *DECODE TYPE AGNOSTIC FUNCTION    
 PrintD5Num  CMP.B       #0,D5           *print the numeber in d5
@@ -704,8 +746,11 @@ PRINT8      MOVE.B      #'8',(A4)+
 
 
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 8fa7d1857d11a89459207d98f476e0e19b4999d6
 *~Font name~Courier New~
 *~Font size~10~
 *~Tab type~1~
