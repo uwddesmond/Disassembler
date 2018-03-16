@@ -111,8 +111,8 @@ D_BRA       MOVE.W      (A5),D2             *Load op and store in D2
             BGT         BRA_BYTE_
             MOVE.W      (A5),D2             *Load op and store in D2
             AND.W       #$00FF,D2           *Get displacement bits by masking
-            CMP.W       #$00,D2
-            BEQ         
+            CMP.W       #$0000,D2
+            BEQ         BRA_WORD         
             *branch word displacement sub
             MOVE.W      (A5),D2             *Load op and store in D2
             AND.W       #$00FF,D2           *Get displacement bits by masking
@@ -171,7 +171,7 @@ F_OPMODE2   MOVE.W      (A5),D2             *Reload opcode into D2
             BEQ         F_EA_DN             *Branch to handle when op code are Dn + <ea - <Ea>
             RTS
             
-F_DC_EA     MOVE.W      (A5),D2             *Reload opcode into D2
+F_DN_EA     MOVE.W      (A5),D2             *Reload opcode into D2
             JSR         GRABX8_6            *GRAB BITS 8_5 plce into D5
             AND         #$0003,D5
             CMP.W       #0,D5
@@ -190,7 +190,7 @@ F_DC_EA     MOVE.W      (A5),D2             *Reload opcode into D2
      
 
 
-F_DC_EA     MOVE.B      'D',(A4)+           *Must be a data register for dest
+F_EA_DN     MOVE.B      'D',(A4)+           *Must be a data register for dest
             MOVE.W      (A5),D2             *Re load op code
             JSR         GRABx11_9           *grab register bits and store in d5
             JSR         PrintD5Num
@@ -701,6 +701,8 @@ PRINT7      MOVE.B      #'7',(A4)+
 PRINT8      MOVE.B      #'8',(A4)+
             RTS
     
+
+
 
 
 
