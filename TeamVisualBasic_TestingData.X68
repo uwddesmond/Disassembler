@@ -7,61 +7,108 @@
 *               Testing file provides data for the dissasembler to test upon
 *-----------------------------------------------------------
     
-START       ORG         $00007F00            ; first instruction of program
+START       ORG         $00007F00           ; first instruction of program
+
+*-Typeless Opcode Test------------------------------------------
+*-MOVEQ, ADDQ, JSR, NEG
+
+T_MOVEQ     MOVEQ       #3,D0
+            MOVEQ       #$11,D1
+            MOVEQ       #$22,D2
+            MOVEQ       #$34,D3
+            MOVEQ       #$56,D4
+            MOVEQ       #$7A,D5
+            MOVEQ       #$CD,D6
+            MOVEQ       #$FF,D7
+            
+T_ADDQ      ADDQ        #3,D0
+            ADDQ.B      #$1,D0
+            ADDQ.B      #$8,D7
+            ADDQ.W      #$1,D0
+            ADDQ.W      #$8,D7
+            ADDQ.L      #$1,D0
+            ADDQ.L      #$8,D7
+            
+            ;ADDQ.B      #1,A0
+            ;ADDQ.B      #8,A7
+            ADDQ.W      #1,A0
+            ADDQ.W      #8,A7
+            ADDQ.L      #1,A0
+            ADDQ.L      #8,A7
+            
+            ADDQ.B      #1,$123456
+            ADDQ.W      #8,$12
+            ADDQ.L      #7,$1234
+            
+            ADDQ.B      #1,(A0)
+            ADDQ.W      #8,(A7)+
+            ADDQ.L      #1,-(A0)
+
+T_NEG       NEG         D0
+            NEG         D7
+            
+            NEG.B       $12345678
+            NEG.W       $123456
+            NEG.L       $12
+            
+            NEG.B       (A0)
+            NEG.W       (A1)+
+            NEG.L       -(A0)
+            
+T_JSR       JSR         JUMP
+            JSR         JUMP1
+
+                   
 
 *-DECODE_E test-------------------------------------------------
 *-BCC (BCC, BLT, BGE, BCS, BVC), BRA
 
-            BRA.L     JUMP
-            BRA     JUMP2
+            BRA.L       JUMP
+            BRA         JUMP2
            
             
 
-            MULS.W  #$AAAA,D4
-            MULS.W  D3,D5
-            BRA     JUMP
-            BRA     JUMP2
+            ;MULS.W      #$AAAA,D4
+            ;MULS.W      D3,D5
+            BRA         JUMP
+            BRA         JUMP2
 
-            BRA.B     JUMP3
-            BRA.S     JUMP3
+            BRA.B       JUMP3
+            BRA.S       JUMP3
 
             
-            BHI     JUMP3
-            BHI.B   JUMP3
-            BHI.B   JUMP4
-            BLS     JUMP4
-            BCC     JUMP2
+            BHI         JUMP3
+            BHI.B       JUMP3
+            BHI.B       JUMP4
+            BLS         JUMP4
+            BCC         JUMP2
 
-            BCS     JUMP2
-            BNE     JUMP2
-            BEQ     JUMP2
-            BVC     JUMP2
-            BVS     JUMP2
-            BPL     JUMP2
-            BMI     JUMP2
-            BGE     JUMP2   
-            BLT     JUMP2
-            BGT     JUMP2
-            BLE     JUMP3
+            BCS         JUMP2
+            BNE         JUMP2
+            BEQ         JUMP2
+            BVC         JUMP2
+            BVS         JUMP2
+            BPL         JUMP2
+            BMI         JUMP2
+            BGE         JUMP2   
+            BLT         JUMP2
+            BGT         JUMP2
+            BLE         JUMP3
             
-JUMP3       BCC     JUMP2
+JUMP3       BCC         JUMP2
 JUMP4
-            *BLT     DECODE_B
-            *BGE     PRINT_OP
-            *BCS     JUMP5
-            *BVC     JUMP6
+            *BLT         DECODE_B
+            *BGE         PRINT_OP
+            *BCS         JUMP5
+            *BVC         JUMP6
 
 
 *-DECODE_C test--------------------------------------------------
-*-ADDI,SUBI,NEG,ORI,CMPI,ADDI
-            NEG         D2
-            NEG.B       $1234
-            NEG.W       $123456
-            NEG.L       $1234
-            ;NEG         #1234
-            ;NEG         A2
+*-ADDI,SUBI,ORI,CMPI,ADDI
+            
+
             ADDI.B      #$12,D0
-            *ADDI.B      #$12,A0            *not allowed
+
             ADDI.W      #$1234,D7
             ADDI.L      #$12345678,D0
             
@@ -76,10 +123,6 @@ JUMP4
             CMPI.B      #$12,D0
             CMPI.W      #$1234,D7
             CMPI.L      #$12345678,D0
-            
-            
-            ;NEG?
-            
 
 
 *-Shift test-----------------------------------------------------
@@ -121,35 +164,6 @@ JUMP4
             LSL.W       D5,D7
             LSL.W       D6,D7    
             LSL.W       D7,D7     
-            
-            ;LSL.W       $ABCD1234
-            ;LSL.W       $20(A0)
-*
-*            LSL.W       (A0)            
-*            LSL.W       -(A0)           
-*            LSL.W       (A0)+
-*            LSL.W       (A1)            
-*            LSL.W       -(A1)           
-*            LSL.W       (A1)+
-*            LSL.W       (A2)            
-*            LSL.W       -(A2)           
-*            LSL.W       (A2)+
-*            LSL.W       (A3)            
-*            LSL.W       -(A3)           
-*            LSL.W       (A3)+
-*            LSL.W       (A4)            
-*            LSL.W       -(A4)           
-*            LSL.W       (A4)+
-*            LSL.W       (A5)            
-*            LSL.W       -(A5)           
-*            LSL.W       (A5)+
-*            LSL.W       (A6)            
-*            LSL.W       -(A6)           
-*            LSL.W       (A6)+
-*            LSL.W       (A7)            
-*            LSL.W       -(A7)           
-*            LSL.W       (A7)+
-
 
             LSL.L       #$01,D0
             LSL.L       #$02,D1
@@ -199,34 +213,6 @@ JUMP4
             LSR.W       D6,D7    
             LSR.W       D7,D7  
 
-            ;LSR.W       $ABCD1234
-            ;LSR.W       $20(A0)
-
-*            LSR.W       (A0)            
-*            LSR.W       -(A0)           
-*            LSR.W       (A0)+
-*            LSR.W       (A1)            
-*            LSR.W       -(A1)           
-*            LSR.W       (A1)+
-*            LSR.W       (A2)            
-*            LSR.W       -(A2)           
-*            LSR.W       (A2)+
-*            LSR.W       (A3)            
-*            LSR.W       -(A3)           
-*            LSR.W       (A3)+
-*            LSR.W       (A4)            
-*            LSR.W       -(A4)           
-*            LSR.W       (A4)+
-*            LSR.W       (A5)            
-*            LSR.W       -(A5)           
-*            LSR.W       (A5)+
-*            LSR.W       (A6)            
-*            LSR.W       -(A6)           
-*            LSR.W       (A6)+
-*            LSR.W       (A7)            
-*            LSR.W       -(A7)           
-*            LSR.W       (A7)+   
-
             LSR.L       #$01,D0
             LSR.L       #$02,D1
             LSR.L       #$03,D2
@@ -275,33 +261,7 @@ JUMP4
             ASL.W       D6,D7    
             ASL.W       D7,D7   
 
-            ;ASL.W       $ABCD1234
-            ;ASL.W       $20(A0)
 
-*            ASL.W       (A0)            
-*            ASL.W       -(A0)           
-*            ASL.W       (A0)+
-*            ASL.W       (A1)            
-*            ASL.W       -(A1)           
-*            ASL.W       (A1)+
-*            ASL.W       (A2)            
-*            ASL.W       -(A2)           
-*            ASL.W       (A2)+
-*            ASL.W       (A3)            
-*            ASL.W       -(A3)           
-*            ASL.W       (A3)+
-*            ASL.W       (A4)            
-*            ASL.W       -(A4)           
-*            ASL.W       (A4)+
-*            ASL.W       (A5)            
-*            ASL.W       -(A5)           
-*            ASL.W       (A5)+
-*            ASL.W       (A6)            
-*            ASL.W       -(A6)           
-*            ASL.W       (A6)+
-*            ASL.W       (A7)            
-*            ASL.W       -(A7)           
-*            ASL.W       (A7)+  
 
             ASL.L       #$01,D0
             ASL.L       #$02,D1
@@ -351,33 +311,6 @@ JUMP4
             ASR.W       D6,D7    
             ASR.W       D7,D7   
 
-            ;ASR.W       $ABCD1234
-            ;ASR.W       $20(A0)
-
-*            ASR.W       (A0)            
-*            ASR.W       -(A0)           
-*            ASR.W       (A0)+
-*            ASR.W       (A1)            
-*            ASR.W       -(A1)           
-*            ASR.W       (A1)+
-*            ASR.W       (A2)            
-*            ASR.W       -(A2)           
-*            ASR.W       (A2)+
-*            ASR.W       (A3)            
-*            ASR.W       -(A3)           
-*            ASR.W       (A3)+
-*            ASR.W       (A4)            
-*            ASR.W       -(A4)           
-*            ASR.W       (A4)+
-*            ASR.W       (A5)            
-*            ASR.W       -(A5)           
-*            ASR.W       (A5)+
-*            ASR.W       (A6)            
-*            ASR.W       -(A6)           
-*            ASR.W       (A6)+
-*            ASR.W       (A7)            
-*            ASR.W       -(A7)           
-*            ASR.W       (A7)+    
 
             ASR.L       #$01,D0
             ASR.L       #$02,D1
@@ -427,33 +360,6 @@ JUMP4
             ROL.W       D6,D7    
             ROL.W       D7,D7  
             
-            ;ROL.W       $ABCD1234
-            ;ROL.W       $20(A0)
-
-*            ROL.W       (A0)            
-*            ROL.W       -(A0)           
-*            ROL.W       (A0)+
-*            ROL.W       (A1)            
-*            ROL.W       -(A1)           
-*            ROL.W       (A1)+
-*            ROL.W       (A2)            
-*            ROL.W       -(A2)           
-*            ROL.W       (A2)+
-*            ROL.W       (A3)            
-*            ROL.W       -(A3)           
-*            ROL.W       (A3)+
-*            ROL.W       (A4)            
-*            ROL.W       -(A4)           
-*            ROL.W       (A4)+
-*            ROL.W       (A5)            
-*            ROL.W       -(A5)           
-*            ROL.W       (A5)+
-*            ROL.W       (A6)            
-*            ROL.W       -(A6)           
-*            ROL.W       (A6)+
-*            ROL.W       (A7)            
-*            ROL.W       -(A7)           
-*            ROL.W       (A7)+  
 
             ROL.L       #$01,D0
             ROL.L       #$02,D1
@@ -503,33 +409,6 @@ JUMP4
             ROR.W       D6,D7    
             ROR.W       D7,D7 
 
-            ;ROR.W       $ABCD1234
-            ;ROR.W       $20(A0)
-
-*            ROR.W       (A0)            
-*            ROR.W       -(A0)           
-*            ROR.W       (A0)+
-*            ROR.W       (A1)            
-*            ROR.W       -(A1)           
-*            ROR.W       (A1)+
-*            ROR.W       (A2)            
-*            ROR.W       -(A2)           
-*            ROR.W       (A2)+
-*            ROR.W       (A3)            
-*            ROR.W       -(A3)           
-*            ROR.W       (A3)+
-*            ROR.W       (A4)            
-*            ROR.W       -(A4)           
-*            ROR.W       (A4)+
-*            ROR.W       (A5)            
-*            ROR.W       -(A5)           
-*            ROR.W       (A5)+
-*            ROR.W       (A6)            
-*            ROR.W       -(A6)           
-*            ROR.W       (A6)+
-*            ROR.W       (A7)            
-*            ROR.W       -(A7)           
-*            ROR.W       (A7)+  
 
             ROR.L       #$01,D0
             ROR.L       #$02,D1
@@ -549,7 +428,7 @@ JUMP4
 
 
 *--------------------------Test the MOVE Op Code-----------------
-label1      MOVE.B      $12,D6
+JUMP1       MOVE.B      $12,D6
             MOVE.W      $1234,D5
             MOVE.L      $12345678,D7
             MOVE.L      D2,$12345676
@@ -604,46 +483,11 @@ label1      MOVE.B      $12,D6
 JUMP
 JUMP2
 
-            SIMHALT                     ; halt simulator
-            END         START                ; last line of source
+            SIMHALT                         ; halt simulator
+            END         START               ; last line of source
     
     
-    
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<<<<<<< HEAD
-
-=======
->>>>>>> 19687eb006b0a69b53b4c42be8accbdae997b1bf
 
 *~Font name~Courier New~
 *~Font size~10~
