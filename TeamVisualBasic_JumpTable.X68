@@ -483,6 +483,7 @@ BGE         MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'G',(A4)+
             MOVE.B      #'E',(A4)+  
 
+            JSR         BRANCH_SIZE        *append the size of the branch
             JSR         DECODE_E           *jump to decoder SUB E 
         
             RTS                             *Return to OutputBuilder file
@@ -491,6 +492,7 @@ BCS         MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'C',(A4)+
             MOVE.B      #'S',(A4)+  
 
+            JSR         BRANCH_SIZE        *append the size of the branch
             JSR         DECODE_E           *jump to decoder SUB E  
         
             RTS                             *Return to OutputBuilder file
@@ -499,6 +501,7 @@ BVC         MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'V',(A4)+
             MOVE.B      #'C',(A4)+ 
 
+            JSR         BRANCH_SIZE        *append the size of the branch
             JSR         DECODE_E           *jump to decoder SUB E   
         
             RTS                             *Return to OutputBuilder file
@@ -507,6 +510,7 @@ BCC         MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'C',(A4)+
             MOVE.B      #'C',(A4)+  
 
+            JSR         BRANCH_SIZE        *append the size of the branch
             JSR         DECODE_E           *jump to decoder SUB E  
         
             RTS                             *Return to OutputBuilder file
@@ -515,6 +519,7 @@ BLT         MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'L',(A4)+
             MOVE.B      #'T',(A4)+   
             
+            JSR         BRANCH_SIZE        *append the size of the branch
             JSR         DECODE_E           *jump to decoder SUB E 
         
             RTS                             *Return to OutputBuilder file
@@ -522,7 +527,8 @@ BLT         MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
 BRA_SUB     MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'R',(A4)+
             MOVE.B      #'A',(A4)+  
-
+            
+            JSR         BRANCH_SIZE        *append the size of the branch
             JSR         DECODE_E           *jump to decoder SUB E  
         
             RTS                             *Return to OutputBuilder file
@@ -836,6 +842,14 @@ ADDA_SIZE   MOVE.W      (A5),D0             *reload OPCODE into (A5)
             CMPI.W      #7,D0
             BEQ         APPND_LONG          *is a long operation
             BRA         DATA                *is not one of the supported sizes
+            
+BRANCH_SIZE MOVE.W      (A5),D0             *reload OPCODE into (A5)
+            AND.W       #$03,D0             *isolate the last 2 bits
+            CMPI.W      #$00,D0             *checking if the last 2 bits are $00
+            BEQ         APPND_WORD          *is a word operation    
+            CMPI.W      #$FF,D0             *checking if the last 2 bits are $FF
+            BEQ         APPND_LONG          *is a long operation
+            BRA         APPND_BYTE          *otherwise is a byte
                    
 
 APPND_BYTE  MOVE.B      #'.',(A4)+
@@ -856,6 +870,7 @@ APPND_LONG  MOVE.B      #'.',(A4)+
 *-FILES--------------------------------------------------------
             INCLUDE     'TeamVisualBasic_OP_Decoder.X68'    ;Helper file for jump table
             
+
 
 
 
