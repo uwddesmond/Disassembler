@@ -8,15 +8,21 @@
 *-----------------------------------------------------------
     
 START       ORG         $00007F00            ; first instruction of program
-
+*-DECODE_F test----------------------------------------------------
+            BRA     JUMP 
+            MULS.W  #$AAAA,D4
+            MULS.W  D3,D5
+            ADD.W   #$4,D4
+            OR.W    #$3,D4
+            SUB.W   #$898,D5
+            SUB.W   D6,D5
 *-DECODE_E test-------------------------------------------------
 *-BCC (BCC, BLT, BGE, BCS, BVC), BRA
 
 <<<<<<< HEAD
             
 
-            MULS.W  #$AAAA,D4
-            MULS.W  D3,D5
+            
             BRA     JUMP
             BRA     JUMP2
 =======
@@ -604,6 +610,9 @@ JUMP2
     
     
     
+
+
+
 
 
 

@@ -143,14 +143,17 @@ BRA_BYTE    MOVE.W      (A5),D0
 *-xxxx Reg(3) OPMode(3) EAMode(3) EAReg(3)       
   
 DECODE_F    MOVE.W      #2,D6               *Initilize opcode length to 2
+            MOVE.B      #9,(A4)+            *tab after op cod
             MOVE.W      (A5),D2             *Copy opcode into d2
-            LSL.W       #6,D2               *Shift to grab op mode
+            LSR.W       #6,D2               *Shift to grab op mode
             AND.W       #$0007,D2           *Mask other bits
             JSR         F_OPMODE
+            MOVE.B      #',',(A4)+          *Move comma into string
+            MOVE.B      #'D',(A4)+
             MOVE.W      (A5),D2             *Recopy OPCODE into D2  
-            LSR.W       #6,D2               *Shift right 6 - isolate Dest Mode
-            AND.W       #$0007,D2           *Mask out other bits
-            JSR         GET_DSTMODE         *Append DST string to (A4)
+            JSR         GRABx11_9           *grab dest reg
+            JSR         PrintD5Num          *pritn register number
+            RTS
 *-----------------------------------------------------------
 *-OPTYPE_F HELPER FUNCTIONS
 *Helps determine the OPTYPE
@@ -158,7 +161,7 @@ DECODE_F    MOVE.W      #2,D6               *Initilize opcode length to 2
 F_OPMODE    CMP.W       #7,D2               *Check if opcode type falls into the opmode 11 ,divs,mul
             BEQ         F_111_MODE          *Branch to handle 111 Modes
             CMP.W       #7,D2
-            BGT         F_OPMODE2
+            BLT         F_OPMODE2
             RTS
             
 F_OPMODE2   MOVE.W      (A5),D2             *Reload opcode into D2
@@ -204,7 +207,7 @@ F_111_MODE  MOVE.W      (A5),D2
             JSR         GRABx5_3
             MOVE.W      D5,D2
             JSR         GET_SRCMODE
-            RTS                                         
+            RTS                                        
            
             
           
@@ -670,6 +673,9 @@ PRINT7      MOVE.B      #'7',(A4)+
 PRINT8      MOVE.B      #'8',(A4)+
             RTS
     
+
+
+
 
 
 
