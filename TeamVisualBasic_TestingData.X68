@@ -72,6 +72,7 @@ T_JSR       JSR         JUMP
 
                    
 
+>>>>>>> 8fa7d1857d11a89459207d98f476e0e19b4999d6
 *-DECODE_E test-------------------------------------------------
 *-BCC (BCC, BLT, BGE, BCS, BVC), BRA
 
@@ -80,11 +81,15 @@ T_JSR       JSR         JUMP
            
             
 
+<<<<<<< HEAD
             
             BRA     JUMP
             BRA     JUMP2
+=======
             BRA.B     JUMP3
             BRA.S     JUMP3
+>>>>>>> 12c1ee8919728579c5f442b0a4ccdb5d9376c686
+=======
             ;MULS.W      #$AAAA,D4
             ;MULS.W      D3,D5
             BRA         JUMP
@@ -93,6 +98,7 @@ T_JSR       JSR         JUMP
             BRA.B       JUMP3
             BRA.S       JUMP3
 
+>>>>>>> 8fa7d1857d11a89459207d98f476e0e19b4999d6
             
             BHI         JUMP3
             BHI.B       JUMP3
@@ -506,6 +512,41 @@ JUMP2
     
 
 
+<<<<<<< HEAD
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=======
+>>>>>>> 8fa7d1857d11a89459207d98f476e0e19b4999d6
 
 
 
