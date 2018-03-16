@@ -282,8 +282,7 @@ NEG_PRINT   MOVE.W      (A5),D2             *reload op code from a5
             
             CMP.B       #1,D2               *If == 1, its (xxx).W
             BEQ         LONG_DATA
-                                          
-                                           
+                                                                                    
                                            
             RTS
 *-----------------------------------------------------------
