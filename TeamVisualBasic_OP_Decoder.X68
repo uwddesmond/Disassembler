@@ -741,11 +741,8 @@ PRINT8      MOVE.B      #'8',(A4)+
 
 
 
-<<<<<<< HEAD
 
 
-=======
->>>>>>> 8fa7d1857d11a89459207d98f476e0e19b4999d6
 *~Font name~Courier New~
 *~Font size~10~
 *~Tab type~1~

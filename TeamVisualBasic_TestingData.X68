@@ -7,19 +7,20 @@
 *               Testing file provides data for the dissasembler to test upon
 *-----------------------------------------------------------
     
-<<<<<<< HEAD
-START       ORG         $00007F00            ; first instruction of program
-*-DECODE_F test----------------------------------------------------
-            BRA     JUMP 
-            MULS.W  #$AAAA,D4
-            MULS.W  D3,D5
-            ADD.W   #$4,D4
-            OR.W    #$3,D4
-            SUB.W   #$898,D5
-            SUB.W   D6,D5
-=======
 START       ORG         $00007F00           ; first instruction of program
-
+*-DECODE_F
+            ADD.W       #$887,D5 
+            MULS.W      #$435,D4
+            MULS.W      D4,D5
+            ADD.W       #$093,D4
+            ADD.L       #$354,D5
+            ADD.W       D4,D5
+            ADD.W       #$887,D5
+            OR.W        #$445,D4
+            OR.L        D4,D5
+            SUB.W       #$9743,D5
+            SUB.W       #$6443,D4
+            SUB.W       D4,D5
 *-Typeless Opcode Test------------------------------------------
 *-MOVEQ, ADDQ, JSR, NEG
 
@@ -546,6 +547,9 @@ JUMP2
 
 =======
 >>>>>>> 8fa7d1857d11a89459207d98f476e0e19b4999d6
+
+
+
 *~Font name~Courier New~
 *~Font size~10~
 *~Tab type~1~
