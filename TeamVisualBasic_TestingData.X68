@@ -12,18 +12,24 @@ START       ORG         $00007F00            ; first instruction of program
 *-DECODE_E test-------------------------------------------------
 *-BCC (BCC, BLT, BGE, BCS, BVC), BRA
 
-            BRA     JUMP
-            BRA     JUMP2
+            ;BRA.L     JUMP
+            ;BRA     JUMP2
             
-            BCC     JUMP2
-            BLT     DECODE_B
-            BGE     PRINT_OP
-            BCS     JUMP5
-            BVC     JUMP6
+            ;BCC     JUMP2
+            ;BLT     DECODE_B
+            ;BGE     PRINT_OP
+            ;BCS     JUMP5
+            ;BVC     JUMP6
 *JUMP6
 
 *-DECODE_C test--------------------------------------------------
 *-ADDI,SUBI,NEG,ORI,CMPI,ADDI
+            NEG         D2
+            NEG.B       $1234
+            NEG.W       $123456
+            NEG.L       $1234
+            ;NEG         #1234
+            ;NEG         A2
             ADDI.B      #$12,D0
             *ADDI.B      #$12,A0            *not allowed
             ADDI.W      #$1234,D7
@@ -573,6 +579,8 @@ JUMP2
     
     
     
+
+
 
 
 
