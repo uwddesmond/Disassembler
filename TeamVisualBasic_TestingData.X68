@@ -8,7 +8,19 @@
 *-----------------------------------------------------------
     
 START       ORG         $00007F00           ; first instruction of program
-
+*-DECODE_F
+            ADD.W       #$887,D5 
+            MULS.W      #$435,D4
+            MULS.W      D4,D5
+            ADD.W       #$093,D4
+            ADD.L       #$354,D5
+            ADD.W       D4,D5
+            ADD.W       #$887,D5
+            OR.W        #$445,D4
+            OR.L        D4,D5
+            SUB.W       #$9743,D5
+            SUB.W       #$6443,D4
+            SUB.W       D4,D5
 *-Typeless Opcode Test------------------------------------------
 *-MOVEQ, ADDQ, JSR, NEG
 
@@ -68,6 +80,11 @@ T_JSR       JSR         JUMP
            
             
 
+            
+            BRA     JUMP
+            BRA     JUMP2
+            BRA.B     JUMP3
+            BRA.S     JUMP3
             ;MULS.W      #$AAAA,D4
             ;MULS.W      D3,D5
             BRA         JUMP
@@ -487,6 +504,10 @@ JUMP2
             END         START               ; last line of source
     
     
+
+
+
+
 
 
 *~Font name~Courier New~
