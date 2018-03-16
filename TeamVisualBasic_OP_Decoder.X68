@@ -277,8 +277,6 @@ B_SRC_DMODE MOVE.W      (A5),D2             *reload op
             JSR         Printd5Num          *print register numebr
             RTS
             
-
-
 *-----------------------------------------------------------
 *-OPTYPE_c HELPER FUNCTIONS
 *Helps print second argument
@@ -295,8 +293,7 @@ C_SRC       ;MOVE.W      (A5),D2             *Reload op
             ;JSR         GET_SRCMODE
             
             RTS
-                      
-           
+                                
 
 *-OPS WITHOUT TYPE------------------------------------------
 *-OPCODES: MOVEQ
@@ -545,7 +542,6 @@ IMMEDIATE_D MOVE.B      #'#',(A4)+              *add the # to data string to imm
 *----------------------------------------------------------
 *Grab bits found at indes 2 to 0 and stores values into D5            
 GRABx2_0    MOVE.W      (A5),D2         *recopy op code
-            AND.W       #$0007,D2       *mask other bits
             ANDI.W       #$0007,D2       *mask other bits
             MOVE.W      D2,D5           *copy D2 to D5
             RTS 
@@ -599,7 +595,6 @@ A7toSP_repl SUBA        #1,A4           *move the A4 string back by a digit
 
 *-Size helper------------------------------------------------
 *DECODE TYPE AGNOSTIC FUNCTION         
-PRINT_DATA  CMP.B       #4,D7
 PRINT_DATA  CMP.B       #2,D7           *If there is no additional data, go back
             BEQ         RTS_BACK
 
