@@ -953,10 +953,10 @@ ADDA_SIZE   MOVE.W      (A5),D0             *reload OPCODE into (A5)
             BRA         DATA                *is not one of the supported sizes
             
 BRANCH_SIZE MOVE.W      (A5),D0             *reload OPCODE into (A5)
-            AND.W       #$03,D0             *isolate the last 2 bits
-            CMPI.W      #$00,D0             *checking if the last 2 bits are $00
+            AND.W       #$08,D0             *isolate the last 8 bits
+            CMPI.W      #$00,D0             *checking if the last 8 bits are $00
             BEQ         APPND_WORD          *is a word operation    
-            CMPI.W      #$FF,D0             *checking if the last 2 bits are $FF
+            CMPI.W      #$FF,D0             *checking if the last 8 bits are $FF
             BEQ         APPND_LONG          *is a long operation
             BRA         APPND_BYTE          *otherwise is a byte
                    
