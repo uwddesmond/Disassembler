@@ -310,7 +310,6 @@ D_JSR       MOVE.W      #2,D6               *Initilize opcode length to 2
             JSR         GET_SRCMODE         *print source mode
             RTS
 
-<<<<<<< HEAD
 D_NEG       MOVE.B      #9,(A4)+            *tab after op code
             MOVE.W      #2,D6               *Initilize opcode length to 2
             MOVE.W      (A5),D2             *reload op code from a5          
@@ -345,18 +344,9 @@ NEG_PRINT   MOVE.W      (A5),D2             *reload op code from a5
                                                                                     
                                            
             RTS
-*-----------------------------------------------------------
-*-OPTYPE_F HELPER FUNCTIONS
-*Helps determine the OPTYPE
-*-----------------------------------------------------------
-F_OPMODE
-           
             
           
-            
-=======
-        
->>>>>>> 19687eb006b0a69b53b4c42be8accbdae997b1bf
+           
              
 
 *-SRC_MODE--------------------------------------------------
@@ -701,6 +691,7 @@ PRINT7      MOVE.B      #'7',(A4)+
 PRINT8      MOVE.B      #'8',(A4)+
             RTS
     
+
 
 
 
