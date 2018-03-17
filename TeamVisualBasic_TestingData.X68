@@ -8,17 +8,9 @@
 *-----------------------------------------------------------
 
 START       ORG         $00007F00           ; first instruction of program            
-            *ADDA.W      $0002,A4
-            *ADDA.W      A3,A4
-            *ADDA.L      $00000002,A4
-            *ADDA.L      A4,A3
-            
-JUMPTEST
-
-            BRA         JUMPTEST
-            BRA         JUMPTEST2
-JUMPTEST2
-
+            ADD.L       #$354,D5
+            ADD.W       D4,D5
+            ADD.W       #$887,D5
 *-DECODE_F Test-------------------------------------------------
 *-ADD MULS ADD OR SUB
 
@@ -35,7 +27,7 @@ JUMPTEST2
             SUB.W       #$6443,D4
             SUB.W       D4,D5
 *-Typeless Opcode Test------------------------------------------
-*-MOVEQ, ADDQ, JSR, NEG
+*-MOVEQ, ADDQ, JSR, NEG,SUB.Q,LEA
 
 T_MOVEQ     MOVEQ       #3,D0
             MOVEQ       #$11,D1
@@ -80,56 +72,65 @@ T_NEG       NEG         D0
             NEG.W       (A1)+
             NEG.L       -(A0)
             
-T_JSR       JSR         JUMP
-            JSR         JUMP1
+T_JSR       JSR         T_DECODE_C
+            JSR         T_NEG
 
+T_SUBQ      SUBQ.L      #$1,D1
+            SUBQ.L      #$2,A1
+            SUBQ.W      #$3,D2
+            SUBQ.W      #$4,A3
+            SUBQ.W      #$2,D4
+            SUBQ.W      #$3,A4
+            SUBQ.B      #$1,D1
+            SUBQ.B      #$4,D5
+            
+T_LEA       LEA         T_SUBQ,A0
+            LEA         T_JSR,A2
+            LEA         T_DECODE_C,A5                     
                    
 
 
 *-DECODE_E test-------------------------------------------------
 *-BCC (BCC, BLT, BGE, BCS, BVC), BRA
 
-            BRA.L       JUMP
-            BRA         JUMP2
+DECODE_E_TEST
+            BRA.L       T_DECODE_C
+            BRA         T_DECODE_C
            
             
 
             
-            BRA     JUMP
-            BRA     JUMP2
+            BRA         T_DECODE_C
+            BRA         T_DECODE_C
 
-            BRA.B     JUMP3
-            BRA.S     JUMP3
+            BRA.B       T_DECODE_C     
+            BRA.S       T_DECODE_C
 
-            ;MULS.W      #$AAAA,D4
-            ;MULS.W      D3,D5
-            BRA         JUMP
-            BRA         JUMP2
+            BRA         T_DECODE_C
+            BRA         T_DECODE_C
 
-            BRA.B       JUMP3
-            BRA.S       JUMP3
+            BRA.B       T_DECODE_C
+            BRA.S       T_DECODE_C
 
             
-            BHI         JUMP3
-            BHI.B       JUMP3
-            BHI.B       JUMP4
-            BLS         JUMP4
-            BCC         JUMP2
+            BHI         T_DECODE_C
+            BHI.B       T_DECODE_C
+            BHI.B       T_DECODE_C
+            BLS         T_DECODE_C
+            BCC         T_DECODE_C
 
-            BCS         JUMP2
-            BNE         JUMP2
-            BEQ         JUMP2
-            BVC         JUMP2
-            BVS         JUMP2
-            BPL         JUMP2
-            BMI         JUMP2
-            BGE         JUMP2   
-            BLT         JUMP2
-            BGT         JUMP2
-            BLE         JUMP3
+            BCS         T_DECODE_C
+            BNE         T_DECODE_C
+            BEQ         T_DECODE_C
+            BVC         T_DECODE_C
+            BVS         T_DECODE_C
+            BPL         T_DECODE_C
+            BMI         T_DECODE_C
+            BGE         T_DECODE_C
+            BLT         T_DECODE_C
+            BGT         T_DECODE_C
+            BLE         T_DECODE_C
             
-JUMP3       BCC         JUMP2
-JUMP4
             *BLT         DECODE_B
             *BGE         PRINT_OP
             *BCS         JUMP5
@@ -139,7 +140,7 @@ JUMP4
 *-DECODE_C test--------------------------------------------------
 *-ADDI,SUBI,ORI,CMPI,ADDI
             
-
+T_DECODE_C
             ADDI.B      #$12,D0
 
             ADDI.W      #$1234,D7
@@ -458,10 +459,14 @@ JUMP4
             ROR.L       D5,D7
             ROR.L       D6,D7    
             ROR.L       D7,D7
+            
+*-DECODE_B test--------------------------------------------------
+*-LSL,LSR,ROL,ROR
 
-
-*--------------------------Test the MOVE Op Code-----------------
-JUMP1       MOVE.B      $12,D6
+*-DECODE_A test--------------------------------------------------
+*-MOVE,MOVEA
+T_MOVE      
+            MOVE.B      $12,D6
             MOVE.W      $1234,D5
             MOVE.L      $12345678,D7
             MOVE.L      D2,$12345676
@@ -505,16 +510,57 @@ JUMP1       MOVE.B      $12,D6
             MOVE.B      $78,D5
             MOVE.W      D6,D6
             MOVE.W      D7,D7
-*---------------------------testing the <#data> type--------------
+
             MOVE.L      #$12345678,D2
             MOVE.W      #$1234,D5
             MOVE.B      #$12,D7
-*---------------------------Test the MOVEA op Code-------------------
-            MOVEA.L     A2,A4
-            MOVEA.L     #$12345678,A6
+T_MOVEA
 
-JUMP
-JUMP2
+            MOVEA.L     A1,A1
+            MOVEA.L     A2,A2
+            MOVEA.L     A3,A3
+            MOVEA.L     A4,A4
+            MOVEA.L     A5,A5
+            MOVEA.L     A6,A6
+            MOVEA.L     A7,A7
+            
+            MOVEA.W     A0,A0
+            MOVEA.W     A1,A1
+            MOVEA.W     A2,A2
+            MOVEA.W     A3,A3
+            MOVEA.W     A4,A4
+            MOVEA.W     A5,A5
+            MOVEA.W     A6,A6
+            MOVEA.W     A7,A7
+            
+            MOVEA.L     $1234,A0
+            MOVEA.L     $1234,A1
+            MOVEA.L     $1234,A2
+            MOVEA.L     $1234,A3
+            MOVEA.L     $1234,A4
+            MOVEA.L     $1234,A5
+            MOVEA.L     $1234,A6
+            MOVEA.L     $1234,A7
+            MOVEA.L     $1234,A0
+            MOVEA.L     $1234,A1
+            MOVEA.L     $1234,A2
+            MOVEA.L     $1234,A3
+            MOVEA.L     $1234,A4
+            MOVEA.L     $1234,A5
+            MOVEA.L     $1234,A6
+            MOVEA.L     $1234,A7
+            
+            MOVEA.L     #$00000000,A6
+            MOVEA.L     #$11111111,A6
+            MOVEA.L     #$22222222,A6
+            MOVEA.L     #$33333333,A6
+            MOVEA.L     #$44444444,A6
+            MOVEA.L     #$55555555,A6
+            MOVEA.L     #$66666666,A6
+            MOVEA.L     #$77777777,A6
+            
+            
+
 
             SIMHALT                         ; halt simulator
             END         START               ; last line of source
@@ -557,6 +603,10 @@ JUMP2
 
 =======
 >>>>>>> 8fa7d1857d11a89459207d98f476e0e19b4999d6
+
+
+
+
 
 
 

@@ -428,11 +428,12 @@ MOVEA       MOVE.B      #'M',(A4)+          *Load OPCODE string into (A4)
             RTS                             *Return to OutputBuilder file
 
 *-BIN 4--------------------------------------------------------
-NOP         ADDI        #BYTE,D7            *NOP is 2 Bytes; Increment length var by 2
+NOP         ADDI.B      #2,D7            *NOP is 2 Bytes; Increment length var by 2
             MOVE.B      #'N',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'O',(A4)+
             MOVE.B      #'P',(A4)+
             
+            MOVE.B      #2,D6
             *JSR         D_NOP
             
             RTS                             *Return to OutputBuilder file
@@ -985,6 +986,8 @@ APPND_LONG  MOVE.B      #'.',(A4)+
 *-FILES--------------------------------------------------------
             INCLUDE     'TeamVisualBasic_OP_Decoder.X68'    ;Helper file for jump table
             
+
+
 
 
 

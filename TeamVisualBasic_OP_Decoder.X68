@@ -129,9 +129,14 @@ BRA_BYTE_   CMP.W       #$FF,D2
             BLT         BRA_BYTE
             RTS
 
-BRA_BYTE    MOVE.W      (A5),D0
-            AND.W       #$00FF,D0
-            MOVE.W      #8,D2
+BRA_BYTE    MOVE.W      (A5),D0             *LOAD OP CODE
+            AND.W       #$00FF,D0           *And to get displacement
+            ROR.L       #8,D0
+            MOVE.B      #',',(A4)+
+            *MOVE.L      A5,D5              *move the address into D5
+            *ADD.L       D0,D5              *add the displacement to the address
+            *MOVE.L      D5,D0              *move the new addres into the D0
+            MOVE.W      #2,D2              *set the loop counter to 32 to print full address
             JSR         GD_LOOP
             RTS     
 *-----------displacement sub routines---------------------       
@@ -325,7 +330,7 @@ D_ADDQ      MOVE.B      #9,(A4)+            *tab after op code
 D_JSR       MOVE.B      #9,(A4)+            *tab after op code
             MOVE.W      #2,D6               *Initilize opcode length to 2
             MOVE.W      (A5),D2             *reload op code from a5
-            LSL.W       #3,D2               *shift so source mode is in LSBs  
+            LSR.W       #3,D2               *shift so source mode is in LSBs  
             AND.W       #$0007,D2           *mask out other bits
             JSR         GET_SRCMODE         *print source mode
             RTS
@@ -362,9 +367,7 @@ NEG_PRINT   MOVE.W      (A5),D2             *reload op code from a5
             BEQ         WORD_DATA
             
             CMP.B       #1,D2               *If == 1, its (xxx).W
-            BEQ         LONG_DATA
-                                                                                    
-                                           
+            BEQ         LONG_DATA                                                                                                                               
             RTS
             
           
@@ -759,6 +762,9 @@ PRINT7      MOVE.B      #'7',(A4)+
 PRINT8      MOVE.B      #'8',(A4)+
             RTS
     
+
+
+
 
 
 
