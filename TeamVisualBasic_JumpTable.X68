@@ -451,8 +451,6 @@ RTS         MOVE.B      #'R',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'T',(A4)+
             MOVE.B      #'S',(A4)+ 
 
-            MOVE.B      #WORD,D6            *Increment the size counter D6 by a WORD 
-            MOVE.B      #WORD,D7            *Increment the size counter D7 by a WORD
             MOVE.L      #2,D6               *Increment the size counter D6 by a WORD 
             MOVE.L      #2,D7               *Increment the size counter D7 by a WORD
             

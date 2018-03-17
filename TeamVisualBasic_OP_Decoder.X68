@@ -89,8 +89,6 @@ DECODE_D    MOVE.B      #9,(A4)+            *tab after op code
 *-OPCODEs: BCC (BCC, BLT, BGE, BCS, BVC), BRA
 *-xxxx Condition(4) 8 Bit Displacement       
   
-DECODE_E    MOVE.B      #9,(A4)+          *tab after op code
-            MOVE.B      #9,(A4)+          *2tabs since bra is short
 DECODE_E    MOVE.B      #9,(A4)+            *tab after op code
             MOVE.B      #9,(A4)+            *2tabs since bra is short
             MOVE.W      #2,D6               *Initilize opcode length to 2
