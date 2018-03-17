@@ -148,8 +148,8 @@ BIN_5       MOVE.W      (A5),D0             *reload opcode into D0
             CMPI.W      #1,D0               *check if the bit is a 1
             BEQ         SUBQ                *if SUBQ go to the SUB
             
-            CMPI.W      #0,D0               *check if the bit is a 0
-            BEQ         ADDQ                *if ADDQ go to the SUB
+            ;CMPI.W      #0,D0               *check if the bit is a 0
+            ;BEQ         ADDQ                *if ADDQ go to the SUB
             
             BRA         DATA                *if neither SUBQ or ADDQ must be DATA
 
@@ -269,10 +269,10 @@ BIN_12      MOVE.W      (A5),D0             *reload opcode into D0
             CMPI.W      #7,D0               *check if the bits == 7
             BEQ         MULS_W              *if MULS word go to SUB 
             
-            CMPI.W      #3,D0               *check if the bits == 011
-            BEQ         DATA                *if they do it is DATA branch to SUB
+*            CMPI.W      #3,D0               *check if the bits == 011
+*            BEQ         DATA                *if they do it is DATA branch to SUB
                                                         
-            BRA         AND                 *if bits are not MULS or DATA must be AND
+            BRA         DATA                *default case: data
 
 *--------------------------------------------------------------            
 *-BIN 13 Possible OPCODES:
@@ -493,15 +493,15 @@ SUBQ        MOVE.B      #'S',(A4)+          *Load OPCODE string into (A4)
             
             RTS                             *Return to OutputBuilder file
             
-ADDQ        MOVE.B      #'A',(A4)+          *Load OPCODE string into (A4)
-            MOVE.B      #'D',(A4)+
-            MOVE.B      #'D',(A4)+   
-            MOVE.B      #'Q',(A4)+ 
-                                       
-            JSR         GET_SIZE_67         *Append size
-            JSR         D_ADDQ              
-            
-            RTS                             *Return to OutputBuilder file
+*ADDQ        MOVE.B      #'A',(A4)+          *Load OPCODE string into (A4)
+*            MOVE.B      #'D',(A4)+
+*            MOVE.B      #'D',(A4)+   
+*            MOVE.B      #'Q',(A4)+ 
+*                                       
+*            JSR         GET_SIZE_67         *Append size
+*            JSR         D_ADDQ              
+*            
+*            RTS                             *Return to OutputBuilder file
             
            
 *-BIN 6--------------------------------------------------------
@@ -720,14 +720,14 @@ MULS_W      MOVE.B      #'M',(A4)+          *Load OPCODE string into (A4)
             
             RTS                             *Return to OutputBuilder file
             
-AND         MOVE.B      #'A',(A4)+          *Load OPCODE string into (A4)
-            MOVE.B      #'N',(A4)+
-            MOVE.B      #'D',(A4)+   
-            
-            JSR         SIZE_678            *Append size
-            JSR         DECODE_F           *jump to decoder SUB F
-            
-            RTS                             *Return to OutputBuilder file
+*AND         MOVE.B      #'A',(A4)+          *Load OPCODE string into (A4)
+*            MOVE.B      #'N',(A4)+
+*            MOVE.B      #'D',(A4)+   
+*            
+*            JSR         SIZE_678            *Append size
+*            JSR         DECODE_F           *jump to decoder SUB F
+*            
+*            RTS                             *Return to OutputBuilder file
             
 *-BIN 13---------------------------------------------------------
 ADD         MOVE.B      #'A',(A4)+          *Load OPCODE string into (A4)
@@ -982,6 +982,7 @@ APPND_LONG  MOVE.B      #'.',(A4)+
 *-FILES--------------------------------------------------------
             INCLUDE     'TeamVisualBasic_OP_Decoder.X68'    ;Helper file for jump table
             
+
 
 
 
