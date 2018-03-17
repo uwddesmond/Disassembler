@@ -276,7 +276,7 @@ BIN_12      MOVE.W      (A5),D0             *reload opcode into D0
 
 *--------------------------------------------------------------            
 *-BIN 13 Possible OPCODES:
-*-ADD, ADDA
+*-ADD
 *--------------------------------------------------------------    
 BIN_13      MOVE.W      (A5),D0             *reload opcode into D0
             LSR.W       #6,D0               *shift bits to the right 6
@@ -452,7 +452,7 @@ LEA         MOVE.B      #'L',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'E',(A4)+
             MOVE.B      #'A',(A4)+   
             
-            *JSR         D_LEA               *jump to LEA in the decoder
+            JSR         D_LEA               *jump to LEA in the decoder
         
             RTS                             *Return to OutputBuilder file
             
@@ -492,7 +492,7 @@ SUBQ        MOVE.B      #'S',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'Q',(A4)+ 
                                        
             JSR         GET_SIZE_67         *Append size
-            JSR         DECODE_C           *jump to decoder SUB C
+            JSR         D_SUBQ           *jump to decoder SUB C
             
             RTS                             *Return to OutputBuilder file
             
@@ -502,7 +502,7 @@ ADDQ        MOVE.B      #'A',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'Q',(A4)+ 
                                        
             JSR         GET_SIZE_67         *Append size
-            *JSR         D_ADDQ              
+            JSR         D_ADDQ              
             
             RTS                             *Return to OutputBuilder file
             
@@ -749,9 +749,14 @@ ADDA        MOVE.B      #'A',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'D',(A4)+
             MOVE.B      #'A',(A4)+   
             
-            JSR         DECODE_F           *jump to decoder SUB F
+            JSR         ADDA_SIZE           *add size
+                        
+            
+            JSR         D_ADDA              *jump to decoder SUB F
                 
             RTS                             *Return to OutputBuilder file
+            
+
      
 *-BIN 14-------------------------------------------------------                                                                  
 LOGIC_REG   MOVE.B      #'L',(A4)+          *Load OPCODE string into (A4)
@@ -980,6 +985,11 @@ APPND_LONG  MOVE.B      #'.',(A4)+
 *-FILES--------------------------------------------------------
             INCLUDE     'TeamVisualBasic_OP_Decoder.X68'    ;Helper file for jump table
             
+
+
+
+
+
 
 
 

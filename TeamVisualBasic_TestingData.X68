@@ -7,8 +7,15 @@
 *               Testing file provides data for the dissasembler to test upon
 *-----------------------------------------------------------
     
-START       ORG         $00007F00           ; first instruction of program
-*-DECODE_F
+START       ORG         $00007F00           ; first instruction of program            
+            ADDA.W      $0002,A4
+            ADDA.W      A3,A4
+            ADDA.L      $00000002,A4
+            ADDA.L      A4,A3
+
+*-DECODE_F Test-------------------------------------------------
+*-ADD MULS ADD OR SUB
+
             ADD.W       #$887,D5 
             MULS.W      #$435,D4
             MULS.W      D4,D5
@@ -547,6 +554,14 @@ JUMP2
 
 =======
 >>>>>>> 8fa7d1857d11a89459207d98f476e0e19b4999d6
+
+
+
+
+
+
+
+
 
 
 
