@@ -157,7 +157,7 @@ JUMP1
             CMP.B       #$12,D5
             CMP.L       #$123456,D6
             
-            BCLR        D0,D1       ;Register
+            BCLR        D0,D1           ;Register
             BCLR        D0,(A3)
             BCLR        D0,(A3)+
             BCLR        D0,-(A3)
@@ -621,6 +621,7 @@ JUMP2
             END         START               ; last line of source
     
     
+
 
 
 
