@@ -7,6 +7,7 @@
 *               Testing file provides data for the dissasembler to test upon
 *-----------------------------------------------------------
 
+
 START       ORG         $00007F00           ; first instruction of program            
             *ADD.L       #$987354,D5
             ADD.W       D4,D5
@@ -25,7 +26,7 @@ START       ORG         $00007F00           ; first instruction of program
             OR.L        D4,D5
             SUB.W       #$9743,D5
             SUB.W       #$6443,D4
-            SUB.W       D4,D5
+
 *-Typeless Opcode Test------------------------------------------
 *-MOVEQ, ADDQ, JSR, NEG,SUB.Q,LEA
 
@@ -99,9 +100,22 @@ DECODE_E_TEST
            
             
 
-            
+
             BRA         T_DECODE_C
             BRA         T_DECODE_C
+
+
+            ;BRA     JUMP
+            ;BRA     JUMP2
+
+            ;BRA.B     JUMP3
+            ;BRA.S     JUMP3
+
+            ;MULS.W      #$AAAA,D4
+            ;MULS.W      D3,D5
+            ;BRA         JUMP
+            ;BRA         JUMP2
+
 
             BRA.B       T_DECODE_C     
             BRA.S       T_DECODE_C
@@ -568,41 +582,10 @@ T_MOVEA
     
 
 
-<<<<<<< HEAD
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-=======
->>>>>>> 8fa7d1857d11a89459207d98f476e0e19b4999d6
 
 
 

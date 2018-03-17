@@ -428,6 +428,7 @@ MOVEA       MOVE.B      #'M',(A4)+          *Load OPCODE string into (A4)
             RTS                             *Return to OutputBuilder file
 
 *-BIN 4--------------------------------------------------------
+<<<<<<< HEAD
 NOP         ADDI.B      #2,D7            *NOP is 2 Bytes; Increment length var by 2
             MOVE.B      #'N',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'O',(A4)+
@@ -435,6 +436,14 @@ NOP         ADDI.B      #2,D7            *NOP is 2 Bytes; Increment length var b
             
             MOVE.B      #2,D6
             *JSR         D_NOP
+=======
+NOP         MOVE.B      #'N',(A4)+          *Load OPCODE string into (A4)
+            MOVE.B      #'O',(A4)+
+            MOVE.B      #'P',(A4)+
+            
+            MOVE.L      #2,D6
+            ADDI        #2,D7               *NOP is 2 Bytes; Increment length var by
+>>>>>>> 45f59fdcb58efa92aae3a67d4f13c4dddd995cab
             
             RTS                             *Return to OutputBuilder file
                         
@@ -444,8 +453,9 @@ RTS         MOVE.B      #'R',(A4)+          *Load OPCODE string into (A4)
 
             MOVE.B      #WORD,D6            *Increment the size counter D6 by a WORD 
             MOVE.B      #WORD,D7            *Increment the size counter D7 by a WORD
+            MOVE.L      #2,D6               *Increment the size counter D6 by a WORD 
+            MOVE.L      #2,D7               *Increment the size counter D7 by a WORD
             
-            *JSR         D_RTS
             
             RTS                             *Return to OutputBuilder file
             
@@ -453,7 +463,11 @@ LEA         MOVE.B      #'L',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'E',(A4)+
             MOVE.B      #'A',(A4)+   
             
+<<<<<<< HEAD
             JSR         D_LEA               *jump to LEA in the decoder
+=======
+            ;JSR         D_LEA               *jump to LEA in the decoder
+>>>>>>> 45f59fdcb58efa92aae3a67d4f13c4dddd995cab
         
             RTS                             *Return to OutputBuilder file
             
@@ -464,7 +478,7 @@ MOVEM       MOVE.B      #'M',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'M',(A4)+
 
             JSR         MOVEM_SIZE          *Append size
-            *JSR         D_MOVEM             *jump to MOVEM in the decoder
+            JSR         D_MOVEM             *jump to MOVEM in the decoder
             
             RTS                             *Return to OutputBuilder file
             
@@ -991,12 +1005,15 @@ APPND_LONG  MOVE.B      #'.',(A4)+
 
 
 
+<<<<<<< HEAD
 
 
 
 
 
 
+=======
+>>>>>>> 45f59fdcb58efa92aae3a67d4f13c4dddd995cab
 *~Font name~Courier New~
 *~Font size~10~
 *~Tab type~1~
