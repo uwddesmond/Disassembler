@@ -428,12 +428,12 @@ MOVEA       MOVE.B      #'M',(A4)+          *Load OPCODE string into (A4)
             RTS                             *Return to OutputBuilder file
 
 *-BIN 4--------------------------------------------------------
-NOP         ADDI        #BYTE,D7            *NOP is 2 Bytes; Increment length var by 2
-            MOVE.B      #'N',(A4)+          *Load OPCODE string into (A4)
+NOP         MOVE.B      #'N',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'O',(A4)+
             MOVE.B      #'P',(A4)+
             
-            *JSR         D_NOP
+            MOVE.L      #2,D6
+            ADDI        #2,D7               *NOP is 2 Bytes; Increment length var by
             
             RTS                             *Return to OutputBuilder file
                         
@@ -441,10 +441,9 @@ RTS         MOVE.B      #'R',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'T',(A4)+
             MOVE.B      #'S',(A4)+ 
 
-            MOVE.B      #WORD,D6            *Increment the size counter D6 by a WORD 
-            MOVE.B      #WORD,D7            *Increment the size counter D7 by a WORD
+            MOVE.L      #2,D6               *Increment the size counter D6 by a WORD 
+            MOVE.L      #2,D7               *Increment the size counter D7 by a WORD
             
-            *JSR         D_RTS
             
             RTS                             *Return to OutputBuilder file
             
@@ -452,7 +451,7 @@ LEA         MOVE.B      #'L',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'E',(A4)+
             MOVE.B      #'A',(A4)+   
             
-            *JSR         D_LEA               *jump to LEA in the decoder
+            ;JSR         D_LEA               *jump to LEA in the decoder
         
             RTS                             *Return to OutputBuilder file
             
@@ -463,7 +462,7 @@ MOVEM       MOVE.B      #'M',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'M',(A4)+
 
             JSR         MOVEM_SIZE          *Append size
-            *JSR         D_MOVEM             *jump to MOVEM in the decoder
+            JSR         D_MOVEM             *jump to MOVEM in the decoder
             
             RTS                             *Return to OutputBuilder file
             
@@ -980,6 +979,7 @@ APPND_LONG  MOVE.B      #'.',(A4)+
 *-FILES--------------------------------------------------------
             INCLUDE     'TeamVisualBasic_OP_Decoder.X68'    ;Helper file for jump table
             
+
 
 
 
