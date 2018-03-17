@@ -63,6 +63,7 @@ T_JSR       JSR         JUMP
 
                    
 
+
 *-DECODE_E test-------------------------------------------------
 *-BCC (BCC, BLT, BGE, BCS, BVC), BRA
 
@@ -71,6 +72,13 @@ T_JSR       JSR         JUMP
            
             
 
+
+            BRA     JUMP
+            BRA     JUMP2
+
+            BRA.B     JUMP3
+            BRA.S     JUMP3
+
             ;MULS.W      #$AAAA,D4
             ;MULS.W      D3,D5
             BRA         JUMP
@@ -78,6 +86,7 @@ T_JSR       JSR         JUMP
 
             BRA.B       JUMP3
             BRA.S       JUMP3
+
 
             
             BHI         JUMP3
@@ -490,6 +499,13 @@ JUMP2
             END         START               ; last line of source
     
     
+
+
+
+
+
+
+
 
 
 *~Font name~Courier New~
