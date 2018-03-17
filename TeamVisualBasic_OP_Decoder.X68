@@ -168,7 +168,7 @@ F_OPMODE    CMP.W       #7,D2               *Check if opcode type falls into the
             
 F_OPMODE2   MOVE.W      (A5),D2             *Reload opcode into D2
             LSR.W       #6,D2
-            LSR.W       #5,D2
+            LSR.W       #2,D2
             AND.W       #$0001,D2            *Shift to get opmode bits into the final 3 LSB
             CMP.W       #1,D2
             BEQ         F_DN_EA             *Branch to handle when op codes are Dn+<ea> -- Dn
@@ -762,6 +762,7 @@ PRINT7      MOVE.B      #'7',(A4)+
 PRINT8      MOVE.B      #'8',(A4)+
             RTS
     
+
 
 
 
