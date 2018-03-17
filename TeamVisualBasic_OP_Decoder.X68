@@ -97,9 +97,6 @@ DECODE_E    MOVE.B      #9,(A4)+          *tab after op code
             *what type of branch it is (BCS, BLT, BGE, etc.). Only thing that matters in DECODE_E
             *is the 8 bit displacement because that is where the branch is suppose to be connected to
             
-            LSR.W       #8,D2               *GRAB condition bits
-            AND.W       #$000F,D2           *Mask out other bits
-            CMP.W       #0,D2               *CHECK IF BRA
             JSR         D_BRA               *Go to decode BRA sub routine
             RTS
             
@@ -107,7 +104,7 @@ DECODE_E    MOVE.B      #9,(A4)+          *tab after op code
 
 D_BRA       MOVE.W      (A5),D2             *Load op and store in D2
             AND.W       #$00FF,D2           *Get displacement bits by masking
-            CMP.W       #$00,D2
+            CMP.W       #$0000,D2
             BGT         BRA_BYTE_
             MOVE.W      (A5),D2             *Load op and store in D2
             AND.W       #$00FF,D2           *Get displacement bits by masking
@@ -762,6 +759,7 @@ PRINT7      MOVE.B      #'7',(A4)+
 PRINT8      MOVE.B      #'8',(A4)+
             RTS
     
+
 
 
 
