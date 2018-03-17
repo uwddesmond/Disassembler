@@ -108,7 +108,7 @@ CNVRT_DONE  CMP.B       #8,D3               ;If no input, invalid
 C_VALIDATE  CMPA.L      A5,A6               ;If end address < start address     
             BLT         C_ERR1
                                               
-            CMPA.L      #$00000000,A5       ;If start address is <0x5000
+            CMPA.L      #$00005000,A5       ;If start address is <0x5000
             BLT         C_ERR2
             
             MOVE.L      A5,D0               ;Check rightmost input address bit
@@ -177,6 +177,7 @@ C_ERR_BASE2 LEA         M_INV_INPUT,A1      ;Load error message
             
             BRA         START 
            
+
 
 
 
