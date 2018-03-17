@@ -379,8 +379,7 @@ BCLR_IM     MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'L',(A4)+
             MOVE.B      #'R',(A4)+
             
-            JSR         APPND_BYTE          *must be a byte if it is a BCLR on immediate data
-            JSR         DECODE_D            *jump to decoder SUB D
+            JSR         D_BCLRI             *jump to decoder SUB D
             
             RTS                             *Return to OutputBuilder file
             
@@ -389,8 +388,7 @@ BCLR_REG    MOVE.B      #'B',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'L',(A4)+
             MOVE.B      #'R',(A4)+
             
-            JSR         APPND_LONG          *must be a long if it is a BCLR on a register
-            JSR         DECODE_D            *jump to decoder SUB D
+            JSR         D_BCLR             *jump to decoder SUB D
             
             RTS                             *Return to OutputBuilder file
 
@@ -462,7 +460,7 @@ MOVEM       MOVE.B      #'M',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'M',(A4)+
 
             JSR         MOVEM_SIZE          *Append size
-            ;JSR         D_MOVEM             *jump to MOVEM in the decoder
+            JSR         D_MOVEM             *jump to MOVEM in the decoder
             
             RTS                             *Return to OutputBuilder file
             
@@ -491,7 +489,7 @@ SUBQ        MOVE.B      #'S',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'Q',(A4)+ 
                                        
             JSR         GET_SIZE_67         *Append size
-            ;JSR         D_SUBQ           *jump to decoder SUB C
+            JSR         D_SUBQ           *jump to decoder SUB C
             
             RTS                             *Return to OutputBuilder file
             
@@ -698,7 +696,7 @@ EOR         MOVE.B      #'E',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'R',(A4)+   
 
             JSR         GET_SIZE_67         *Append size
-            JSR         DECODE_D           *jump to decoder SUB D
+            JSR         D_EOR               *jump to decoder D_EOR
             
             RTS                             *Return to OutputBuilder file
 
@@ -707,7 +705,7 @@ CMP         MOVE.B      #'C',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'P',(A4)+   
 
             JSR         GET_SIZE_67         *Append size
-            JSR         DECODE_D           *jump to decoder SUB D
+            JSR         DECODE_D            *jump to decoder SUB D
             
             RTS                             *Return to OutputBuilder file
 
@@ -751,7 +749,7 @@ ADDA        MOVE.B      #'A',(A4)+          *Load OPCODE string into (A4)
             JSR         ADDA_SIZE           *add size
                         
             
-            ;JSR         D_ADDA              *jump to decoder SUB F
+            JSR         D_ADDA              *jump to decoder SUB F
                 
             RTS                             *Return to OutputBuilder file
             
@@ -984,6 +982,8 @@ APPND_LONG  MOVE.B      #'.',(A4)+
 *-FILES--------------------------------------------------------
             INCLUDE     'TeamVisualBasic_OP_Decoder.X68'    ;Helper file for jump table
             
+
+
 
 
 

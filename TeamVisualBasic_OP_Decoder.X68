@@ -66,22 +66,34 @@ DECODE_B    MOVE.B      #9,(A4)+            *tab after op code
 DECODE_C    MOVE.B      #9,(A4)+            *tab after op code
             MOVE.W      #2,D6               *Initilize opcode length to 2
             
-            JSR         PRINT_DATA          *Append immediate data to string
-            JSR         B_SRC_DMODE         *Append ,D(reg num) to string
+            JSR         IMMEDIATE_D         *Append immediate data to string
+            MOVE.B      #',',(A4)+
+            
+            MOVE.W      (A5),D2
+            ASR.L       #3,D2    
+            ANDI.L      #$00000007,D2
+            JSR         GET_SRCMODE         *Append ,D(reg num) to string
 
             RTS
             
 *-OPCODE Decode Type D--------------------------------------
-*-OPCODEs: MOVEQ, EOR, CMP, BCLR (immediate and register)
+*-OPCODEs: EOR, CMP, BCLR (immediate and register)
 *-xxxx Register(3) x Size(2) EA Mode(3) EA Reg(3)       
    
-DECODE_D    MOVE.B      #9,(A4)+          *tab after op code
-            MOVE.W      #2,D6               *Initilize opcode length to 2   
-            MOVE.B      #'#',D6
-            MOVE.B      #'$',D6     
-            MOVE.W      #2,D2               *move counter to 2 since only 2 HEX values used
-            LSL.W       #8,D2               *set up data for printers
-            JSR         GD_LOOP             *print hex the 2 bits
+DECODE_D    MOVE.B      #9,(A4)+            *tab after op code
+            MOVE.W      #2,D6               *Initilize opcode length to 2
+            MOVE.W      (A5),D2
+            JSR         GRABX5_3
+            MOVE.W      D5,D2
+            JSR         GET_SRCMODE
+            MOVE.B      #',',(A4)+
+            
+            MOVE.B      #'D',(A4)+
+            MOVE.W      (A5),D2
+            JSR         GRABx11_9
+            JSR         PrintD5Num  
+             
+            MOVE.W      (A5),D2
             RTS
 
 *-OPCODE Decode Type E--------------------------------------
@@ -144,18 +156,33 @@ BRA_BYTE    MOVE.W      (A5),D0
             RTS     
 *-----------displacement sub routines---------------------       
 *-OPCODE Decode Type F--------------------------------------
-*-OPCODEs: 
+*-OPCODEs: ADD, MULS, OR, DIVS, SUB, AND, DIVU     
 *-xxxx Reg(3) OPMode(3) EAMode(3) EAReg(3)       
   
 DECODE_F    MOVE.W      #2,D6               *Initilize opcode length to 2
+            MOVE.B      #9,(A4)+            *tab after op cod
             MOVE.W      (A5),D2             *Copy opcode into d2
-            LSL.W       #6,D2               *Shift to grab op mode
+            LSR.W       #6,D2               *Shift to grab op mode
             AND.W       #$0007,D2           *Mask other bits
             JSR         F_OPMODE
+            MOVE.B      #',',(A4)+          *Move comma into string
+            MOVE.B      #'D',(A4)+
             MOVE.W      (A5),D2             *Recopy OPCODE into D2  
-            LSR.W       #6,D2               *Shift right 6 - isolate Dest Mode
-            AND.W       #$0007,D2           *Mask out other bits
-            JSR         GET_DSTMODE         *Append DST string to (A4)
+            JSR         GRABx11_9           *grab dest reg
+            JSR         PrintD5Num          *pritn register number
+            RTS
+
+
+
+*            MOVE.W      #2,D6               *Initilize opcode length to 2
+*            MOVE.W      (A5),D2             *Copy opcode into d2
+*            LSR.W       #6,D2               *Shift to grab op mode
+*            AND.W       #$0007,D2           *Mask other bits
+*            JSR         F_OPMODE
+*            MOVE.W      (A5),D2             *Recopy OPCODE into D2  
+*            LSR.W       #6,D2               *Shift right 6 - isolate Dest Mode
+*            AND.W       #$0007,D2           *Mask out other bits
+*            JSR         GET_DSTMODE         *Append DST string to (A4)
 *-----------------------------------------------------------
 *-OPTYPE_F HELPER FUNCTIONS
 *Helps determine the OPTYPE
@@ -163,13 +190,12 @@ DECODE_F    MOVE.W      #2,D6               *Initilize opcode length to 2
 F_OPMODE    CMP.W       #7,D2               *Check if opcode type falls into the opmode 11 ,divs,mul
             BEQ         F_111_MODE          *Branch to handle 111 Modes
             CMP.W       #7,D2
-            BGT         F_OPMODE2
+            BLT         F_OPMODE2
             RTS
             
 F_OPMODE2   MOVE.W      (A5),D2             *Reload opcode into D2
-            LSR.W       #6,D2
-            LSR.W       #5,D2
-            AND.W       $0001,D2            *Shift to get opmode bits into the final 3 LSB
+            LSR.W       #8,D2
+            AND.W       #$0001,D2            *Shift to get opmode bits into the final 3 LSB
             CMP.W       #1,D2
             BEQ         F_DN_EA             *Branch to handle when op codes are Dn+<ea> -- Dn
             CMP.W       #0,D2
@@ -186,7 +212,7 @@ F_DN_EA     MOVE.W      (A5),D2             *Reload opcode into D2
             CMP.W       #2,D5
             BEQ         LONG_DATA
             *---------------PRINT DESTINATION REG---------------
-            MOVE.B      'D',(A4)+           *Must be a data register for dest
+            MOVE.B      #'D',(A4)+           *Must be a data register for dest
             MOVE.W      (A5),D2             *Re load op code
             JSR         GRABx11_9           *grab register bits and store in d5
             JSR         PrintD5Num
@@ -195,10 +221,12 @@ F_DN_EA     MOVE.W      (A5),D2             *Reload opcode into D2
      
 
 
-F_EA_DN     MOVE.B      'D',(A4)+           *Must be a data register for dest
+F_EA_DN     ;MOVE.B      #'D',(A4)+           *Must be a data register for dest
             MOVE.W      (A5),D2             *Re load op code
-            JSR         GRABx11_9           *grab register bits and store in d5
-            JSR         PrintD5Num
+            JSR         GRABx5_3           *grab register bits and store in d5
+            MOVE.B      D5,D2
+            JSR         GET_SRCMODE
+            
             RTS
             
             
@@ -213,13 +241,6 @@ F_111_MODE  MOVE.W      (A5),D2
            
             
           
-    
-*-OPCODE Decode Type G---------------------------------------
-*-OPCODEs: NEG, ORI, CMPI, ADDI
-*-xxxxxxxx Size(2) EAMode(3) EAReg(3)
-
-*DECODE_G   MOVE.W       #2,D6               *Initialize OPCODE length to 2
-           *Check for the size of the OPCODE
             
 *-----------------------------------------------------------
 *-OPTYPE_B HELPER FUNCTIONS
@@ -283,7 +304,69 @@ B_SRC_DMODE MOVE.W      (A5),D2             *reload op
 
 *-OPS WITHOUT TYPE------------------------------------------
 *-OPCODES: MOVEQ
+D_EOR       MOVE.B      #9,(A4)+            *tab after op code
+            MOVE.W      #2,D6               *Initilize opcode length to 2
+            MOVE.B      #'D',(A4)+
+            MOVE.W      (A5),D2
+            JSR         GRABx11_9
+            JSR         PrintD5Num  
+            MOVE.B      #',',(A4)+ 
+            MOVE.W      (A5),D2
+            JSR         GRABX5_3
+            MOVE.W      D5,D2
+            JSR         GET_SRCMODE
+           
+          
+            RTS
+            
+D_BCLR      MOVE.B      #9,(A4)+            *tab after op code
+            MOVE.W      #2,D6               *Initilize opcode length to 2
+            MOVE.B      #'D',(A4)+
+            MOVE.W      (A5),D2
+            JSR         GRABx11_9
+            JSR         PrintD5Num  
+            MOVE.B      #',',(A4)+ 
+            MOVE.W      (A5),D2
+            JSR         GRABX5_3
+            
+            CMP.L       #7,D5
+            BEQ         BCLR_SIZE
+            
+            MOVE.W      D5,D2
+            JSR         GET_DSTMODE          
+          
+            RTS            
+BCLR_SIZE   MOVE.W      (A5),D2
+            JSR         GRABx2_0
+            CMP.W       #1,D5
+            BEQ         LONG_DATA
+            
+            MOVE.W      (A5),D2
+            JSR         GRABx2_0
+            CMP.W       #0,D5
+            BEQ         WORD_DATA
+            RTS
+   
+D_BCLRI     MOVE.B      #9,(A4)+            *tab after op code
+            MOVE.W      #4,D6               *Initilize opcode length to 2
+            MOVE.W      (A5),D2
+            MOVE.L      A5,A3
+            ADDA.L      #2,A3
+            MOVE.B      #'#',(A4)+
+            MOVE.L      (A3),D0
+            ROR.L       #8,D0
+            MOVE.L      #2,D2
+            JSR         GD_LOOP
+            MOVE.B      #',',(A4)+
+            JSR         GRABx5_3
+            MOVE.L      D5,D2
+            JSR         GET_DSTMODE
+            RTS
+            
+            
+            RTS
 
+            
 D_MOVEQ     MOVE.W      #2,D6               *Initilize opcode length to 2
             MOVE.W      (A5),D0             *grab op code from a5
             MOVE.B      #09,(A4)+           *Insert tab character
@@ -329,16 +412,16 @@ D_NEG       MOVE.B      #9,(A4)+            *tab after op code
             ANDI.L      #$00000007,D2       
             
             CMP.B       #0,D2               *if == 0, Dn
-            BEQ         DregMode            
+            BEQ         SregMode            
             
             CMP.B       #2,D2               *if == 2, (An)
-            BEQ         DaddINMode
+            BEQ         SaddINMode
             
             CMP.B       #3,D2               *if == 3, (An)+
-            BEQ         DaddINpost
+            BEQ         SaddINpost
             
             CMP.B       #4,D2               *if == 4, -(An)
-            BEQ         DaddINpre 
+            BEQ         SaddINpre 
 
             CMP.B       #7,D2               *if == 7, -(An)
             BEQ         NEG_PRINT
@@ -366,7 +449,6 @@ D_ADDA      MOVE.B      #9,(A4)+            *tab after op code
             JSR         GET_SRCMODE         *get destination mode
             
             MOVE.W      (A5),D2             *reload opcode into D5
-            MOVE.B      '9',(A4)+           *load tab into string
             MOVE.B      #',',(A4)+          *load comma into string
             MOVE.B      #'A',(A4)+          *print a for address
             JSR         GRABx11_9           *grab bits
@@ -407,18 +489,53 @@ D_SUBQ      MOVE.B      #9,(A4)+            *tab after op code
             MOVE.W      (A5),D0             *grab op code from a5
             MOVE.B      #'#',(A4)+          *preload source string for literal
             MOVE.B      #'$',(A4)+          *preload source string for hex
-            MOVE.W      #1,D2               *move counter to 1 since only 1 bit is used
-            LSL.W       #2,D2               *set up data for printer
             JSR         GRABx11_9           *grab bits at index 11_9
-            JSR         PrintD5num          *Print number in D5
+            CMP.B       #0,D5
+            BEQ         D_SUBQ_1
+            BRA         D_SUBQ_2
+D_SUBQ_1    MOVE.B      #8,D5
+        
+D_SUBQ_2    JSR         PrintD5num          *Print number in D5
             MOVE.B      #',',(A4)+          *Print comma
             MOVE.W      (A5),D2             *reload op code from a5
-            LSL.W       #3,D2               *shift so source mode is in LSBs  
+            LSR.W       #3,D2               *shift so source mode is in LSBs  
             AND.W       #$0007,D2           *mask out other bits
             JSR         GET_SRCMODE         *print source mode
             RTS
            
-             
+D_MOVEM     MOVE.B      #9,(A4)+            *tab after op code
+            MOVE.W      #2,D6               *Initilize opcode length to 2
+                                         
+            ;JSR         MM_FLAG             *If -(An), set D4 to 1. Otherwise[(An), (An)+}], set D4 to 0            
+            
+            ;MOVE.W      (A5),D2             *reload op code from a5
+            ;ROL.L       #6,D2               *get dr bit on the LSB position
+            ;ANDI.L      #$00000001,D2       *isolate dr bit
+            
+            ;CMP.B       #0,D2               *if bit is 0 
+            ;BEQ         MM_R2M              *branch to register to memory
+            ;BRA         MM_M2R              *otherwise, branch to memory to register  
+            
+            *Before this line is the MOVEM Implementation Attempt
+            *--------------------------------------------------------------------
+            *Immediately after up to MM_LONG is the quick fix for turn-in
+            
+            MOVE.W      (A5),D2             *reload op code from a5  
+            ASR.L       #3,D2               *get dr bit on the LSB position
+            ANDI.L      #$00000007,D2       *isolate EA mode bit
+            
+            CMP.B       #7,D2               *is there (xxx).W (xxx).L extra data?
+            BEQ         MM_DATA
+            RTS
+            
+MM_DATA     CMP.B       #6,D7               *If D7 signifies MOVEM.W, Set D6 to 4
+            BEQ         MM_WORD
+            BRA         MM_LONG
+            
+MM_WORD     MOVE.L      #6,D6
+            RTS
+MM_LONG     MOVE.L      #8,D6
+            RTS                
 
 *-SRC_MODE--------------------------------------------------
 *-Assumption is that the SRC Mode bits are pre-isolated in D2
@@ -762,6 +879,10 @@ PRINT7      MOVE.B      #'7',(A4)+
 PRINT8      MOVE.B      #'8',(A4)+
             RTS
     
+
+
+
+
 
 
 
