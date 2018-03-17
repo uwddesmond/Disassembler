@@ -462,7 +462,7 @@ MOVEM       MOVE.B      #'M',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'M',(A4)+
 
             JSR         MOVEM_SIZE          *Append size
-            JSR         D_MOVEM             *jump to MOVEM in the decoder
+            ;JSR         D_MOVEM             *jump to MOVEM in the decoder
             
             RTS                             *Return to OutputBuilder file
             
@@ -491,7 +491,7 @@ SUBQ        MOVE.B      #'S',(A4)+          *Load OPCODE string into (A4)
             MOVE.B      #'Q',(A4)+ 
                                        
             JSR         GET_SIZE_67         *Append size
-            JSR         D_SUBQ           *jump to decoder SUB C
+            ;JSR         D_SUBQ           *jump to decoder SUB C
             
             RTS                             *Return to OutputBuilder file
             
@@ -751,7 +751,7 @@ ADDA        MOVE.B      #'A',(A4)+          *Load OPCODE string into (A4)
             JSR         ADDA_SIZE           *add size
                         
             
-            JSR         D_ADDA              *jump to decoder SUB F
+            ;JSR         D_ADDA              *jump to decoder SUB F
                 
             RTS                             *Return to OutputBuilder file
             
@@ -958,10 +958,10 @@ ADDA_SIZE   MOVE.W      (A5),D0             *reload OPCODE into (A5)
             BRA         DATA                *is not one of the supported sizes
             
 BRANCH_SIZE MOVE.W      (A5),D0             *reload OPCODE into (A5)
-            AND.W       #$08,D0             *isolate the last 8 bits
-            CMPI.W      #$00,D0             *checking if the last 8 bits are $00
+            AND.W       #$00FF,D0           *isolate the last 8 bits
+            CMPI.B      #$00,D0             *checking if the last 8 bits are $00
             BEQ         APPND_WORD          *is a word operation    
-            CMPI.W      #$FF,D0             *checking if the last 8 bits are $FF
+            CMPI.B      #$FF,D0             *checking if the last 8 bits are $FF
             BEQ         APPND_LONG          *is a long operation
             BRA         APPND_BYTE          *otherwise is a byte
                    
@@ -984,6 +984,7 @@ APPND_LONG  MOVE.B      #'.',(A4)+
 *-FILES--------------------------------------------------------
             INCLUDE     'TeamVisualBasic_OP_Decoder.X68'    ;Helper file for jump table
             
+
 
 
 

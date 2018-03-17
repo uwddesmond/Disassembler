@@ -10,7 +10,6 @@
 *-----------------------------------------------------------
 
 *-----------------------------------------------------------
-
 *-Starting Point: Branch into one of many OPCODE Types 
 *-Size bits are not handled here, that is handled in the jump table
 *-
@@ -76,7 +75,7 @@ DECODE_C    MOVE.B      #9,(A4)+            *tab after op code
 *-OPCODEs: MOVEQ, EOR, CMP, BCLR (immediate and register)
 *-xxxx Register(3) x Size(2) EA Mode(3) EA Reg(3)       
    
-DECODE_D    MOVE.B      #9,(A4)+            *tab after op code
+DECODE_D    MOVE.B      #9,(A4)+          *tab after op code
             MOVE.W      #2,D6               *Initilize opcode length to 2   
             MOVE.B      #'#',D6
             MOVE.B      #'$',D6     
@@ -89,8 +88,8 @@ DECODE_D    MOVE.B      #9,(A4)+            *tab after op code
 *-OPCODEs: BCC (BCC, BLT, BGE, BCS, BVC), BRA
 *-xxxx Condition(4) 8 Bit Displacement       
   
-DECODE_E    MOVE.B      #9,(A4)+            *tab after op code
-            MOVE.B      #9,(A4)+            *2tabs since bra is short
+DECODE_E    MOVE.B      #9,(A4)+          *tab after op code
+            MOVE.B      #9,(A4)+          *2tabs since bra is short
             MOVE.W      #2,D6               *Initilize opcode length to 2
             MOVE.W      (A5),D2
             
@@ -98,6 +97,9 @@ DECODE_E    MOVE.B      #9,(A4)+            *tab after op code
             *what type of branch it is (BCS, BLT, BGE, etc.). Only thing that matters in DECODE_E
             *is the 8 bit displacement because that is where the branch is suppose to be connected to
             
+            LSR.W       #8,D2               *GRAB condition bits
+            AND.W       #$000F,D2           *Mask out other bits
+            CMP.W       #0,D2               *CHECK IF BRA
             JSR         D_BRA               *Go to decode BRA sub routine
             RTS
             
@@ -105,14 +107,13 @@ DECODE_E    MOVE.B      #9,(A4)+            *tab after op code
 
 D_BRA       MOVE.W      (A5),D2             *Load op and store in D2
             AND.W       #$00FF,D2           *Get displacement bits by masking
-            CMP.W       #$0000,D2
+            CMP.W       #$00,D2
             BGT         BRA_BYTE_
-            
             MOVE.W      (A5),D2             *Load op and store in D2
             AND.W       #$00FF,D2           *Get displacement bits by masking
             CMP.W       #$0000,D2
             BEQ         BRA_WORD         
-            
+            *branch word displacement sub
             MOVE.W      (A5),D2             *Load op and store in D2
             AND.W       #$00FF,D2           *Get displacement bits by masking
             CMP.W       #$00FF,D2
@@ -131,18 +132,16 @@ BRA_BYTE_   CMP.W       #$FF,D2
             BLT         BRA_BYTE
             RTS
 
-BRA_BYTE    MOVE.W      (A5),D0             *LOAD OP CODE
-            AND.W       #$00FF,D0           *And to get displacement
+BRA_BYTE    MOVE.W      (A5),D0
+            AND.W       #$00FF,D0
             ROR.L       #8,D0
-            MOVE.B      #',',(A4)+
-            *MOVE.L      A5,D5              *move the address into D5
-            *ADD.L       D0,D5              *add the displacement to the address
-            *MOVE.L      D5,D0              *move the new addres into the D0
-            MOVE.W      #2,D2              *set the loop counter to 32 to print full address
+            MOVE.W      #2,D2
+            ;ADDI.B      #2,D6
+            
+            MOVE.B      #'$',(A4)+
+            
             JSR         GD_LOOP
             RTS     
-            
-
 *-----------displacement sub routines---------------------       
 *-OPCODE Decode Type F--------------------------------------
 *-OPCODEs: 
@@ -157,7 +156,6 @@ DECODE_F    MOVE.W      #2,D6               *Initilize opcode length to 2
             LSR.W       #6,D2               *Shift right 6 - isolate Dest Mode
             AND.W       #$0007,D2           *Mask out other bits
             JSR         GET_DSTMODE         *Append DST string to (A4)
-            
 *-----------------------------------------------------------
 *-OPTYPE_F HELPER FUNCTIONS
 *Helps determine the OPTYPE
@@ -165,19 +163,13 @@ DECODE_F    MOVE.W      #2,D6               *Initilize opcode length to 2
 F_OPMODE    CMP.W       #7,D2               *Check if opcode type falls into the opmode 11 ,divs,mul
             BEQ         F_111_MODE          *Branch to handle 111 Modes
             CMP.W       #7,D2
-            BLT         F_OPMODE2
             BGT         F_OPMODE2
             RTS
             
 F_OPMODE2   MOVE.W      (A5),D2             *Reload opcode into D2
             LSR.W       #6,D2
-<<<<<<< HEAD
-            LSR.W       #2,D2
-            AND.W       #$0001,D2            *Shift to get opmode bits into the final 3 LSB
-=======
             LSR.W       #5,D2
             AND.W       $0001,D2            *Shift to get opmode bits into the final 3 LSB
->>>>>>> 45f59fdcb58efa92aae3a67d4f13c4dddd995cab
             CMP.W       #1,D2
             BEQ         F_DN_EA             *Branch to handle when op codes are Dn+<ea> -- Dn
             CMP.W       #0,D2
@@ -193,23 +185,23 @@ F_DN_EA     MOVE.W      (A5),D2             *Reload opcode into D2
             BEQ         WORD_DATA
             CMP.W       #2,D5
             BEQ         LONG_DATA
-<<<<<<< HEAD
-            *-------------------PRINT DESTINATION REG----------------------------
-=======
-            
->>>>>>> 45f59fdcb58efa92aae3a67d4f13c4dddd995cab
+            *---------------PRINT DESTINATION REG---------------
             MOVE.B      'D',(A4)+           *Must be a data register for dest
             MOVE.W      (A5),D2             *Re load op code
             JSR         GRABx11_9           *grab register bits and store in d5
             JSR         PrintD5Num
             RTS
-                 
+            
+     
+
+
 F_EA_DN     MOVE.B      'D',(A4)+           *Must be a data register for dest
             MOVE.W      (A5),D2             *Re load op code
             JSR         GRABx11_9           *grab register bits and store in d5
             JSR         PrintD5Num
             RTS
-                       
+            
+            
 
 *------------------------------------------------------------
 *Handles when op mode bits are 111
@@ -220,6 +212,15 @@ F_111_MODE  MOVE.W      (A5),D2
             RTS                                         
            
             
+          
+    
+*-OPCODE Decode Type G---------------------------------------
+*-OPCODEs: NEG, ORI, CMPI, ADDI
+*-xxxxxxxx Size(2) EAMode(3) EAReg(3)
+
+*DECODE_G   MOVE.W       #2,D6               *Initialize OPCODE length to 2
+           *Check for the size of the OPCODE
+            
 *-----------------------------------------------------------
 *-OPTYPE_B HELPER FUNCTIONS
 *Helps determine the size of shifts or registers
@@ -228,7 +229,8 @@ F_111_MODE  MOVE.W      (A5),D2
 *Shift on address is occuring    
 *print address by using EA Mode and EA Reg bits at end of op
 *DECODE TYPE SPECIFIC FUNCTION       
-B_ADDMODE  MOVE.W       (A5),D2
+B_ADDMODE
+           MOVE.W       (A5),D2
            LSR.W        #3,D2
            AND.W        #$0007,D2
            JSR          GET_DSTMODE
@@ -282,44 +284,44 @@ B_SRC_DMODE MOVE.W      (A5),D2             *reload op
 *-OPS WITHOUT TYPE------------------------------------------
 *-OPCODES: MOVEQ
 
-D_MOVEQ     MOVE.B      #9,(A4)+            *tab after op code
-            MOVE.W      #2,D6               *Initilize opcode length to 2
+D_MOVEQ     MOVE.W      #2,D6               *Initilize opcode length to 2
             MOVE.W      (A5),D0             *grab op code from a5
+            MOVE.B      #09,(A4)+           *Insert tab character
+            
             MOVE.B      #'#',(A4)+          *preload source string for literal
             MOVE.B      #'$',(A4)+          *preload source string for hex
-            MOVE.W      #2,D2               *move 8 to counter since this si long data 8 hex values are required
-            LSL.W       #8,D2               *shift over 8 so bits in high order for print
-            JSR         GD_LOOP
-            JSR         B_DATAREG           *grabs and prints data reg 
+            
+            JSR         P_MOVEQ_B
+            MOVE.B      #',',(A4)+
+            MOVE.B      #'D',(A4)+
+            JSR         GRABx11_9
+            JSR         PrintD5Num
             RTS
+            
+P_MOVEQ_B   MOVE.W      (A5),D0
+            AND.W       #$00FF,D0
+            ROR.L       #8,D0
+            MOVE.W      #2,D2
+            JSR         GD_LOOP         
+            RTS  
+            
 
-D_ADDQ      MOVE.B      #9,(A4)+            *tab after op code
-            MOVE.W      #2,D6               *Initilize opcode length to 2
+D_ADDQ      MOVE.W      #2,D6               *Initilize opcode length to 2
             MOVE.W      (A5),D0             *grab op code from a5
             MOVE.B      #'#',(A4)+          *preload source string for literal
             MOVE.B      #'$',(A4)+          *preload source string for hex
             MOVE.W      #1,D2               *move counter to 1 since only 1 bit is used
             LSL.W       #2,D2               *set up data for printer
-            JSR         GRABx11_9           *grab bits at index 11_9
-            JSR         PrintD5num          *Print number in D5
-            MOVE.B      #',',(A4)+          *Print comma
+            ADD.W       #$C000,D2           *mask out first bits
+            JSR         GD_LOOP             *print hex the 2 bits
             MOVE.W      (A5),D2             *reload op code from a5
             LSL.W       #3,D2               *shift so source mode is in LSBs  
             AND.W       #$0007,D2           *mask out other bits
             JSR         GET_SRCMODE         *print source mode
             RTS
             
-D_JSR       MOVE.B      #9,(A4)+            *tab after op code
-            MOVE.W      #2,D6               *Initilize opcode length to 2
-            MOVE.W      (A5),D2             *reload op code from a5
-            LSR.W       #3,D2               *shift so source mode is in LSBs  
-            AND.W       #$0007,D2           *mask out other bits
-            JSR         GET_SRCMODE         *print source mode
-            RTS
-*-Neg Implementation----------------------------------------
+
 D_NEG       MOVE.B      #9,(A4)+            *tab after op code
-            MOVE.W      #2,D6               *Initilize opcode length to 2
-            
             MOVE.W      #2,D6               *Initilize opcode length to 2
             MOVE.W      (A5),D2             *reload op code from a5          
             
@@ -349,69 +351,13 @@ NEG_PRINT   MOVE.W      (A5),D2             *reload op code from a5
             BEQ         WORD_DATA
             
             CMP.B       #1,D2               *If == 1, its (xxx).W
-            BEQ         LONG_DATA                                                                                                                               
+            BEQ         LONG_DATA
+                                                                                    
+                                           
             RTS
             
-
-D_MOVEM     MOVE.B      #9,(A4)+            *tab after op code
-            MOVE.W      #2,D6               *Initilize opcode length to 2
-                                         
-            ;JSR         MM_FLAG             *If -(An), set D4 to 1. Otherwise[(An), (An)+}], set D4 to 0            
-            
-            ;MOVE.W      (A5),D2             *reload op code from a5
-            ;ROL.L       #6,D2               *get dr bit on the LSB position
-            ;ANDI.L      #$00000001,D2       *isolate dr bit
-            
-            ;CMP.B       #0,D2               *if bit is 0 
-            ;BEQ         MM_R2M              *branch to register to memory
-            ;BRA         MM_M2R              *otherwise, branch to memory to register  
-            
-            *Before this line is the MOVEM Implementation Attempt
-            *--------------------------------------------------------------------
-            *Immediately after up to MM_LONG is the quick fix for turn-in
-            
-            MOVE.W      (A5),D2             *reload op code from a5  
-            ASR.L       #3,D2               *get dr bit on the LSB position
-            ANDI.L      #$00000007,D2       *isolate EA mode bit
-            
-            CMP.B       #7,D2               *is there (xxx).W (xxx).L extra data?
-            BEQ         MM_DATA
-            RTS
-            
-MM_DATA     CMP.B       #6,D7               *If D7 signifies MOVEM.W, Set D6 to 4
-            BEQ         MM_WORD
-            BRA         MM_LONG
-            
-MM_WORD     MOVE.L      #6,D6
-            RTS
-MM_LONG     MOVE.L      #8,D6
-            RTS
-               
-*-Handles printing the EA mode
-MM_MODE     MOVE.W      (A5),D2             *reload op code from a5  
-            ASR.L       #3,D2               *get dr bit on the LSB position
-            ANDI.L      #$00000007,D2       *isolate EA mode bit
-
-            CMP.B       #2,D2               *if mode == 2; (An) 
-            BEQ         DaddInMode         
-            CMP.B       #3,D2               *if mode == 3; (An)+ 
-            BEQ         DaddInpost
-            CMP.B       #2,D2               *if mode == 4; -(An) 
-            BEQ         DaddINpre
-            CMP.B       #2,D2               *if mode == 7; (xxx).W or (xxx).L 
-            BEQ         MM_GETADDR             
-            
-*-Flag code for determining which direction to read the Register Mask
-MM_FLAG     MOVE.W      (A5),D2             *reload op code from a5  
-            ASR.L       #3,D2               *Isolate EA MODE bits
-            ANDI.L      #$00000003,D2 
-            CMP.B       #4,D2               *Is predecrement? -(An)
-            BEQ         MM_FLAG_SET
-            
-            MOVE.L      #0,D4               *Otherwise Flag var D4 is 0 ((An), (An)+)
-            RTS
-
           
+         
 D_ADDA      MOVE.B      #9,(A4)+            *tab after op code
             MOVE.W      #2,D6               *Initilize opcode length to 2
             MOVE.W      (A5),D2             *reload opcode in D2
@@ -431,17 +377,30 @@ D_LEA       MOVE.B      #9,(A4)+            *tab after op code
             MOVE.B      #9,(A4)+            *2nd tab after op code
             MOVE.W      #2,D6               *Initilize opcode length to 2
             MOVE.W      (A5),D2             *reload opcode in D2
-            JSR         GRABx5_3            *grab bits index 5_3
-            MOVE.W      D5,D2               *Move bits grabbed into D2
-            JSR         GET_SRCMODE         *get destination mode
+            JSR         GRABx2_0
+            CMP.W       #$0001,D5
+            BEQ         LONG_DATA
+            CMP.W       #$0000,D5
+            BEQ         WORD_DATA
             
             MOVE.W      (A5),D2             *reload opcode into D5
-            MOVE.B      '9',(A4)+           *load tab into string
+  
             MOVE.B      #',',(A4)+          *load comma into string
             MOVE.B      #'A',(A4)+          *print a for address
             JSR         GRABx11_9           *grab bits
             JSR         PrintD5Num          *print d5 number
             RTS
+
+D_JSR       MOVE.B      #9,(A4)+            *tab after op code
+            MOVE.B      #9,(A4)+            *2nd tab after op code
+            MOVE.W      #2,D6               *Initilize opcode length to 2
+            MOVE.W      (A5),D2             *reload opcode in D2
+            JSR         GRABx2_0
+            CMP.W       #$0001,D5
+            BEQ         LONG_DATA
+            CMP.W       #$0000,D5
+            BEQ         WORD_DATA
+            
             
 D_SUBQ      MOVE.B      #9,(A4)+            *tab after op code
             MOVE.W      #2,D6               *Initilize opcode length to 2
@@ -458,26 +417,9 @@ D_SUBQ      MOVE.B      #9,(A4)+            *tab after op code
             AND.W       #$0007,D2           *mask out other bits
             JSR         GET_SRCMODE         *print source mode
             RTS
+           
+             
 
-              
-
-
-MM_FLAG_SET MOVE.L      #1,D4               *Flag var D4. 1 means -(An) predecrement
-            RTS
-            
-*-Handles getting the immediate data    
-MM_GETADDR  ADDA        #4,A5               *Get immediate data @ 2 words after address
-            CMP.B       #6,D7               *if size == 6, read in a word
-            BEQ         MM_GOTO_W           *Branch to subroutine that'll read in a word of immediate data
-            
-            JSR         LONG_DATA           *else branch to subroutine that'll read in a long of immediate data
-            SUBA        #4,A5               *Return A5 ptr
-            RTS
-  
-MM_GOTO_W   JSR         WORD_DATA
-            SUBA        #4,A5               *Return A5 ptr
-            RTS
-                
 *-SRC_MODE--------------------------------------------------
 *-Assumption is that the SRC Mode bits are pre-isolated in D2
 *DECODE TYPE SPECIFIC FUNCTION
@@ -598,7 +540,6 @@ DaddMode    MOVE.B      #'A',(A4)+
 DaddInMode  MOVE.B      #'(',(A4)+
             MOVE.B      #'A',(A4)+
             JSR         GRABx11_9         *put reg num into D5
-            JSR         GRABx11_9           *put reg num into D5
             JSR         A7toSP              *if reg num is 7, replace w/ SP           
             MOVE.B      #')',(A4)+
             RTS
@@ -607,7 +548,6 @@ DaddINpre   MOVE.B      #'-',(A4)+
             MOVE.B      #'(',(A4)+
             MOVE.B      #'A',(A4)+
             JSR         GRABx11_9         *put reg num into D5
-            JSR         GRABx11_9           *put reg num into D5
             JSR         A7toSP              *if reg num is 7, replace w/ SP 
             MOVE.B      #')',(A4)+
             RTS
@@ -615,7 +555,6 @@ DaddINpre   MOVE.B      #'-',(A4)+
 DaddINpost  MOVE.B      #'(',(A4)+
             MOVE.B      #'A',(A4)+
             JSR         GRABx11_9         *put reg num into D5
-            JSR         GRABx11_9           *put reg num into D5
             JSR         A7toSP              *if reg num is 7, replace w/ SP 
             MOVE.B      #')',(A4)+
             MOVE.B      #'+',(A4)+
@@ -826,12 +765,6 @@ PRINT8      MOVE.B      #'8',(A4)+
 
 
 
-<<<<<<< HEAD
-
-
-
-
-<<<<<<< HEAD
 
 
 
@@ -862,17 +795,6 @@ PRINT8      MOVE.B      #'8',(A4)+
 
 
 
-
-
-
-
-
-
-
-
-
-=======
->>>>>>> 45f59fdcb58efa92aae3a67d4f13c4dddd995cab
 *~Font name~Courier New~
 *~Font size~10~
 *~Tab type~1~
